@@ -1,3 +1,5 @@
+import secrets
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -124,3 +126,18 @@ class Settlement(models.Model):
 
     def __str__(self):
         return f'{self.payer} paid {self.payee} {self.amount}'
+
+
+class ApiKey(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='api_key'
+    )
+    key = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def generate_key(cls):
+        return secrets.token_hex(32)
+
+    def __str__(self):
+        return f'ApiKey for {self.user}'

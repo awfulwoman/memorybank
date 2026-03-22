@@ -91,3 +91,19 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/models.py` — added Settlement model
   - `backend/core/migrations/0007_settlement.py` — migration
 ---
+
+## 2026-03-22 - US-008
+
+- What was implemented: DRF configured with SessionAuthentication + custom ApiKeyAuthentication (X-API-Key header); ApiKey model (OneToOne to User); login/logout API endpoints at `/api/auth/login/` and `/api/auth/logout/`
+- Files changed:
+  - `backend/core/models.py` — added ApiKey model with `generate_key()` classmethod
+  - `backend/core/authentication.py` — ApiKeyAuthentication class
+  - `backend/core/views.py` — LoginView, LogoutView
+  - `backend/core/urls.py` — URL routes for auth
+  - `backend/memorybank/settings.py` — REST_FRAMEWORK config
+  - `backend/memorybank/urls.py` — included core.urls at `/api/`
+  - `backend/core/migrations/0008_apikey.py` — migration
+- **Learnings for future iterations:**
+  - ApiKeyAuthentication is listed BEFORE SessionAuthentication so API key takes priority
+  - Login response includes `is_staff` flag for frontend admin checks
+---
