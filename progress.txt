@@ -8,6 +8,14 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
 ---
 
+## 2026-03-22 - US-009
+- Added 4 validation tests to `backend/core/tests/test_security.py`
+- Tests: settlement with non-member payee → 400, expense with non-member split → 400
+- Tests: settlement with valid payee → 201, expense with valid splits → 201
+- Files changed: `backend/core/tests/test_security.py`
+- Full suite: 71 tests pass
+---
+
 ## 2026-03-22 - US-008
 - Created `backend/core/tests/test_security.py` with 8 authorization tests
 - Tests: bob (non-member) gets 403 on all 6 group endpoints (GET/POST expenses, GET/POST settlements, GET balances, GET export)

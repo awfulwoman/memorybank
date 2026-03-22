@@ -67,3 +67,56 @@ class NonMemberAccessBlockedTest(TestCase):
         self.client.force_login(self.alice)
         resp = self.client.get(f"/api/groups/{self.group.pk}/expenses/")
         self.assertEqual(resp.status_code, 200)
+
+
+class InvalidPayeeAndSplitsTest(TestCase):
+    """US-009: Verify invalid settlement payees and expense splits are rejected."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.outsider = User.objects.create_user(username="outsider", password="pass")
+        self.group = Group.objects.create(name="G", created_by=self.staff)
+        self.group.members.add(self.staff, self.alice)
+        # outsider is NOT a member
+        self.client.force_login(self.staff)
+
+    def test_settlement_nonmember_payee_400(self):
+        resp = self.client.post(f"/api/groups/{self.group.pk}/settlements/", {
+            "payee": self.outsider.pk,
+            "amount": "50.00",
+            "date": "2026-01-15",
+        }, format="json")
+        self.assertEqual(resp.status_code, 400)
+
+    def test_expense_nonmember_split_400(self):
+        resp = self.client.post(f"/api/groups/{self.group.pk}/expenses/", {
+            "amount": "100.00",
+            "description": "Test",
+            "date": "2026-01-01",
+            "split_data": [
+                {"user_id": self.outsider.pk, "amount": "100.00"},
+            ],
+        }, format="json")
+        self.assertEqual(resp.status_code, 400)
+
+    def test_settlement_valid_payee_201(self):
+        resp = self.client.post(f"/api/groups/{self.group.pk}/settlements/", {
+            "payee": self.alice.pk,
+            "amount": "50.00",
+            "date": "2026-01-15",
+        }, format="json")
+        self.assertEqual(resp.status_code, 201)
+
+    def test_expense_valid_split_201(self):
+        resp = self.client.post(f"/api/groups/{self.group.pk}/expenses/", {
+            "amount": "100.00",
+            "description": "Test",
+            "date": "2026-01-01",
+            "split_data": [
+                {"user_id": self.staff.pk, "amount": "50.00"},
+                {"user_id": self.alice.pk, "amount": "50.00"},
+            ],
+        }, format="json")
+        self.assertEqual(resp.status_code, 201)
