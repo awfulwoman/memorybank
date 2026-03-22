@@ -3,7 +3,17 @@
     <AppNavbar />
 
     <main class="content">
-      <h2>{{ group?.name ?? 'Loading…' }}</h2>
+      <div class="page-header">
+        <h2>{{ group?.name ?? 'Loading…' }}</h2>
+        <button
+          v-if="canEditGroup"
+          class="settings-btn"
+          title="Group Settings"
+          @click="showSettings = true"
+        >
+          <span class="mdi mdi-cog"></span>
+        </button>
+      </div>
       <!-- Balance Summary -->
       <section class="card">
         <h3>Balances</h3>
@@ -111,6 +121,15 @@
       @saved="onExpenseSaved"
     />
 
+    <GroupSettingsModal
+      v-if="showSettings && group"
+      :group-id="groupId"
+      :name="group.name"
+      :icon="group.icon"
+      @close="showSettings = false"
+      @saved="onSettingsSaved"
+    />
+
     <AddExpenseForm
       v-if="showAddExpense && group"
       :group-id="groupId"
@@ -131,6 +150,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import AddExpenseForm from '@/components/AddExpenseForm.vue'
 import EditExpenseForm from '@/components/EditExpenseForm.vue'
 import SettlementForm from '@/components/SettlementForm.vue'
+import GroupSettingsModal from '@/components/GroupSettingsModal.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -147,6 +167,12 @@ const showAddExpense = ref(false)
 const showSettlement = ref(false)
 const editingExpense = ref<any>(null)
 const viewingReceipt = ref<string | null>(null)
+const showSettings = ref(false)
+
+const canEditGroup = computed(() => {
+  if (!group.value || !auth.user) return false
+  return group.value.created_by === auth.user.id || auth.user.is_staff
+})
 
 const groupMembers = computed(() => group.value?.members_list ?? [])
 
@@ -168,6 +194,11 @@ async function onExpenseSaved() {
   showAddExpense.value = false
   editingExpense.value = null
   await refreshData()
+}
+
+function onSettingsSaved(updated: any) {
+  group.value = updated
+  showSettings.value = false
 }
 
 async function onSettlementSaved() {
@@ -216,6 +247,31 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-header h2 { margin: 0; }
+
+.settings-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.settings-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .card {
