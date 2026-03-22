@@ -43,3 +43,12 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - **Learnings for future iterations:**
   - Must set AUTH_USER_MODEL before any migrations run (or delete sqlite3 and re-migrate)
 ---
+
+## 2026-03-22 - US-003
+
+- What was implemented: Category (name), GroupType (name), Currency (name, symbol, code) models with Django admin registration
+- Files changed:
+  - `backend/core/models.py` — added Category, GroupType, Currency models
+  - `backend/core/admin.py` — registered all three with list_display
+  - `backend/core/migrations/0002_category_currency_grouptype.py` — migration
+---
