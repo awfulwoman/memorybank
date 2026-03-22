@@ -5,6 +5,8 @@
 - Migrations dir: `backend/core/migrations/`
 - `GroupViewSet` uses `get_permissions()` to vary permission by action (not a single `permission_classes` list)
 - When changing permission behavior, check `test_permissions.py` for tests that assert old behavior
+- GroupSerializer returns `members_list` with `[{id, username, display_name}]` — use for member UIs
+- GroupMemberView accepts `user_id` OR `username` in POST body
 
 # Ralph Progress Log
 Started: Sun 22 Mar 2026 20:32:57 CET
@@ -92,4 +94,28 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - Modal pattern: `modal-overlay` with `@click.self` for backdrop close, inner `.modal` div
   - `api.currencies()` returns `{id, code, name}` — use for currency dropdown
   - Group create API accepts `{name, icon, currency, default_split_method}`, returns full group object
+---
+
+## 2026-03-22 - US-009
+- Created `GroupSettingsModal.vue` with editable name and IconPicker for icon
+- Added gear/cog button to group detail page header, visible only to group owner (`created_by == user.id`) or staff
+- Save calls `PATCH /api/groups/{id}/` and updates group data in-place
+- Reused modal pattern from CreateGroupModal (overlay, form, actions)
+- Files changed: `frontend/src/components/GroupSettingsModal.vue` (new), `frontend/src/views/GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - Group serializer returns `created_by` as user ID (number), not username — compare with `auth.user.id`
+  - `api.updateGroup()` returns the full updated group object — can assign directly to `group.value`
+---
+
+## 2026-03-22 - US-010
+- Added member management to GroupSettingsModal: member list with remove buttons, add-by-username input
+- Added `members_list` field to GroupSerializer (returns `[{id, username, display_name}]`)
+- Extended GroupMemberView.post to accept `username` as alternative to `user_id`
+- Added `addMemberByUsername` to frontend api.ts
+- Owner cannot remove themselves (shows "you" badge instead of remove button)
+- Files changed: `core/serializers.py`, `core/views.py`, `frontend/src/api.ts`, `frontend/src/components/GroupSettingsModal.vue`, `frontend/src/views/GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - GroupSerializer now returns `members_list` with id/username/display_name — use this instead of just `member_ids` for UI
+  - GroupMemberView accepts both `user_id` and `username` for adding members
+  - Modal member management pattern: local `members` ref copied from props, updated after API calls
 ---
