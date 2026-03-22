@@ -177,3 +177,18 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/views.py` — _expense_rows, _render_export, GroupExportView, MeExportView
   - `backend/core/urls.py` — export routes
 ---
+
+## 2026-03-22 - US-016
+
+- What was implemented: Vue 3 + TypeScript + Pinia + Vue Router project scaffolded in `frontend/`; Vite proxy for /api and /media to backend:8000; multi-stage Dockerfile (build + nginx serve); docker-compose.yml updated with frontend service; nginx.conf proxies /api and /media
+- Files changed:
+  - `frontend/` — full Vue 3 scaffold
+  - `frontend/vite.config.ts` — added proxy config
+  - `frontend/Dockerfile` — multi-stage build
+  - `frontend/nginx.conf` — nginx config with SPA fallback and proxy
+  - `docker-compose.yml` — added frontend service
+- **Learnings for future iterations:**
+  - `npm create vue@latest` does NOT support --no-vitest etc; use just `--ts --router --pinia --force`
+  - vite-plugin-vue-devtools removed from config (not needed for production build)
+  - Frontend typecheck: `npm run type-check` (vue-tsc --build)
+---
