@@ -69,6 +69,7 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   background: #f5f5f5;
+  padding: 1rem;
 }
 
 .login-card {
@@ -78,6 +79,8 @@ async function handleLogin() {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 360px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
 }
 
 h1 {
@@ -106,6 +109,7 @@ label {
 
 input {
   width: 100%;
+  min-height: 44px;
   padding: 0.5rem 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -120,6 +124,7 @@ input:focus {
 
 button {
   width: 100%;
+  min-height: 44px;
   padding: 0.6rem;
   background: #42b883;
   color: white;

@@ -1,134 +1,165 @@
 # Ralph Progress Log
-Started: Sun 22 Mar 2026
+Started: Sun 22 Mar 2026 18:54:54 CET
 ---
 
 ## Codebase Patterns
 
-- Django project package is `memorybank` (at `backend/memorybank/`), app is `core` (at `backend/core/`)
-- DJANGO_SETTINGS_MODULE = `memorybank.settings`
-- DB path configurable via `SQLITE_PATH` env var; media path via `MEDIA_ROOT` env var
-- Run Django commands from `backend/` directory: `cd backend && python manage.py ...`
-- Run tests: `cd backend && python manage.py test core`
-- Custom User model: `core.User` extends `AbstractUser` with `display_name` and `avatar`; `AUTH_USER_MODEL = 'core.User'` in settings
-- Balance computed on-the-fly via `_compute_balances()` in views.py — no stored state
-- Soft delete pattern: `ExpenseManager` filters `is_deleted=False`; `Expense.all_objects` for unfiltered
-- ExpenseSerializer handles split logic: `split_data` (write-only) for custom splits, auto equal splits when omitted
-- AdminWritePermission: reads for all auth users, writes for staff only
-- ApiKeyAuthentication via `X-API-Key` header in `core/authentication.py`
-- prd.json branchName drives which git branch to work on; create from main if missing
-- No code volume mount in docker-compose — must `docker compose up --build` to pick up code changes
-- Fixture at `core/fixtures/test_data.json`; password for all fixture users: `password123`
-- Load fixture: `python manage.py loaddata test_data` (6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group)
-- Fixture PKs: admin=1 (staff), alice=2 (regular), currency=1 (USD), category=1 (Food), grouptype=1 (Home), group=1
+- **Breakpoint variables**: `--bp-phone: 768px`, `--bp-tablet: 1024px` defined in `base.css` — use in media queries across all views
+- **Table scroll**: Wrap tables in `.table-scroll-container` for horizontal scroll on small screens
+- **box-sizing**: Already global `border-box` in `base.css` (lines 53-56)
+- **Viewport meta**: Already in `index.html`
+- **Typecheck**: Run `npx vue-tsc --build` from `frontend/` (need `npm install` first if node_modules missing)
+- **main.css**: Cleaned up — removed default Vue template grid/padding; `#app` now only sets `font-weight: normal`
+- **AppNavbar integration**: Import `AppNavbar` from `@/components/AppNavbar.vue` and use `<AppNavbar />` at top of view template, removing inline navbar markup and related CSS/JS
+- **Responsive visibility**: Use `.desktop-only` / `.mobile-only` classes with `@media (max-width: 1023px)` and `@media (min-width: 1024px)` — matches `--bp-tablet: 1024px`
 
 ---
 
-## 2026-03-22 - US-001: Create test fixtures
-- Created `backend/core/fixtures/test_data.json` with all required test data
-- Files changed: `backend/core/fixtures/test_data.json` (new)
+## 2026-03-22 - US-001
+- Added CSS custom properties `--bp-phone: 768px` and `--bp-tablet: 1024px` to `:root` in `base.css`
+- Added `.table-scroll-container` utility class (overflow-x auto, width 100%) to `base.css`
+- Confirmed `box-sizing: border-box` already present globally
+- Confirmed viewport meta tag already in `index.html`
+- Files changed: `frontend/src/assets/base.css`
 - **Learnings for future iterations:**
-  - Docker compose has no code volume mount; must rebuild image to pick up file changes
-  - Fixture password hash generated via `make_password('password123')` inside the container
-  - Fixture loads 6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group with both users as members
+  - `base.css` already has comprehensive reset including box-sizing
+  - `main.css` has Vue template default styles (grid layout at 1024px) that will likely need modification for navbar integration (US-004)
+  - `npm install` needed before typecheck if fresh checkout
 ---
 
-## 2026-03-22 - US-002: Model unit tests
-- Created `backend/core/tests/__init__.py` and `backend/core/tests/test_models.py`
-- 7 tests: User creation, Category/GroupType/Currency __str__, Group M2M + default_split, ExpenseManager soft delete, ApiKey.generate_key
-- Files changed: `backend/core/tests/__init__.py` (new), `backend/core/tests/test_models.py` (new)
+## 2026-03-22 - US-002
+- Created `frontend/src/components/AppNavbar.vue` — desktop horizontal navbar
+- Brand "MemoryBank" on left, nav links (Dashboard, Profile, Admin if staff) center-right, Sign out far right
+- Active route highlighted via `exact-active-class` (Dashboard) and `active-class` (others)
+- Uses auth store for user info, isStaff check, logout action
+- Uses Vue Router for navigation and active route detection
+- Files changed: `frontend/src/components/AppNavbar.vue`
 - **Learnings for future iterations:**
-  - Django test runner uses in-memory SQLite — no need to worry about fixture conflicts with dev DB
-  - Use `Expense.all_objects.create()` to create expenses (default manager filters is_deleted=False)
-- ExpenseSerializer.save() needs `created_by` and `group` passed explicitly (read_only fields)
-- Serializer tests don't need HTTP — instantiate serializer directly, call is_valid() + save()
+  - Dashboard link needs `exact-active-class` not `active-class` since `/` would match all routes
+  - Existing views all have inline `.navbar` CSS — US-004 will need to remove these and import AppNavbar
+  - Navbar pattern: flex with gap, brand left, links auto-margin-left, logout margin-left
 ---
 
-## 2026-03-22 - US-003 & US-004: Serializer unit tests
-- Created `backend/core/tests/test_serializers.py` with 6 tests
-- US-003: equal split, custom split, invalid split rejection
-- US-004: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids
-- Files changed: `backend/core/tests/test_serializers.py` (new)
+## 2026-03-22 - US-003
+- Added hamburger menu to AppNavbar for screens below 1024px
+- Desktop nav links/logout hidden on mobile, replaced by hamburger button
+- Hamburger animates to X via CSS transforms on the 3 lines
+- Dropdown menu with all nav links + sign out appears below navbar
+- Click-outside-to-close via document click listener + overlay backdrop
+- Menu closes on link click
+- 44px min touch target on hamburger button
+- Files changed: `frontend/src/components/AppNavbar.vue`
 - **Learnings for future iterations:**
-  - ExpenseSerializer requires `created_by` and `group` passed to save() since they're read_only
-  - Serializer split validation happens in _create_splits() at save time, not during is_valid()
+  - Use `@click.stop` on hamburger and mobile menu to prevent document click handler from immediately closing
+  - CSS approach: `.desktop-only` / `.mobile-only` classes with media queries + `!important` to override scoped display values
+  - Hamburger animation: 3 spans, middle fades out, top/bottom rotate ±45deg with translateY to meet at center
+  - Overlay div must be outside the `<header>` to cover the full viewport
 ---
 
-## 2026-03-22 - US-005: Balance computation unit tests — basic cases
-- Created `backend/core/tests/test_balances.py` with 3 tests
-- Tests: equal split payer owed half, empty returns empty, null creator skipped
-- Files changed: `backend/core/tests/test_balances.py` (new)
+## 2026-03-22 - US-003 committed
+- Commit: d034ada
+---
+
+## 2026-03-22 - US-004
+- Replaced inline navbar markup with `<AppNavbar />` in DashboardView, GroupDetailView, ProfileView, AdminView
+- Removed per-view navbar CSS and related JS (handleLogout, unused router imports)
+- LoginView left unchanged (no navbar on login page)
+- Cleaned up `main.css` — removed default Vue template grid layout and padding that constrained `#app` width
+- GroupDetailView: moved group name into an `<h2>` inside content since navbar no longer shows it
+- Files changed: `DashboardView.vue`, `GroupDetailView.vue`, `ProfileView.vue`, `AdminView.vue`, `main.css`
 - **Learnings for future iterations:**
-  - `_compute_balances()` is a standalone function importable from `core.views`
-  - Takes expenses queryset and settlements queryset, returns (net_balances dict, pairwise list)
-  - Must manually create ExpenseSplit records when testing balances (not via serializer)
+  - `main.css` had default Vue template styles (`max-width: 1280px`, grid layout at 1024px) that broke full-width navbar — always check for inherited layout constraints
+  - When removing inline navbars, also remove related imports (RouterLink if unused, useRouter if only used for logout)
+  - GroupDetailView had the group name in the old navbar — needed to relocate it to content area
 ---
 
-## 2026-03-22 - US-006: Balance computation — settlements and multi-member
-- Added SettlementBalanceTest and MultiMemberBalanceTest to `test_balances.py`
-- 4 new tests: partial settlement, full settlement zeroing, multiple payers net, 3-member cross debts
-- Files changed: `backend/core/tests/test_balances.py` (modified)
+## 2026-03-22 - US-004 committed
+- Commit: db4846f
+---
+
+## 2026-03-22 - US-005
+- Made login card responsive for landscape/short viewports: `max-height: calc(100vh - 2rem)` + `overflow-y: auto`
+- Added `padding: 1rem` to container so card doesn't touch screen edges on small devices
+- Added `min-height: 44px` to inputs and button for touch targets
+- Files changed: `LoginView.vue`
 - **Learnings for future iterations:**
-  - Settlement reduces `owes[payer_id][payee_id]` — payer is the one paying back debt
-  - Net balances are derived from pairwise debts, not directly from expenses
-- API tests use `APIClient` from `rest_framework.test`; `force_login()` for auth, `HTTP_X_API_KEY=key` for API key header
+  - Login card was already centered via flexbox — only needed overflow and touch target fixes
+  - Pattern for landscape safety: `max-height: calc(100vh - Xrem)` + `overflow-y: auto` on card
 ---
 
-## 2026-03-22 - US-007 & US-008: Auth API tests
-- Created `backend/core/tests/test_auth.py` with 9 tests
-- US-007: login valid/invalid, logout, unauthenticated access
-- US-008: API key create, replace, delete, delete-nonexistent, X-API-Key authentication
-- Files changed: `backend/core/tests/test_auth.py` (new)
+## 2026-03-22 - US-006
+- Made group card grid responsive: 1 column phone (<768px), 2 columns tablet (768-1023px), 3 columns desktop (>=1024px)
+- Added balance summary section using `api.meBalances()` — shows non-zero balances per group
+- Balance cards use flexbox, stack vertically on phone (<768px)
+- Added `overflow-x: hidden` on `.dashboard` to prevent horizontal overflow
+- Files changed: `DashboardView.vue`
 - **Learnings for future iterations:**
-  - APIClient handles CSRF automatically in tests
-  - `HTTP_X_API_KEY=key` kwarg to client methods sets the X-API-Key header
+  - `api.meBalances()` returns array of `{group_id, group_name, balance, debts}` — filter by non-zero balance for summary display
+  - Explicit media query breakpoints preferred over `auto-fill` for precise column control per AC
+  - `Promise.all` pattern for parallel API calls in `onMounted`
 ---
 
-## 2026-03-22 - US-009: AdminWritePermission API tests
-- Created `backend/core/tests/test_permissions.py` with 5 tests
-- Tests: non-staff GET OK, non-staff POST 403 (categories & groups), staff POST 201, staff DELETE 204
-- Files changed: `backend/core/tests/test_permissions.py` (new)
----
-
-## 2026-03-22 - US-010: User profile API tests
-- Created `backend/core/tests/test_users.py` with 3 tests
-- Files changed: `backend/core/tests/test_users.py` (new)
----
-
-## 2026-03-22 - US-011: Group CRUD and member management
-- Created `backend/core/tests/test_groups.py` with 6 tests
-- Files changed: `backend/core/tests/test_groups.py` (new)
+## 2026-03-22 - US-007
+- Added responsive styles for GroupDetailView expense list and actions at <768px
+- Expense `.expense-main` wraps: description takes full width, amount + buttons flow below
+- Section header action buttons (Add Expense, Record Payment) go full-width on phone with 44px touch targets
+- Edit/delete buttons get 44px min-height for touch
+- Export buttons stack vertically on phone
+- Balance/debt/settlement rows flex-wrap for narrow screens
+- Files changed: `GroupDetailView.vue`
 - **Learnings for future iterations:**
-  - Migration `0004_default_group` creates a default group — tests must account for pre-existing groups
-  - GroupMemberView uses `IsAdminUser` (staff only), not `AdminWritePermission`
+  - `flex-wrap: wrap` + `flex: 1 1 100%` on description is a clean pattern for stacking flex children on mobile
+  - Touch targets: always add `min-height: 44px` to interactive elements in mobile media query
 ---
 
-## 2026-03-22 - US-012: Expense CRUD API tests
-- Created `backend/core/tests/test_expenses.py` with 7 tests
-- Files changed: `backend/core/tests/test_expenses.py` (new)
+## 2026-03-22 - US-008
+- Enhanced responsive styles for balance/debt/settlement rows on GroupDetailView at <768px
+- Balance rows: `flex-direction: column` so username stacks above balance amount
+- Debt rows: stack vertically so "X owes Y amount" reads top-to-bottom on narrow screens
+- Settlement rows: same vertical stacking treatment
+- Added `overflow-wrap: break-word` and `overflow: hidden` on `.card` to prevent horizontal overflow
+- Files changed: `GroupDetailView.vue`
 - **Learnings for future iterations:**
-  - ExpenseDetailView checks `created_by == request.user` for PATCH/DELETE
-  - Soft delete sets `is_deleted=True` — use `Expense.all_objects` to verify
+  - `flex-direction: column` is cleaner than `flex-wrap: wrap` for true single-column reflow on mobile
+  - `overflow-wrap: break-word` + `overflow: hidden` on card containers prevents any child from causing horizontal scroll
 ---
 
-## 2026-03-22 - US-013: Settlement API tests
-- Created `backend/core/tests/test_settlements.py` with 2 tests
-- Files changed: `backend/core/tests/test_settlements.py` (new)
----
-
-## 2026-03-22 - US-014: Balance API endpoint tests
-- Created `backend/core/tests/test_balance_api.py` with 3 tests
-- Files changed: `backend/core/tests/test_balance_api.py` (new)
----
-
-## 2026-03-22 - US-015: Export API tests
-- Created `backend/core/tests/test_exports.py` with 4 tests
-- Files changed: `backend/core/tests/test_exports.py` (new)
+## 2026-03-22 - US-009
+- Added responsive styles to all three modal forms: AddExpenseForm, EditExpenseForm, SettlementForm
+- Below 480px: modal takes full width minus 16px margin
+- Below 768px: inputs get min-height 44px for touch targets, action buttons become sticky at modal bottom
+- Added missing `max-height: 90vh; overflow-y: auto` to SettlementForm modal (AddExpense/EditExpense already had it)
+- Files changed: `AddExpenseForm.vue`, `EditExpenseForm.vue`, `SettlementForm.vue`
 - **Learnings for future iterations:**
-  - DRF's `URL_FORMAT_OVERRIDE` defaults to `'format'`, meaning `?format=csv` triggers DRF content negotiation
-  - Export views use `HttpResponse` (not DRF `Response`), but DRF intercepts the `format` query param before the view runs
-  - Fix: `@override_settings(REST_FRAMEWORK={..., 'URL_FORMAT_OVERRIDE': None})` in test class
-  - Consider setting `URL_FORMAT_OVERRIDE = None` in project settings if export endpoints are used in production
+  - Sticky actions inside overflow-y container: `position: sticky; bottom: -Xrem` where X matches parent padding, with background color to cover scrolling content
+  - SettlementForm was missing max-height/overflow-y — always check all modals share the same base responsive setup
+  - All three modals share identical overlay/modal base CSS — could be extracted to a shared class in base.css if more modals are added
 ---
 
-## FULL SUITE: 59 tests, all passing
+## 2026-03-22 - US-010
+- Added responsive styles for ProfileView at <768px
+- Avatar section stacks vertically (flex-direction: column) on phone
+- Avatar upload button, inline buttons, and export buttons get 44px touch targets
+- Display name row wraps on narrow screens
+- API key code block already had word-break: break-all; key status gets text-overflow ellipsis
+- Export buttons stack vertically on phone
+- Files changed: `ProfileView.vue`
+- **Learnings for future iterations:**
+  - ProfileView was already well-structured with max-width 640px — only needed media query additions
+  - The `code` element already had `word-break: break-all` from base styles, so API key display was mostly handled
+  - Pattern: `flex-direction: column` on avatar sections for phone stacking, same as balance rows in US-008
+---
+
+## 2026-03-22 - US-011
+- Added responsive styles for AdminView at <768px
+- Wrapped all list sections in `.table-scroll-container` for horizontal scroll safety
+- Inline forms (add category, add currency, add user, add group) stack vertically on phone via `flex-direction: column`
+- All inputs/selects/buttons get 44px min-height for touch targets
+- List rows wrap: label takes full width, action buttons flow below
+- Cards get `overflow-x: auto` for scroll containment
+- Files changed: `AdminView.vue`
+- **Learnings for future iterations:**
+  - AdminView uses list rows not HTML tables, but `.table-scroll-container` wrapper still provides overflow-x safety
+  - Currency inline form had inline `style="width:60px"` — overridden with `!important` in media query for full-width on mobile
+  - `flex: 1` on `.small-btn` inside wrapped `.row-actions` makes action buttons evenly sized on mobile
 ---

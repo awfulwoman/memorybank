@@ -15,7 +15,7 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -32,7 +32,7 @@
         "Verify in browser using dev-browser skill at 1280px width"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -50,7 +50,7 @@
         "Verify in browser using dev-browser skill at 375px width"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -66,7 +66,7 @@
         "Verify in browser using dev-browser skill at 375px and 1280px widths"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -81,7 +81,7 @@
         "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -97,7 +97,7 @@
         "Verify in browser using dev-browser skill at 375px, 768px, and 1280px widths"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -113,7 +113,7 @@
         "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -128,7 +128,7 @@
         "Verify in browser using dev-browser skill at 375px width"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -144,7 +144,7 @@
         "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -158,7 +158,7 @@
         "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -173,7 +173,7 @@
         "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]

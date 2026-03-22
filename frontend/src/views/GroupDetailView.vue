@@ -1,12 +1,9 @@
 <template>
   <div class="group-detail">
-    <header class="navbar">
-      <RouterLink to="/" class="back">← Groups</RouterLink>
-      <span class="brand">{{ group?.name ?? 'Loading…' }}</span>
-      <RouterLink to="/profile" class="nav-link">Profile</RouterLink>
-    </header>
+    <AppNavbar />
 
     <main class="content">
+      <h2>{{ group?.name ?? 'Loading…' }}</h2>
       <!-- Balance Summary -->
       <section class="card">
         <h3>Balances</h3>
@@ -127,9 +124,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
+import AppNavbar from '@/components/AppNavbar.vue'
 import AddExpenseForm from '@/components/AddExpenseForm.vue'
 import EditExpenseForm from '@/components/EditExpenseForm.vue'
 import SettlementForm from '@/components/SettlementForm.vue'
@@ -211,28 +209,6 @@ onMounted(async () => {
   background: #f5f5f5;
 }
 
-.navbar {
-  background: white;
-  padding: 0.75rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.back, .nav-link {
-  color: #42b883;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.brand {
-  flex: 1;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #2c3e50;
-}
-
 .content {
   max-width: 800px;
   margin: 2rem auto;
@@ -247,6 +223,8 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 1.25rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .card h3 {
@@ -349,5 +327,82 @@ onMounted(async () => {
   position: fixed; top: 1rem; right: 1rem; background: white;
   border: none; border-radius: 50%; width: 2rem; height: 2rem;
   font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Responsive: phone (<768px) ── */
+@media (max-width: 767px) {
+  .content {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+
+  .expense-main {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .expense-main .desc {
+    flex: 1 1 100%;
+  }
+
+  .expense-main .amount {
+    margin-right: auto;
+  }
+
+  .expense-meta {
+    word-break: break-word;
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .add-btn {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .edit-btn, .delete-btn {
+    min-height: 44px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.6rem 0;
+  }
+
+  .debt-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.6rem 0;
+  }
+
+  .settlement-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.6rem 0;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    text-align: center;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 </style>

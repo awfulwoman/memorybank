@@ -1,9 +1,6 @@
 <template>
   <div class="profile-page">
-    <header class="navbar">
-      <RouterLink to="/" class="back">← Dashboard</RouterLink>
-      <span class="brand">Profile</span>
-    </header>
+    <AppNavbar />
 
     <main class="content">
       <!-- Profile info -->
@@ -94,9 +91,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/api'
+import AppNavbar from '@/components/AppNavbar.vue'
 
 const auth = useAuthStore()
 const editingName = ref(false)
@@ -156,15 +153,6 @@ async function uploadAvatar(e: Event) {
 
 <style scoped>
 .profile-page { min-height: 100vh; background: #f5f5f5; }
-
-.navbar {
-  background: white; padding: 0.75rem 1.5rem;
-  display: flex; align-items: center; gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.back { color: #42b883; text-decoration: none; font-size: 0.9rem; }
-.brand { font-weight: 700; font-size: 1.1rem; color: #2c3e50; }
 
 .content {
   max-width: 640px; margin: 2rem auto; padding: 0 1rem;
@@ -241,4 +229,54 @@ input {
 code { display: block; background: #f5f5f5; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; word-break: break-all; margin-bottom: 0.5rem; }
 .key-status { color: #888; font-size: 0.875rem; margin: 0 0 0.75rem; }
 .export-btn.danger { color: #e74c3c; border-color: #e74c3c; }
+
+/* Responsive: phone (<768px) */
+@media (max-width: 767px) {
+  .avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avatar-upload-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .display-name-row {
+    flex-wrap: wrap;
+  }
+
+  .display-name-row input {
+    min-height: 44px;
+  }
+
+  .inline-btn {
+    min-height: 44px;
+  }
+
+  .key-display code {
+    overflow-wrap: break-word;
+    word-break: break-all;
+  }
+
+  .key-status {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
 </style>

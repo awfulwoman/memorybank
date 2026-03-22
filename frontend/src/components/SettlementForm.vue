@@ -84,7 +84,7 @@ async function submit() {
 }
 .modal {
   background: white; border-radius: 8px; padding: 1.5rem;
-  width: 100%; max-width: 400px;
+  width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto;
 }
 h3 { margin: 0 0 1rem; color: #2c3e50; }
 .field { margin-bottom: 0.75rem; }
@@ -101,4 +101,30 @@ input, select {
 .actions button[type="submit"] { background: #42b883; color: white; border-color: #42b883; }
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
 .error { color: #e74c3c; font-size: 0.875rem; }
+
+/* Responsive modal — US-009 */
+@media (max-width: 479px) {
+  .modal {
+    max-width: calc(100% - 16px);
+    margin: 8px;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  input, select {
+    min-height: 44px;
+  }
+  .actions {
+    position: sticky;
+    bottom: -1.5rem;
+    background: white;
+    padding: 0.75rem 0;
+    margin-bottom: -1.5rem;
+  }
+  .actions button {
+    min-height: 44px;
+    flex: 1;
+  }
+}
 </style>
