@@ -62,3 +62,30 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ExpenseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class Expense(models.Model):
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    description = models.CharField(max_length=500)
+    date = models.DateField()
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='expenses')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='expenses'
+    )
+    receipt_image = models.ImageField(upload_to='receipts/', blank=True, null=True)
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = ExpenseManager()
+    all_objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.description} ({self.amount})'

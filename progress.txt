@@ -65,3 +65,13 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - Group model conflicts with django.contrib.auth.models.Group — use `related_name='expense_groups'` on members M2M and `related_name='created_groups'` on created_by to avoid clash
   - The Group model is in `core` app, not `auth`; no django Group name clash since we import from models directly
 ---
+
+## 2026-03-22 - US-005
+
+- What was implemented: Expense model with amount, description, date, category (FK), group (FK), created_by (FK), receipt_image, is_deleted, created_at, updated_at; ExpenseManager excludes soft-deleted; all_objects manager includes them
+- Files changed:
+  - `backend/core/models.py` — added ExpenseManager and Expense model
+  - `backend/core/migrations/0005_expense.py` — migration
+- **Learnings for future iterations:**
+  - Soft delete pattern: custom Manager filtering `is_deleted=False`; `all_objects = models.Manager()` for unfiltered access
+---
