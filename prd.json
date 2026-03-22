@@ -105,8 +105,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_auth"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "4 tests: login valid, login invalid, logout, unauthenticated access"
     },
     {
       "id": "US-008",
@@ -121,8 +121,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_auth"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "5 tests: create key, replace key, delete key, delete nonexistent, X-API-Key auth"
     },
     {
       "id": "US-009",

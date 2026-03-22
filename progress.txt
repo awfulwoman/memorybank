@@ -70,4 +70,15 @@ Started: Sun 22 Mar 2026
 - **Learnings for future iterations:**
   - Settlement reduces `owes[payer_id][payee_id]` — payer is the one paying back debt
   - Net balances are derived from pairwise debts, not directly from expenses
+- API tests use `APIClient` from `rest_framework.test`; `force_login()` for auth, `HTTP_X_API_KEY=key` for API key header
+---
+
+## 2026-03-22 - US-007 & US-008: Auth API tests
+- Created `backend/core/tests/test_auth.py` with 9 tests
+- US-007: login valid/invalid, logout, unauthenticated access
+- US-008: API key create, replace, delete, delete-nonexistent, X-API-Key authentication
+- Files changed: `backend/core/tests/test_auth.py` (new)
+- **Learnings for future iterations:**
+  - APIClient handles CSRF automatically in tests
+  - `HTTP_X_API_KEY=key` kwarg to client methods sets the X-API-Key header
 ---
