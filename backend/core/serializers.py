@@ -57,6 +57,7 @@ class CurrencySerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     member_count = serializers.SerializerMethodField()
     member_ids = serializers.SerializerMethodField()
+    members_list = serializers.SerializerMethodField()
     group_type_name = serializers.CharField(source='group_type.name', read_only=True)
     currency_code = serializers.CharField(source='currency.code', read_only=True)
 
@@ -65,7 +66,7 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'icon', 'group_type', 'group_type_name',
             'currency', 'currency_code', 'default_split_method',
-            'created_by', 'member_count', 'member_ids',
+            'created_by', 'member_count', 'member_ids', 'members_list',
         ]
         read_only_fields = ['created_by']
 
@@ -74,6 +75,12 @@ class GroupSerializer(serializers.ModelSerializer):
 
     def get_member_ids(self, obj):
         return list(obj.members.values_list('id', flat=True))
+
+    def get_members_list(self, obj):
+        return [
+            {'id': m.id, 'username': m.username, 'display_name': m.display_name}
+            for m in obj.members.all().order_by('username')
+        ]
 
 
 class ExpenseSplitSerializer(serializers.ModelSerializer):

@@ -143,8 +143,14 @@ class GroupMemberView(APIView):
     def post(self, request, pk):
         group = Group.objects.get(pk=pk)
         user_id = request.data.get('user_id')
+        username = request.data.get('username')
         try:
-            user = User.objects.get(pk=user_id)
+            if user_id:
+                user = User.objects.get(pk=user_id)
+            elif username:
+                user = User.objects.get(username=username)
+            else:
+                return Response({'detail': 'user_id or username required.'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         group.members.add(user)

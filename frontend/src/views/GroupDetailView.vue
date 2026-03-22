@@ -126,8 +126,11 @@
       :group-id="groupId"
       :name="group.name"
       :icon="group.icon"
+      :members-list="group.members_list ?? []"
+      :current-user-id="auth.user?.id ?? 0"
       @close="showSettings = false"
       @saved="onSettingsSaved"
+      @members-changed="onMembersChanged"
     />
 
     <AddExpenseForm
@@ -199,6 +202,11 @@ async function onExpenseSaved() {
 function onSettingsSaved(updated: any) {
   group.value = updated
   showSettings.value = false
+}
+
+async function onMembersChanged() {
+  const groups = await api.groups()
+  group.value = groups.find((g: any) => g.id === groupId) ?? group.value
 }
 
 async function onSettlementSaved() {
