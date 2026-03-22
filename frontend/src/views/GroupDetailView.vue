@@ -131,6 +131,7 @@
       @close="showSettings = false"
       @saved="onSettingsSaved"
       @members-changed="onMembersChanged"
+      @deleted="router.push('/')"
     />
 
     <AddExpenseForm
@@ -146,7 +147,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -156,6 +157,7 @@ import SettlementForm from '@/components/SettlementForm.vue'
 import GroupSettingsModal from '@/components/GroupSettingsModal.vue'
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuthStore()
 const groupId = Number(route.params.id)
 

@@ -48,6 +48,24 @@
         <p v-if="memberError" class="error">{{ memberError }}</p>
         <p v-if="memberSuccess" class="success">{{ memberSuccess }}</p>
       </div>
+
+      <!-- Delete Group -->
+      <div class="danger-section">
+        <h4>Danger Zone</h4>
+        <div v-if="!confirmingDelete">
+          <button class="danger-btn" @click="confirmingDelete = true">Delete Group</button>
+        </div>
+        <div v-else class="confirm-delete">
+          <p class="danger-text">Are you sure? This will permanently delete the group, all expenses, and settlements.</p>
+          <div class="confirm-actions">
+            <button type="button" @click="confirmingDelete = false">Cancel</button>
+            <button class="danger-btn" :disabled="deleting" @click="deleteGroup">
+              {{ deleting ? 'Deleting…' : 'Yes, delete' }}
+            </button>
+          </div>
+          <p v-if="deleteError" class="error">{{ deleteError }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -69,6 +87,7 @@ const emit = defineEmits<{
   close: []
   saved: [group: any]
   membersChanged: []
+  deleted: []
 }>()
 
 const loading = ref(false)
@@ -124,6 +143,23 @@ async function addMember() {
     memberError.value = e.detail || 'User not found'
   } finally {
     adding.value = false
+  }
+}
+
+const confirmingDelete = ref(false)
+const deleting = ref(false)
+const deleteError = ref('')
+
+async function deleteGroup() {
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    await api.deleteGroup(props.groupId)
+    emit('deleted')
+  } catch (e: any) {
+    deleteError.value = e.detail || 'Failed to delete group'
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -273,6 +309,47 @@ input {
 }
 
 .add-member button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.danger-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-danger);
+}
+
+.danger-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--color-danger);
+  border-radius: 4px;
+  background: var(--color-danger);
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.danger-text {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  margin: 0 0 0.75rem;
+}
+
+.confirm-delete { }
+
+.confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.confirm-actions button {
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-card-bg);
+  color: var(--color-text);
+}
 
 @media (max-width: 479px) {
   .modal {

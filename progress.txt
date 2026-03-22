@@ -119,3 +119,13 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - GroupMemberView accepts both `user_id` and `username` for adding members
   - Modal member management pattern: local `members` ref copied from props, updated after API calls
 ---
+
+## 2026-03-22 - US-011
+- Added "Danger Zone" section to GroupSettingsModal with Delete Group button
+- Inline confirmation dialog (not browser `confirm()`) — shows warning text with Cancel/Yes buttons
+- On successful deletion, emits `deleted` event; GroupDetailView handles it with `router.push('/')`
+- Files changed: `frontend/src/components/GroupSettingsModal.vue`, `frontend/src/views/GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - Inline confirmation pattern (toggle `confirmingDelete` ref) is better UX than `window.confirm()`
+  - `api.deleteGroup` already existed in api.ts — always check before adding new API methods
+---
