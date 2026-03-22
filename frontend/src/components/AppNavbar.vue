@@ -80,12 +80,12 @@ async function handleLogoutMobile() {
 
 <style scoped>
 .navbar {
-  background: white;
+  background: var(--color-navbar-bg);
   padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--color-navbar-shadow);
   position: relative;
   z-index: 100;
 }
@@ -105,7 +105,7 @@ async function handleLogoutMobile() {
 }
 
 .nav-link {
-  color: #42b883;
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 0.9rem;
   padding: 0.35rem 0.75rem;
@@ -114,29 +114,29 @@ async function handleLogoutMobile() {
 }
 
 .nav-link:hover {
-  background-color: rgba(66, 184, 131, 0.08);
+  background-color: var(--color-primary-bg);
 }
 
 .nav-link.active {
-  background-color: rgba(66, 184, 131, 0.12);
+  background-color: var(--color-primary-bg-active);
   font-weight: 600;
 }
 
 .nav-btn {
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   padding: 0.35rem 0.75rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-subtle);
   cursor: pointer;
   margin-left: 0.5rem;
   transition: border-color 0.2s, color 0.2s;
 }
 
 .nav-btn:hover {
-  border-color: #999;
-  color: #333;
+  border-color: var(--color-input-border-hover);
+  color: var(--color-heading);
 }
 
 /* Hamburger button */
@@ -185,8 +185,8 @@ async function handleLogoutMobile() {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--color-navbar-bg);
+  box-shadow: 0 4px 12px var(--color-navbar-shadow);
   flex-direction: column;
   padding: 0.5rem 0;
   z-index: 101;
@@ -209,7 +209,7 @@ async function handleLogoutMobile() {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay);
   z-index: 99;
 }
 

@@ -59,7 +59,7 @@ onMounted(async () => {
 <style scoped>
 .dashboard {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-page-bg);
   overflow-x: hidden;
 }
 
@@ -71,7 +71,7 @@ onMounted(async () => {
 
 h2 {
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--color-heading);
 }
 
 /* Balance summary */
@@ -86,10 +86,10 @@ h2 {
 }
 
 .balance-card {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px var(--color-card-shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -100,7 +100,7 @@ h2 {
 
 .balance-group {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .balance-amount {
@@ -109,11 +109,11 @@ h2 {
 }
 
 .balance-amount.positive {
-  color: #27ae60;
+  color: var(--color-success);
 }
 
 .balance-amount.negative {
-  color: #e74c3c;
+  color: var(--color-danger);
 }
 
 /* Group grid — responsive columns */
@@ -136,39 +136,39 @@ h2 {
 }
 
 .group-card {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 8px;
   padding: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px var(--color-card-shadow);
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s;
 }
 
 .group-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px var(--color-card-shadow-hover);
 }
 
 .group-card h3 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
-  color: #2c3e50;
+  color: var(--color-heading);
 }
 
 .meta {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-muted);
   margin: 0 0 0.25rem;
 }
 
 .members {
   font-size: 0.875rem;
-  color: #555;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .loading, .empty {
-  color: #666;
+  color: var(--color-text-subtle);
 }
 
 /* Phone: balance cards stack vertically */

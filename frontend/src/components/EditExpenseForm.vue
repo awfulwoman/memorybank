@@ -164,35 +164,36 @@ async function submit() {
   display: flex; align-items: center; justify-content: center; z-index: 100;
 }
 .modal {
-  background: white; border-radius: 8px; padding: 1.5rem;
+  background: var(--color-card-bg); border-radius: 8px; padding: 1.5rem;
   width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
 }
-h3 { margin: 0 0 0.25rem; color: #2c3e50; }
-.last-modified { font-size: 0.75rem; color: #aaa; margin: 0 0 1rem; }
+h3 { margin: 0 0 0.25rem; color: var(--color-heading); }
+.last-modified { font-size: 0.75rem; color: var(--color-text-faint); margin: 0 0 1rem; }
 .field { margin-bottom: 0.75rem; }
 label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; }
 input, select {
-  width: 100%; padding: 0.4rem 0.6rem; border: 1px solid #ddd;
+  width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--color-input-border);
   border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;
+  background: var(--color-input-bg); color: var(--color-text);
 }
 .toggle { display: flex; gap: 0.5rem; }
 .toggle button {
-  flex: 1; padding: 0.4rem; border: 1px solid #ddd; border-radius: 4px;
-  background: white; cursor: pointer; font-size: 0.875rem;
+  flex: 1; padding: 0.4rem; border: 1px solid var(--color-input-border); border-radius: 4px;
+  background: var(--color-card-bg); cursor: pointer; font-size: 0.875rem; color: var(--color-text);
 }
-.toggle button.active { background: #42b883; color: white; border-color: #42b883; }
-.split-info { font-size: 0.875rem; color: #555; background: #f8f8f8; padding: 0.5rem; border-radius: 4px; }
+.toggle button.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+.split-info { font-size: 0.875rem; color: var(--color-text-secondary); background: var(--color-info-bg); padding: 0.5rem; border-radius: 4px; }
 .custom-splits .split-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
 .custom-splits .split-row span { width: 120px; font-size: 0.875rem; }
 .custom-splits .split-row input { flex: 1; }
 .actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
 .actions button {
   padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.9rem; cursor: pointer;
-  border: 1px solid #ddd; background: white;
+  border: 1px solid var(--color-input-border); background: var(--color-card-bg); color: var(--color-text);
 }
-.actions button[type="submit"] { background: #42b883; color: white; border-color: #42b883; }
+.actions button[type="submit"] { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #e74c3c; font-size: 0.875rem; }
+.error { color: var(--color-danger); font-size: 0.875rem; }
 
 /* Responsive modal — US-009 */
 @media (max-width: 479px) {
@@ -213,7 +214,7 @@ input, select {
   .actions {
     position: sticky;
     bottom: -1.5rem;
-    background: white;
+    background: var(--color-card-bg);
     padding: 0.75rem 0;
     margin-bottom: -1.5rem;
   }

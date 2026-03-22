@@ -206,7 +206,7 @@ onMounted(async () => {
 <style scoped>
 .group-detail {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-page-bg);
 }
 
 .content {
@@ -219,17 +219,17 @@ onMounted(async () => {
 }
 
 .card {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 8px;
   padding: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px var(--color-card-shadow);
   overflow-wrap: break-word;
   overflow: hidden;
 }
 
 .card h3 {
   margin: 0 0 1rem;
-  color: #2c3e50;
+  color: var(--color-heading);
 }
 
 .balance-row, .debt-row, .settlement-row {
@@ -237,7 +237,7 @@ onMounted(async () => {
   gap: 0.5rem;
   align-items: center;
   padding: 0.4rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
   font-size: 0.9rem;
 }
 
@@ -245,12 +245,12 @@ onMounted(async () => {
   flex: 1;
 }
 
-.positive { color: #27ae60; font-weight: 600; }
-.negative { color: #e74c3c; font-weight: 600; }
+.positive { color: var(--color-success); font-weight: 600; }
+.negative { color: var(--color-danger); font-weight: 600; }
 
 .expense-row {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .expense-main {
@@ -261,12 +261,12 @@ onMounted(async () => {
 
 .expense-meta {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-muted);
 }
 
-.date { color: #aaa; font-size: 0.8rem; }
+.date { color: var(--color-text-faint); font-size: 0.8rem; }
 
-.empty, .loading { color: #999; font-size: 0.875rem; }
+.empty, .loading { color: var(--color-text-placeholder); font-size: 0.875rem; }
 
 .section-header {
   display: flex;
@@ -278,7 +278,7 @@ onMounted(async () => {
 .section-header h3 { margin: 0; }
 
 .add-btn {
-  background: #42b883;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -290,28 +290,28 @@ onMounted(async () => {
 .edit-btn, .delete-btn {
   font-size: 0.75rem;
   padding: 0.15rem 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 3px;
-  background: white;
+  background: var(--color-card-bg);
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-subtle);
   margin-left: 0.5rem;
 }
 
 .delete-btn {
-  color: #e74c3c;
-  border-color: #e74c3c;
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .export-buttons { display: flex; gap: 0.75rem; }
 .export-btn {
-  padding: 0.4rem 1rem; border: 1px solid #42b883; border-radius: 4px;
-  color: #42b883; text-decoration: none; font-size: 0.9rem;
+  padding: 0.4rem 1rem; border: 1px solid var(--color-primary); border-radius: 4px;
+  color: var(--color-primary); text-decoration: none; font-size: 0.9rem;
 }
 
 .receipt-btn {
   background: none; border: none; font-size: 0.75rem; cursor: pointer;
-  color: #42b883; padding: 0; margin-left: 0.5rem;
+  color: var(--color-primary); padding: 0; margin-left: 0.5rem;
 }
 
 .receipt-overlay {

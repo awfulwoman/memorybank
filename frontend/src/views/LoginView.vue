@@ -68,15 +68,15 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-page-bg);
   padding: 1rem;
 }
 
 .login-card {
-  background: white;
+  background: var(--color-card-bg);
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px var(--color-card-shadow);
   width: 100%;
   max-width: 360px;
   max-height: calc(100vh - 2rem);
@@ -86,11 +86,11 @@ async function handleLogin() {
 h1 {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
-  color: #2c3e50;
+  color: var(--color-heading);
 }
 
 .subtitle {
-  color: #666;
+  color: var(--color-text-subtle);
   margin: 0 0 1.5rem;
   font-size: 0.9rem;
 }
@@ -104,14 +104,16 @@ label {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.25rem;
-  color: #444;
+  color: var(--color-text-label);
 }
 
 input {
   width: 100%;
   min-height: 44px;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
   border-radius: 4px;
   font-size: 1rem;
   box-sizing: border-box;
@@ -119,14 +121,14 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: var(--color-primary);
 }
 
 button {
   width: 100%;
   min-height: 44px;
   padding: 0.6rem;
-  background: #42b883;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -141,7 +143,7 @@ button:disabled {
 }
 
 .error {
-  color: #e74c3c;
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin: 0.5rem 0;
 }

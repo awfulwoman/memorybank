@@ -39,6 +39,32 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
 
+  --color-page-bg: #f5f5f5;
+  --color-card-bg: #ffffff;
+  --color-card-shadow: rgba(0, 0, 0, 0.08);
+  --color-card-shadow-hover: rgba(0, 0, 0, 0.15);
+  --color-text-secondary: #555;
+  --color-text-muted: #888;
+  --color-text-faint: #aaa;
+  --color-text-label: #444;
+  --color-text-subtle: #666;
+  --color-text-placeholder: #999;
+  --color-primary: #42b883;
+  --color-primary-bg: rgba(66, 184, 131, 0.08);
+  --color-primary-bg-active: rgba(66, 184, 131, 0.12);
+  --color-success: #27ae60;
+  --color-danger: #e74c3c;
+  --color-input-border: #ddd;
+  --color-input-border-hover: #999;
+  --color-input-bg: #ffffff;
+  --color-code-bg: #f5f5f5;
+  --color-info-bg: #f8f8f8;
+  --color-navbar-bg: #ffffff;
+  --color-navbar-shadow: rgba(0, 0, 0, 0.1);
+  --color-overlay: rgba(0, 0, 0, 0.3);
+  --color-modal-shadow: rgba(0, 0, 0, 0.15);
+  --color-badge-inactive: #ccc;
+
   --section-gap: 160px;
 }
 
@@ -53,6 +79,32 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+
+    --color-page-bg: #1a1a2e;
+    --color-card-bg: #2a2a3e;
+    --color-card-shadow: rgba(0, 0, 0, 0.3);
+    --color-card-shadow-hover: rgba(0, 0, 0, 0.5);
+    --color-text-secondary: #c0c0c0;
+    --color-text-muted: #a0a0a0;
+    --color-text-faint: #909090;
+    --color-text-label: #d0d0d0;
+    --color-text-subtle: #b0b0b0;
+    --color-text-placeholder: #808080;
+    --color-primary: #42b883;
+    --color-primary-bg: rgba(66, 184, 131, 0.15);
+    --color-primary-bg-active: rgba(66, 184, 131, 0.25);
+    --color-success: #2ecc71;
+    --color-danger: #e74c3c;
+    --color-input-border: #444;
+    --color-input-border-hover: #666;
+    --color-input-bg: #333;
+    --color-code-bg: #2a2a3e;
+    --color-info-bg: #333;
+    --color-navbar-bg: #2a2a3e;
+    --color-navbar-shadow: rgba(0, 0, 0, 0.3);
+    --color-overlay: rgba(0, 0, 0, 0.5);
+    --color-modal-shadow: rgba(0, 0, 0, 0.4);
+    --color-badge-inactive: #555;
   }
 }
 

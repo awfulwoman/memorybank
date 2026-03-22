@@ -162,7 +162,7 @@ async function submit() {
 }
 
 .modal {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 8px;
   padding: 1.5rem;
   width: 100%;
@@ -171,17 +171,19 @@ async function submit() {
   overflow-y: auto;
 }
 
-h3 { margin: 0 0 1rem; color: #2c3e50; }
+h3 { margin: 0 0 1rem; color: var(--color-heading); }
 
 .field { margin-bottom: 0.75rem; }
 label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; }
 input, select {
   width: 100%;
   padding: 0.4rem 0.6rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   font-size: 0.95rem;
   box-sizing: border-box;
+  background: var(--color-input-bg);
+  color: var(--color-text);
 }
 
 .toggle {
@@ -192,23 +194,23 @@ input, select {
 .toggle button {
   flex: 1;
   padding: 0.4rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
-  background: white;
+  background: var(--color-card-bg);
   cursor: pointer;
   font-size: 0.875rem;
 }
 
 .toggle button.active {
-  background: #42b883;
+  background: var(--color-primary);
   color: white;
-  border-color: #42b883;
+  border-color: var(--color-primary);
 }
 
 .split-info {
   font-size: 0.875rem;
-  color: #555;
-  background: #f8f8f8;
+  color: var(--color-text-secondary);
+  background: var(--color-info-bg);
   padding: 0.5rem;
   border-radius: 4px;
 }
@@ -241,19 +243,20 @@ input, select {
   border-radius: 4px;
   font-size: 0.9rem;
   cursor: pointer;
-  border: 1px solid #ddd;
-  background: white;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-card-bg);
+  color: var(--color-text);
 }
 
 .actions button[type="submit"] {
-  background: #42b883;
+  background: var(--color-primary);
   color: white;
-  border-color: #42b883;
+  border-color: var(--color-primary);
 }
 
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.error { color: #e74c3c; font-size: 0.875rem; }
+.error { color: var(--color-danger); font-size: 0.875rem; }
 
 /* Responsive modal — US-009 */
 @media (max-width: 479px) {
@@ -274,7 +277,7 @@ input, select {
   .actions {
     position: sticky;
     bottom: -1.5rem;
-    background: white;
+    background: var(--color-card-bg);
     padding: 0.75rem 0;
     margin-bottom: -1.5rem;
   }

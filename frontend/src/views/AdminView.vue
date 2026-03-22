@@ -300,7 +300,7 @@ async function deleteItem(type: string, id: number) {
 </script>
 
 <style scoped>
-.admin-page { min-height: 100vh; background: #f5f5f5; }
+.admin-page { min-height: 100vh; background: var(--color-page-bg); }
 
 .content {
   max-width: 700px; margin: 2rem auto; padding: 0 1rem;
@@ -308,18 +308,18 @@ async function deleteItem(type: string, id: number) {
 }
 
 .card {
-  background: white; border-radius: 8px; padding: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: var(--color-card-bg); border-radius: 8px; padding: 1.25rem;
+  box-shadow: 0 1px 4px var(--color-card-shadow);
 }
 
 .section-header {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
 }
 
-.section-header h3 { margin: 0; color: #2c3e50; }
+.section-header h3 { margin: 0; color: var(--color-heading); }
 
 .add-btn {
-  background: #42b883; color: white; border: none;
+  background: var(--color-primary); color: white; border: none;
   border-radius: 4px; padding: 0.3rem 0.75rem; font-size: 0.875rem; cursor: pointer;
 }
 
@@ -328,47 +328,49 @@ async function deleteItem(type: string, id: number) {
 }
 
 .inline-form input {
-  flex: 1; padding: 0.4rem 0.6rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;
+  flex: 1; padding: 0.4rem 0.6rem; border: 1px solid var(--color-input-border); border-radius: 4px; font-size: 0.9rem;
+  background: var(--color-input-bg); color: var(--color-text);
 }
 
 .inline-form button {
-  padding: 0.35rem 0.75rem; border: 1px solid #ddd; border-radius: 4px;
-  font-size: 0.875rem; cursor: pointer; background: white;
+  padding: 0.35rem 0.75rem; border: 1px solid var(--color-input-border); border-radius: 4px;
+  font-size: 0.875rem; cursor: pointer; background: var(--color-card-bg); color: var(--color-text);
 }
 
 .list-row {
   display: flex; align-items: center; padding: 0.4rem 0;
-  border-bottom: 1px solid #f0f0f0; gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border); gap: 0.5rem;
 }
 
 .list-row span { flex: 1; font-size: 0.9rem; }
 .list-row input {
-  flex: 1; padding: 0.3rem 0.5rem; border: 1px solid #42b883; border-radius: 3px; font-size: 0.9rem;
+  flex: 1; padding: 0.3rem 0.5rem; border: 1px solid var(--color-primary); border-radius: 3px; font-size: 0.9rem;
+  background: var(--color-input-bg); color: var(--color-text);
 }
 
 .row-actions { display: flex; gap: 0.4rem; }
 
 .small-btn {
-  padding: 0.2rem 0.5rem; font-size: 0.75rem; border: 1px solid #ddd;
-  border-radius: 3px; background: white; cursor: pointer; color: #555;
+  padding: 0.2rem 0.5rem; font-size: 0.75rem; border: 1px solid var(--color-input-border);
+  border-radius: 3px; background: var(--color-card-bg); cursor: pointer; color: var(--color-text-secondary);
 }
 
-.small-btn.save { border-color: #42b883; color: #42b883; }
-.small-btn.danger { border-color: #e74c3c; color: #e74c3c; }
+.small-btn.save { border-color: var(--color-primary); color: var(--color-primary); }
+.small-btn.danger { border-color: var(--color-danger); color: var(--color-danger); }
 
 .badge {
   font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px;
-  background: #42b883; color: white; margin-left: 0.25rem;
+  background: var(--color-primary); color: white; margin-left: 0.25rem;
 }
 
-.inactive-badge { background: #ccc; }
-.inactive { color: #aaa; text-decoration: line-through; }
+.inactive-badge { background: var(--color-badge-inactive); }
+.inactive { color: var(--color-text-faint); text-decoration: line-through; }
 
 .member-panel {
-  margin-top: 1rem; border-top: 1px solid #f0f0f0; padding-top: 0.75rem;
+  margin-top: 1rem; border-top: 1px solid var(--color-border); padding-top: 0.75rem;
 }
 
-.member-panel h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: #555; }
+.member-panel h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--color-text-secondary); }
 
 /* Responsive: phone (<768px) */
 @media (max-width: 767px) {
