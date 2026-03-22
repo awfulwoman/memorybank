@@ -9,6 +9,8 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - DB path configurable via `SQLITE_PATH` env var; media path via `MEDIA_ROOT` env var
 - Run Django commands from `backend/` directory: `cd backend && python manage.py ...`
 - Data volumes mounted at `data/db/` and `data/media/` in repo root
+- Custom User model: `core.User` extends `AbstractUser` with `display_name` and `avatar`; `AUTH_USER_MODEL = 'core.User'` in settings
+- When adding custom user model AFTER initial migrate, delete db.sqlite3 and re-migrate from scratch
 
 ---
 
@@ -28,5 +30,16 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - **Learnings for future iterations:**
   - Django was scaffolded via `django-admin startproject` into a temp dir then moved; the `memorybank/` and `core/` dirs already existed as placeholders
   - Django 6.0.3 is installed on this machine
-  - `python manage.py check` and `migrate` both pass cleanly
+---
+
+## 2026-03-22 - US-002
+
+- What was implemented: Custom User model extending AbstractUser with `display_name` (CharField) and `avatar` (ImageField), migration, Django admin registration
+- Files changed:
+  - `backend/core/models.py` — User model
+  - `backend/core/admin.py` — CustomUserAdmin registered with extra fieldsets
+  - `backend/core/migrations/0001_initial.py` — migration
+  - `backend/memorybank/settings.py` — added `AUTH_USER_MODEL = 'core.User'`
+- **Learnings for future iterations:**
+  - Must set AUTH_USER_MODEL before any migrations run (or delete sqlite3 and re-migrate)
 ---
