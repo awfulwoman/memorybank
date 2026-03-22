@@ -39,4 +39,16 @@ Started: Sun 22 Mar 2026
 - **Learnings for future iterations:**
   - Django test runner uses in-memory SQLite — no need to worry about fixture conflicts with dev DB
   - Use `Expense.all_objects.create()` to create expenses (default manager filters is_deleted=False)
+- ExpenseSerializer.save() needs `created_by` and `group` passed explicitly (read_only fields)
+- Serializer tests don't need HTTP — instantiate serializer directly, call is_valid() + save()
+---
+
+## 2026-03-22 - US-003 & US-004: Serializer unit tests
+- Created `backend/core/tests/test_serializers.py` with 6 tests
+- US-003: equal split, custom split, invalid split rejection
+- US-004: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids
+- Files changed: `backend/core/tests/test_serializers.py` (new)
+- **Learnings for future iterations:**
+  - ExpenseSerializer requires `created_by` and `group` passed to save() since they're read_only
+  - Serializer split validation happens in _create_splits() at save time, not during is_valid()
 ---

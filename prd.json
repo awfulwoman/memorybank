@@ -45,8 +45,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 tests: equal split, custom split, invalid split rejection"
     },
     {
       "id": "US-004",
@@ -59,8 +59,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 tests: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids"
     },
     {
       "id": "US-005",
