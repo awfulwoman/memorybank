@@ -31,7 +31,7 @@ class AdminWritePermissionTest(TestCase):
         resp = self.client.delete(f"/api/categories/{cat.pk}/")
         self.assertEqual(resp.status_code, 204)
 
-    def test_non_staff_post_groups_403(self):
+    def test_non_staff_post_groups_allowed(self):
         self.client.force_login(self.regular)
         cur = Currency.objects.create(name="USD", symbol="$", code="USD")
         gt = GroupType.objects.create(name="Home")
@@ -40,4 +40,4 @@ class AdminWritePermissionTest(TestCase):
             "currency": cur.pk,
             "group_type": gt.pk,
         })
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 201)

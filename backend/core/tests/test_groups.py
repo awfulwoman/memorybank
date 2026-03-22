@@ -21,6 +21,27 @@ class GroupCRUDTest(TestCase):
         })
         self.assertEqual(resp.status_code, 201)
 
+    def test_non_staff_create_group(self):
+        self.client.force_login(self.regular)
+        resp = self.client.post("/api/groups/", {
+            "name": "My Group",
+            "currency": self.cur.pk,
+        })
+        self.assertEqual(resp.status_code, 201)
+        group = Group.objects.get(name="My Group")
+        self.assertEqual(group.created_by, self.regular)
+        self.assertIn(self.regular, group.members.all())
+
+    def test_staff_create_group_also_added_to_members(self):
+        self.client.force_login(self.staff)
+        resp = self.client.post("/api/groups/", {
+            "name": "Staff Group",
+            "currency": self.cur.pk,
+        })
+        self.assertEqual(resp.status_code, 201)
+        group = Group.objects.get(name="Staff Group")
+        self.assertIn(self.staff, group.members.all())
+
     def test_non_staff_sees_only_own_groups(self):
         g1 = Group.objects.create(name="G1", created_by=self.staff)
         g1.members.add(self.regular)

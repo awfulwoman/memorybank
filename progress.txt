@@ -3,6 +3,8 @@
 - Django requires `DJANGO_SECRET_KEY=dev-secret-key` env var for manage.py commands
 - Run tests: `cd backend && DJANGO_SECRET_KEY=dev-secret-key .venv/bin/python manage.py test core`
 - Migrations dir: `backend/core/migrations/`
+- `GroupViewSet` uses `get_permissions()` to vary permission by action (not a single `permission_classes` list)
+- When changing permission behavior, check `test_permissions.py` for tests that assert old behavior
 
 # Ralph Progress Log
 Started: Sun 22 Mar 2026 20:32:57 CET
@@ -16,4 +18,15 @@ Started: Sun 22 Mar 2026 20:32:57 CET
 - **Learnings for future iterations:**
   - Django SECRET_KEY is required via env var since security hardening (US-007 from prior PRD)
   - python3 not in path with django; must use `.venv/bin/python`
+---
+
+## 2026-03-22 - US-002
+- Changed `GroupViewSet` to use `get_permissions()` — `create` action allows any authenticated user, other write actions still require staff
+- Updated `perform_create()` to auto-add creator to `group.members` after save
+- Updated `test_permissions.py`: changed `test_non_staff_post_groups_403` → `test_non_staff_post_groups_allowed` (201)
+- Added tests in `test_groups.py`: `test_non_staff_create_group`, `test_staff_create_group_also_added_to_members`
+- Files changed: `core/views.py`, `core/tests/test_groups.py`, `core/tests/test_permissions.py`
+- **Learnings for future iterations:**
+  - When loosening permissions on a ViewSet, existing permission tests will break — always check `test_permissions.py`
+  - `get_permissions()` returning instances (not classes) is the pattern for per-action permission control
 ---

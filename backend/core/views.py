@@ -119,7 +119,11 @@ class MeApiKeyView(APIView):
 
 class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
-    permission_classes = [AdminWritePermission]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated()]
+        return [AdminWritePermission()]
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -127,7 +131,8 @@ class GroupViewSet(viewsets.ModelViewSet):
         return self.request.user.expense_groups.all().order_by('name')
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        group = serializer.save(created_by=self.request.user)
+        group.members.add(self.request.user)
 
 
 class GroupMemberView(APIView):
