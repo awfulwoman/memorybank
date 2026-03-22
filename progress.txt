@@ -191,4 +191,20 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `npm create vue@latest` does NOT support --no-vitest etc; use just `--ts --router --pinia --force`
   - vite-plugin-vue-devtools removed from config (not needed for production build)
   - Frontend typecheck: `npm run type-check` (vue-tsc --build)
+  - Run typecheck from `frontend/` dir, not repo root
+---
+
+## 2026-03-22 - US-017
+
+- What was implemented: LoginView with username/password form, error display, redirect to dashboard on success; auth store (Pinia) with fetchMe/login/logout; router guard (unauthenticated → /login); api.ts with full API client; App.vue simplified to RouterView only
+- Files changed:
+  - `frontend/src/views/LoginView.vue` — login page
+  - `frontend/src/stores/auth.ts` — auth Pinia store
+  - `frontend/src/router/index.ts` — full route table with auth guard
+  - `frontend/src/api.ts` — API client
+  - `frontend/src/App.vue` — simplified to RouterView
+  - `frontend/src/views/DashboardView.vue`, `GroupDetailView.vue`, `ProfileView.vue`, `AdminView.vue` — stub views
+- **Learnings for future iterations:**
+  - CSRF token read from cookie `csrftoken` and sent as `X-CSRFToken` header
+  - Auth guard calls `auth.fetchMe()` once per navigation if user not loaded; /login is `meta: { public: true }`
 ---
