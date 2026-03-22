@@ -123,3 +123,15 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - `flex-direction: column` is cleaner than `flex-wrap: wrap` for true single-column reflow on mobile
   - `overflow-wrap: break-word` + `overflow: hidden` on card containers prevents any child from causing horizontal scroll
 ---
+
+## 2026-03-22 - US-009
+- Added responsive styles to all three modal forms: AddExpenseForm, EditExpenseForm, SettlementForm
+- Below 480px: modal takes full width minus 16px margin
+- Below 768px: inputs get min-height 44px for touch targets, action buttons become sticky at modal bottom
+- Added missing `max-height: 90vh; overflow-y: auto` to SettlementForm modal (AddExpense/EditExpense already had it)
+- Files changed: `AddExpenseForm.vue`, `EditExpenseForm.vue`, `SettlementForm.vue`
+- **Learnings for future iterations:**
+  - Sticky actions inside overflow-y container: `position: sticky; bottom: -Xrem` where X matches parent padding, with background color to cover scrolling content
+  - SettlementForm was missing max-height/overflow-y — always check all modals share the same base responsive setup
+  - All three modals share identical overlay/modal base CSS — could be extracted to a shared class in base.css if more modals are added
+---
