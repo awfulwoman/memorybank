@@ -86,3 +86,15 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - Login card was already centered via flexbox — only needed overflow and touch target fixes
   - Pattern for landscape safety: `max-height: calc(100vh - Xrem)` + `overflow-y: auto` on card
 ---
+
+## 2026-03-22 - US-006
+- Made group card grid responsive: 1 column phone (<768px), 2 columns tablet (768-1023px), 3 columns desktop (>=1024px)
+- Added balance summary section using `api.meBalances()` — shows non-zero balances per group
+- Balance cards use flexbox, stack vertically on phone (<768px)
+- Added `overflow-x: hidden` on `.dashboard` to prevent horizontal overflow
+- Files changed: `DashboardView.vue`
+- **Learnings for future iterations:**
+  - `api.meBalances()` returns array of `{group_id, group_name, balance, debts}` — filter by non-zero balance for summary display
+  - Explicit media query breakpoints preferred over `auto-fill` for precise column control per AC
+  - `Promise.all` pattern for parallel API calls in `onMounted`
+---

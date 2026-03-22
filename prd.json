@@ -97,7 +97,7 @@
         "Verify in browser using dev-browser skill at 375px, 768px, and 1280px widths"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
