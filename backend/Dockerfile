@@ -19,7 +19,7 @@ COPY . .
 ENV DJANGO_SETTINGS_MODULE=memorybank.settings
 ENV PYTHONUNBUFFERED=1
 
-RUN python manage.py collectstatic --noinput || true
+RUN DJANGO_SECRET_KEY=build-only-collectstatic python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
