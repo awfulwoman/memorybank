@@ -62,3 +62,12 @@ Started: Sun 22 Mar 2026
   - Takes expenses queryset and settlements queryset, returns (net_balances dict, pairwise list)
   - Must manually create ExpenseSplit records when testing balances (not via serializer)
 ---
+
+## 2026-03-22 - US-006: Balance computation — settlements and multi-member
+- Added SettlementBalanceTest and MultiMemberBalanceTest to `test_balances.py`
+- 4 new tests: partial settlement, full settlement zeroing, multiple payers net, 3-member cross debts
+- Files changed: `backend/core/tests/test_balances.py` (modified)
+- **Learnings for future iterations:**
+  - Settlement reduces `owes[payer_id][payee_id]` — payer is the one paying back debt
+  - Net balances are derived from pairwise debts, not directly from expenses
+---

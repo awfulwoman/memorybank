@@ -89,8 +89,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_balances"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "4 tests: partial settlement, full settlement, multiple payers, 3-member cross debts"
     },
     {
       "id": "US-007",
