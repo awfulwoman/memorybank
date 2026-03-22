@@ -215,3 +215,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - Files changed:
   - `frontend/src/views/DashboardView.vue`
 ---
+
+## 2026-03-22 - US-019
+
+- What was implemented: GroupDetailView with expenses list, balance summary (green=positive/red=negative), pairwise debts, settlements section
+- Files changed:
+  - `frontend/src/views/GroupDetailView.vue`
+---
