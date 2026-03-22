@@ -1,12 +1,43 @@
 from django.contrib.auth import authenticate, login, logout
-from rest_framework import status
+from rest_framework import mixins, status, viewsets
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ApiKey
-from .serializers import UserSerializer
+from .models import ApiKey, Category, Currency, GroupType
+from .serializers import CategorySerializer, CurrencySerializer, GroupTypeSerializer, UserSerializer
+
+
+class AdminWritePermission(IsAuthenticated):
+    """Allow read to all authenticated users, write only to admins."""
+
+    WRITE_METHODS = ('POST', 'PUT', 'PATCH', 'DELETE')
+
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        if request.method in self.WRITE_METHODS:
+            return request.user.is_staff
+        return True
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by('name')
+    serializer_class = CategorySerializer
+    permission_classes = [AdminWritePermission]
+
+
+class GroupTypeViewSet(viewsets.ModelViewSet):
+    queryset = GroupType.objects.all().order_by('name')
+    serializer_class = GroupTypeSerializer
+    permission_classes = [AdminWritePermission]
+
+
+class CurrencyViewSet(viewsets.ModelViewSet):
+    queryset = Currency.objects.all().order_by('code')
+    serializer_class = CurrencySerializer
+    permission_classes = [AdminWritePermission]
 
 MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
 

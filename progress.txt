@@ -116,3 +116,15 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/views.py` — MeView, MeAvatarView, MeApiKeyView
   - `backend/core/urls.py` — added user routes
 ---
+
+## 2026-03-22 - US-010
+
+- What was implemented: CRUD ViewSets for `/api/categories/`, `/api/group-types/`, `/api/currencies/` with AdminWritePermission (reads allowed for all authenticated, writes admin-only)
+- Files changed:
+  - `backend/core/serializers.py` — CategorySerializer, GroupTypeSerializer, CurrencySerializer
+  - `backend/core/views.py` — AdminWritePermission, CategoryViewSet, GroupTypeViewSet, CurrencyViewSet
+  - `backend/core/urls.py` — DefaultRouter registrations
+- **Learnings for future iterations:**
+  - AdminWritePermission extends IsAuthenticated; checks `request.user.is_staff` for write methods
+  - DefaultRouter auto-generates list/detail endpoints
+---
