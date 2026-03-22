@@ -47,7 +47,7 @@
         "Tests pass: cd backend && python manage.py test core"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

@@ -41,3 +41,51 @@ class AdminWritePermissionTest(TestCase):
             "group_type": gt.pk,
         })
         self.assertEqual(resp.status_code, 201)
+
+
+class IsGroupOwnerOrAdminTest(TestCase):
+    """Unit tests for IsGroupOwnerOrAdmin permission class."""
+
+    def setUp(self):
+        self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
+        self.owner = User.objects.create_user(username="owner", password="pass", is_staff=False)
+        self.other = User.objects.create_user(username="other", password="pass", is_staff=False)
+        self.group = Group.objects.create(name="TestGroup", created_by=self.owner)
+        self.group.members.add(self.owner, self.other)
+
+    def _check(self, user):
+        from core.permissions import IsGroupOwnerOrAdmin
+        from rest_framework.test import APIRequestFactory
+        factory = APIRequestFactory()
+        request = factory.get("/")
+        request.user = user
+        # Simulate view kwargs with group pk
+        view = type("FakeView", (), {"kwargs": {"pk": self.group.pk}})()
+        return IsGroupOwnerOrAdmin().has_permission(request, view)
+
+    def test_owner_allowed(self):
+        self.assertTrue(self._check(self.owner))
+
+    def test_staff_allowed(self):
+        self.assertTrue(self._check(self.staff))
+
+    def test_non_owner_non_staff_denied(self):
+        self.assertFalse(self._check(self.other))
+
+    def test_nonexistent_group_denied(self):
+        from core.permissions import IsGroupOwnerOrAdmin
+        from rest_framework.test import APIRequestFactory
+        factory = APIRequestFactory()
+        request = factory.get("/")
+        request.user = self.owner
+        view = type("FakeView", (), {"kwargs": {"pk": 99999}})()
+        self.assertFalse(IsGroupOwnerOrAdmin().has_permission(request, view))
+
+    def test_no_pk_in_kwargs_denied(self):
+        from core.permissions import IsGroupOwnerOrAdmin
+        from rest_framework.test import APIRequestFactory
+        factory = APIRequestFactory()
+        request = factory.get("/")
+        request.user = self.owner
+        view = type("FakeView", (), {"kwargs": {}})()
+        self.assertFalse(IsGroupOwnerOrAdmin().has_permission(request, view))

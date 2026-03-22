@@ -30,3 +30,14 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - When loosening permissions on a ViewSet, existing permission tests will break — always check `test_permissions.py`
   - `get_permissions()` returning instances (not classes) is the pattern for per-action permission control
 ---
+
+## 2026-03-22 - US-003
+- Added `IsGroupOwnerOrAdmin` permission class to `core/permissions.py`
+- Follows same pattern as `IsGroupMemberOrAdmin`: extends `IsAuthenticated`, extracts group pk from `view.kwargs`
+- Returns True for `group.created_by == request.user` or `request.user.is_staff`
+- Added 5 unit tests in `test_permissions.py` using `APIRequestFactory` and fake view objects
+- Files changed: `core/permissions.py`, `core/tests/test_permissions.py`
+- **Learnings for future iterations:**
+  - Unit-testing permission classes directly (with APIRequestFactory + fake view) avoids coupling to ViewSet wiring
+  - Permission class tests should cover: owner allowed, staff allowed, non-owner denied, nonexistent group, missing pk
+---
