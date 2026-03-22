@@ -1,120 +1,242 @@
 {
   "project": "MemoryBank",
-  "branchName": "ralph/ghcr-publishing",
-  "description": "Build and publish backend and frontend container images to GitHub Container Registry via GitHub Actions with CI quality gates",
+  "branchName": "ralph/backend-tests",
+  "description": "Comprehensive backend test suite covering models, serializers, balance logic, and all API endpoints",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create GitHub Actions publish workflow skeleton",
-      "description": "As a maintainer, I want a single workflow file that defines the job graph so subsequent stories can add job content to it.",
+      "title": "Create test fixtures",
+      "description": "As a developer, I need shared test fixtures so all tests use consistent, realistic data.",
       "acceptanceCriteria": [
-        "File .github/workflows/publish.yml is created",
-        "Workflow triggers on push to main and on push of tags matching v*.*.*",
-        "Workflow defines four empty jobs: test-backend, test-frontend, publish-backend, publish-frontend",
-        "publish-backend and publish-frontend each declare needs: [test-backend, test-frontend]",
-        "Workflow-level permissions set: contents: read, packages: write",
+        "Create backend/core/fixtures/test_data.json with: 2 users (1 staff 'admin', 1 regular 'alice'), 1 currency (USD), 1 category (Food), 1 group type (Home), 1 group with both users as members",
+        "Fixture loads successfully via: cd backend && python manage.py loaddata test_data",
         "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Fixture: 2 users (admin/alice), USD currency, Food category, Home group type, 1 group with both members. Password: password123"
     },
     {
       "id": "US-002",
-      "title": "Backend test gate job",
-      "description": "As a maintainer, I want the test-backend job to run the Django test suite so broken code is never published.",
+      "title": "Model unit tests",
+      "description": "As a developer, I want unit tests for all models so field constraints, managers, and methods are verified.",
       "acceptanceCriteria": [
-        "test-backend job checks out the repo",
-        "Job sets up Python with version pinned to match backend/Dockerfile",
-        "Job runs: pip install -r backend/requirements.txt",
-        "Job runs: cd backend && python manage.py test",
-        "Workflow fails (publish jobs do not run) if tests fail",
-        "Typecheck passes"
+        "Create backend/core/tests/__init__.py and backend/core/tests/test_models.py",
+        "Test User creation with display_name field",
+        "Test Category, GroupType, Currency __str__ methods return expected strings",
+        "Test Group creation with members M2M and default_split_method",
+        "Test ExpenseManager excludes soft-deleted expenses (Expense.objects vs Expense.all_objects)",
+        "Test ApiKey.generate_key() returns a 64-character hex string",
+        "Tests pass: cd backend && python manage.py test core.tests.test_models"
       ],
       "priority": 2,
       "passes": true,
-      "notes": ""
+      "notes": "7 tests covering all models"
     },
     {
       "id": "US-003",
-      "title": "Frontend type-check gate job",
-      "description": "As a maintainer, I want the test-frontend job to run vue-tsc so type errors are caught before publishing.",
+      "title": "Serializer unit tests — equal and custom splits",
+      "description": "As a developer, I want unit tests for ExpenseSerializer split logic.",
       "acceptanceCriteria": [
-        "test-frontend job checks out the repo",
-        "Job sets up Node with version pinned to match frontend/Dockerfile",
-        "Job runs: cd frontend && npm ci && npm run type-check",
-        "Workflow fails (publish jobs do not run) if type-check fails",
-        "Typecheck passes"
+        "Create backend/core/tests/test_serializers.py",
+        "Test ExpenseSerializer creates equal splits across group members when split_data omitted",
+        "Test ExpenseSerializer creates custom splits when split_data is provided",
+        "Test ExpenseSerializer rejects split_data where amounts don't sum to expense total",
+        "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
       ],
       "priority": 3,
       "passes": true,
-      "notes": ""
+      "notes": "3 tests: equal split, custom split, invalid split rejection"
     },
     {
       "id": "US-004",
-      "title": "Build and publish backend image to GHCR",
-      "description": "As a maintainer, I want the publish-backend job to build and push the backend image to GHCR after CI passes.",
+      "title": "Serializer unit tests — admin user and group serializers",
+      "description": "As a developer, I want unit tests for AdminUserSerializer password hashing and GroupSerializer computed fields.",
       "acceptanceCriteria": [
-        "publish-backend job logs in to GHCR using GITHUB_TOKEN",
-        "Job uses docker/setup-buildx-action to enable BuildKit",
-        "Job uses docker/metadata-action to compute tags: latest + sha-<short-sha> on main push; additionally 1.2.3 / 1.2 / 1 on semver tag (v prefix stripped via flavor)",
-        "Image name follows pattern: ghcr.io/${{ github.repository_owner }}/memorybank-backend (lowercase)",
-        "Job uses docker/build-push-action with context: backend, cache-from: type=gha, cache-to: type=gha,mode=max",
-        "push: true only when not a pull_request event",
-        "Typecheck passes"
+        "Test AdminUserSerializer create hashes password (check_password returns True, raw password not stored)",
+        "Test AdminUserSerializer update with new password hashes it",
+        "Test GroupSerializer returns correct member_count and member_ids",
+        "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
       ],
       "priority": 4,
       "passes": true,
-      "notes": ""
+      "notes": "3 tests: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids"
     },
     {
       "id": "US-005",
-      "title": "Build and publish frontend image to GHCR",
-      "description": "As a maintainer, I want the publish-frontend job to build and push the frontend image to GHCR after CI passes.",
+      "title": "Balance computation unit tests — basic cases",
+      "description": "As a developer, I want thorough tests for _compute_balances() simple scenarios.",
       "acceptanceCriteria": [
-        "publish-frontend job mirrors publish-backend configuration",
-        "Image name: ghcr.io/${{ github.repository_owner }}/memorybank-frontend (lowercase)",
-        "Job uses docker/build-push-action with context: frontend",
-        "Same tagging rules as publish-backend (latest, sha-<short-sha>, semver)",
-        "GHA layer cache enabled",
-        "Typecheck passes"
+        "Create backend/core/tests/test_balances.py",
+        "Test: 1 expense, 2 members, equal split — verify payer is owed half by the other member",
+        "Test: no expenses or settlements returns empty balances",
+        "Test: expense with created_by=None is skipped (no error, empty balances)",
+        "Tests pass: cd backend && python manage.py test core.tests.test_balances"
       ],
       "priority": 5,
       "passes": true,
-      "notes": ""
+      "notes": "3 tests covering basic balance scenarios"
     },
     {
       "id": "US-006",
-      "title": "docker-compose.ghcr.yml for operators",
-      "description": "As an operator, I want a ready-to-use Compose file that pulls published images so I can deploy without cloning the repo.",
+      "title": "Balance computation unit tests — settlements and multi-member",
+      "description": "As a developer, I want tests for settlement offsets and 3+ member scenarios.",
       "acceptanceCriteria": [
-        "File docker-compose.ghcr.yml is created at the repo root",
-        "References ghcr.io/<owner>/memorybank-backend:latest and ghcr.io/<owner>/memorybank-frontend:latest",
-        "Contains no build: keys (pull-only)",
-        "Accepts environment variables: SQLITE_PATH, MEDIA_ROOT, CSRF_TRUSTED_ORIGINS (same as docker-compose.yml)",
-        "Mounts data/db and data/media volumes identically to docker-compose.yml",
-        "File passes: docker compose -f docker-compose.ghcr.yml config",
-        "Typecheck passes"
+        "Test: settlement partially reduces a debt (net balance decreases but not zero)",
+        "Test: settlement fully zeros a debt between two members",
+        "Test: multiple expenses by different payers produce correct net balances",
+        "Test: 3 members with cross-debts simplify to minimal pairwise debts",
+        "Tests pass: cd backend && python manage.py test core.tests.test_balances"
       ],
       "priority": 6,
       "passes": true,
-      "notes": ""
+      "notes": "4 tests: partial settlement, full settlement, multiple payers, 3-member cross debts"
     },
     {
       "id": "US-007",
-      "title": "README deploy section for operators",
-      "description": "As an operator, I want clear deployment instructions in the README so I can run MemoryBank from published images without reading source code.",
+      "title": "Auth API tests — login and logout",
+      "description": "As a developer, I want API tests for login, logout, and unauthenticated access.",
       "acceptanceCriteria": [
-        "README.md gains a ## Deploy section distinct from the existing developer quick-start",
-        "Section shows commands to run the stack with docker-compose.ghcr.yml",
-        "Section documents SQLITE_PATH, MEDIA_ROOT, and CSRF_TRUSTED_ORIGINS with their defaults",
-        "Section links to the GHCR package pages for both images",
-        "Existing README content is not removed or duplicated",
-        "Typecheck passes"
+        "Create backend/core/tests/test_auth.py",
+        "POST /api/auth/login/ with valid credentials returns 200 and username",
+        "POST /api/auth/login/ with invalid credentials returns 401",
+        "POST /api/auth/logout/ returns 200",
+        "Unauthenticated GET /api/users/me/ returns 401 or 403",
+        "Tests pass: cd backend && python manage.py test core.tests.test_auth"
       ],
       "priority": 7,
       "passes": true,
-      "notes": ""
+      "notes": "4 tests: login valid, login invalid, logout, unauthenticated access"
+    },
+    {
+      "id": "US-008",
+      "title": "API key auth tests",
+      "description": "As a developer, I want tests for API key CRUD and authentication via X-API-Key header.",
+      "acceptanceCriteria": [
+        "POST /api/users/me/api-key/ creates key and returns it (201)",
+        "POST /api/users/me/api-key/ again replaces old key with new one",
+        "DELETE /api/users/me/api-key/ removes key (204)",
+        "DELETE /api/users/me/api-key/ with no key returns 404",
+        "Request with valid X-API-Key header authenticates successfully",
+        "Tests pass: cd backend && python manage.py test core.tests.test_auth"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "5 tests: create key, replace key, delete key, delete nonexistent, X-API-Key auth"
+    },
+    {
+      "id": "US-009",
+      "title": "AdminWritePermission API tests",
+      "description": "As a developer, I want tests verifying read access for all auth users and write access for staff only.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_permissions.py",
+        "Non-staff GET /api/categories/ returns 200",
+        "Non-staff POST /api/categories/ returns 403",
+        "Staff POST /api/categories/ returns 201",
+        "Staff DELETE /api/categories/{id}/ returns 204",
+        "Non-staff POST /api/groups/ returns 403",
+        "Tests pass: cd backend && python manage.py test core.tests.test_permissions"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "5 tests covering read/write permission boundaries"
+    },
+    {
+      "id": "US-010",
+      "title": "User profile API tests",
+      "description": "As a developer, I want tests for the /api/users/me/ endpoints.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_users.py",
+        "GET /api/users/me/ returns current user's data (username, display_name)",
+        "PATCH /api/users/me/ updates display_name",
+        "POST /api/users/me/avatar/ with no file returns 400",
+        "Tests pass: cd backend && python manage.py test core.tests.test_users"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "3 tests: GET me, PATCH display_name, avatar no file 400"
+    },
+    {
+      "id": "US-011",
+      "title": "Group CRUD and member management API tests",
+      "description": "As a developer, I want tests for group creation, listing, and member add/remove.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_groups.py",
+        "Staff POST /api/groups/ creates group (201)",
+        "Non-staff GET /api/groups/ returns only groups they belong to",
+        "Staff GET /api/groups/ returns all groups",
+        "POST /api/groups/{id}/members/ with valid user_id adds member",
+        "POST /api/groups/{id}/members/ with non-existent user returns 404",
+        "DELETE /api/groups/{id}/members/{user_id}/ removes member (204)",
+        "Tests pass: cd backend && python manage.py test core.tests.test_groups"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "6 tests: staff create, non-staff filtered list, staff all list, add/remove member, nonexistent user 404"
+    },
+    {
+      "id": "US-012",
+      "title": "Expense CRUD API tests",
+      "description": "As a developer, I want tests for creating, listing, updating, and soft-deleting expenses.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_expenses.py",
+        "POST /api/groups/{id}/expenses/ creates expense with equal splits (201)",
+        "POST /api/groups/{id}/expenses/ with split_data creates custom splits",
+        "GET /api/groups/{id}/expenses/ lists non-deleted expenses only",
+        "PATCH /api/expenses/{id}/ by creator updates expense",
+        "PATCH /api/expenses/{id}/ by non-creator returns 403",
+        "DELETE /api/expenses/{id}/ soft-deletes (is_deleted=True, returns 204)",
+        "Soft-deleted expense no longer appears in GET /api/groups/{id}/expenses/",
+        "Tests pass: cd backend && python manage.py test core.tests.test_expenses"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "7 tests: create equal/custom, list excludes deleted, PATCH creator/non-creator, DELETE soft-deletes"
+    },
+    {
+      "id": "US-013",
+      "title": "Settlement API tests",
+      "description": "As a developer, I want tests for creating and listing settlements.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_settlements.py",
+        "POST /api/groups/{id}/settlements/ creates settlement with request.user as payer (201)",
+        "GET /api/groups/{id}/settlements/ lists settlements for the group",
+        "Tests pass: cd backend && python manage.py test core.tests.test_settlements"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "2 tests: create settlement (payer=request.user), list settlements"
+    },
+    {
+      "id": "US-014",
+      "title": "Balance API endpoint tests",
+      "description": "As a developer, I want API tests for balance endpoints to verify end-to-end correctness.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_balance_api.py",
+        "GET /api/groups/{id}/balances/ returns correct balances after expenses and settlements",
+        "GET /api/users/me/balances/ returns correct aggregate across user's groups",
+        "Empty group returns empty balances list",
+        "Tests pass: cd backend && python manage.py test core.tests.test_balance_api"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "3 tests: group balances with expense+settlement, empty group, me balances aggregate"
+    },
+    {
+      "id": "US-015",
+      "title": "Export API tests",
+      "description": "As a developer, I want tests for CSV and JSON export endpoints.",
+      "acceptanceCriteria": [
+        "Create backend/core/tests/test_exports.py",
+        "GET /api/groups/{id}/export/?format=csv returns text/csv with correct headers",
+        "GET /api/groups/{id}/export/?format=json returns application/json array",
+        "GET /api/groups/{id}/export/?format=xml returns 400",
+        "GET /api/users/me/export/?format=csv exports only current user's expenses",
+        "Tests pass: cd backend && python manage.py test core.tests.test_exports"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": "4 tests: CSV export, JSON export, XML 400, me export filters own expenses. Uses URL_FORMAT_OVERRIDE=None to avoid DRF format negotiation conflict."
     }
   ]
 }

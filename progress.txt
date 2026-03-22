@@ -1,5 +1,5 @@
 # Ralph Progress Log
-Started: Sun 22 Mar 15:20:19 CET 2026
+Started: Sun 22 Mar 2026
 ---
 
 ## Codebase Patterns
@@ -8,363 +8,127 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - DJANGO_SETTINGS_MODULE = `memorybank.settings`
 - DB path configurable via `SQLITE_PATH` env var; media path via `MEDIA_ROOT` env var
 - Run Django commands from `backend/` directory: `cd backend && python manage.py ...`
-- Data volumes mounted at `data/db/` and `data/media/` in repo root
+- Run tests: `cd backend && python manage.py test core`
 - Custom User model: `core.User` extends `AbstractUser` with `display_name` and `avatar`; `AUTH_USER_MODEL = 'core.User'` in settings
-- When adding custom user model AFTER initial migrate, delete db.sqlite3 and re-migrate from scratch
-- Workflow YAML lives in .github/workflows/; validate with `python3 -c "import yaml; yaml.safe_load(open(...))"` before committing.
-- prd.json branchName drives which git branch to work on; create from main if missing.
+- Balance computed on-the-fly via `_compute_balances()` in views.py — no stored state
+- Soft delete pattern: `ExpenseManager` filters `is_deleted=False`; `Expense.all_objects` for unfiltered
+- ExpenseSerializer handles split logic: `split_data` (write-only) for custom splits, auto equal splits when omitted
+- AdminWritePermission: reads for all auth users, writes for staff only
+- ApiKeyAuthentication via `X-API-Key` header in `core/authentication.py`
+- prd.json branchName drives which git branch to work on; create from main if missing
+- No code volume mount in docker-compose — must `docker compose up --build` to pick up code changes
+- Fixture at `core/fixtures/test_data.json`; password for all fixture users: `password123`
+- Load fixture: `python manage.py loaddata test_data` (6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group)
+- Fixture PKs: admin=1 (staff), alice=2 (regular), currency=1 (USD), category=1 (Food), grouptype=1 (Home), group=1
 
 ---
 
-## 2026-03-22 - US-001
-
-- What was implemented: Django project scaffolding with `memorybank` project package and `core` app, SQLite configuration, MEDIA_ROOT, multi-stage Dockerfile, docker-compose.yml with volume mounts
-- Files changed:
-  - `backend/memorybank/settings.py` — full settings with env-configurable SECRET_KEY, DEBUG, ALLOWED_HOSTS, SQLITE_PATH, MEDIA_ROOT
-  - `backend/memorybank/urls.py` — root URL conf with admin
-  - `backend/memorybank/wsgi.py`, `asgi.py` — fixed module reference from `memorybank_proj` to `memorybank`
-  - `backend/manage.py` — fixed settings module reference
-  - `backend/core/__init__.py`, `models.py`, `views.py`, `admin.py`, `apps.py` — core app scaffold
-  - `backend/core/migrations/__init__.py` — migrations package
-  - `backend/requirements.txt` — Django, DRF, Pillow, gunicorn
-  - `backend/Dockerfile` — multi-stage build
-  - `docker-compose.yml` — backend service with db/media volumes
+## 2026-03-22 - US-001: Create test fixtures
+- Created `backend/core/fixtures/test_data.json` with all required test data
+- Files changed: `backend/core/fixtures/test_data.json` (new)
 - **Learnings for future iterations:**
-  - Django was scaffolded via `django-admin startproject` into a temp dir then moved; the `memorybank/` and `core/` dirs already existed as placeholders
-  - Django 6.0.3 is installed on this machine
+  - Docker compose has no code volume mount; must rebuild image to pick up file changes
+  - Fixture password hash generated via `make_password('password123')` inside the container
+  - Fixture loads 6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group with both users as members
 ---
 
-## 2026-03-22 - US-002
-
-- What was implemented: Custom User model extending AbstractUser with `display_name` (CharField) and `avatar` (ImageField), migration, Django admin registration
-- Files changed:
-  - `backend/core/models.py` — User model
-  - `backend/core/admin.py` — CustomUserAdmin registered with extra fieldsets
-  - `backend/core/migrations/0001_initial.py` — migration
-  - `backend/memorybank/settings.py` — added `AUTH_USER_MODEL = 'core.User'`
+## 2026-03-22 - US-002: Model unit tests
+- Created `backend/core/tests/__init__.py` and `backend/core/tests/test_models.py`
+- 7 tests: User creation, Category/GroupType/Currency __str__, Group M2M + default_split, ExpenseManager soft delete, ApiKey.generate_key
+- Files changed: `backend/core/tests/__init__.py` (new), `backend/core/tests/test_models.py` (new)
 - **Learnings for future iterations:**
-  - Must set AUTH_USER_MODEL before any migrations run (or delete sqlite3 and re-migrate)
+  - Django test runner uses in-memory SQLite — no need to worry about fixture conflicts with dev DB
+  - Use `Expense.all_objects.create()` to create expenses (default manager filters is_deleted=False)
+- ExpenseSerializer.save() needs `created_by` and `group` passed explicitly (read_only fields)
+- Serializer tests don't need HTTP — instantiate serializer directly, call is_valid() + save()
 ---
 
-## 2026-03-22 - US-003
-
-- What was implemented: Category (name), GroupType (name), Currency (name, symbol, code) models with Django admin registration
-- Files changed:
-  - `backend/core/models.py` — added Category, GroupType, Currency models
-  - `backend/core/admin.py` — registered all three with list_display
-  - `backend/core/migrations/0002_category_currency_grouptype.py` — migration
----
-
-## 2026-03-22 - US-004
-
-- What was implemented: Group model with name, group_type (FK), currency (FK), default_split_method (equal/custom), created_by (FK to User), members (M2M to User); data migration creates Default group; admin registered
-- Files changed:
-  - `backend/core/models.py` — added Group model
-  - `backend/core/admin.py` — registered GroupAdmin with filter_horizontal for members
-  - `backend/core/migrations/0003_group.py` — schema migration
-  - `backend/core/migrations/0004_default_group.py` — data migration creating Default group
+## 2026-03-22 - US-003 & US-004: Serializer unit tests
+- Created `backend/core/tests/test_serializers.py` with 6 tests
+- US-003: equal split, custom split, invalid split rejection
+- US-004: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids
+- Files changed: `backend/core/tests/test_serializers.py` (new)
 - **Learnings for future iterations:**
-  - Group model conflicts with django.contrib.auth.models.Group — use `related_name='expense_groups'` on members M2M and `related_name='created_groups'` on created_by to avoid clash
-  - The Group model is in `core` app, not `auth`; no django Group name clash since we import from models directly
+  - ExpenseSerializer requires `created_by` and `group` passed to save() since they're read_only
+  - Serializer split validation happens in _create_splits() at save time, not during is_valid()
 ---
 
-## 2026-03-22 - US-005
-
-- What was implemented: Expense model with amount, description, date, category (FK), group (FK), created_by (FK), receipt_image, is_deleted, created_at, updated_at; ExpenseManager excludes soft-deleted; all_objects manager includes them
-- Files changed:
-  - `backend/core/models.py` — added ExpenseManager and Expense model
-  - `backend/core/migrations/0005_expense.py` — migration
+## 2026-03-22 - US-005: Balance computation unit tests — basic cases
+- Created `backend/core/tests/test_balances.py` with 3 tests
+- Tests: equal split payer owed half, empty returns empty, null creator skipped
+- Files changed: `backend/core/tests/test_balances.py` (new)
 - **Learnings for future iterations:**
-  - Soft delete pattern: custom Manager filtering `is_deleted=False`; `all_objects = models.Manager()` for unfiltered access
+  - `_compute_balances()` is a standalone function importable from `core.views`
+  - Takes expenses queryset and settlements queryset, returns (net_balances dict, pairwise list)
+  - Must manually create ExpenseSplit records when testing balances (not via serializer)
 ---
 
-## 2026-03-22 - US-006
-
-- What was implemented: ExpenseSplit model with expense (FK), user (FK), amount (DecimalField); clean() validates sum of splits equals expense amount
-- Files changed:
-  - `backend/core/models.py` — added ExpenseSplit model
-  - `backend/core/migrations/0006_expensesplit.py` — migration
----
-
-## 2026-03-22 - US-007
-
-- What was implemented: Settlement model with group (FK), payer (FK), payee (FK), amount, date, created_at
-- Files changed:
-  - `backend/core/models.py` — added Settlement model
-  - `backend/core/migrations/0007_settlement.py` — migration
----
-
-## 2026-03-22 - US-008
-
-- What was implemented: DRF configured with SessionAuthentication + custom ApiKeyAuthentication (X-API-Key header); ApiKey model (OneToOne to User); login/logout API endpoints at `/api/auth/login/` and `/api/auth/logout/`
-- Files changed:
-  - `backend/core/models.py` — added ApiKey model with `generate_key()` classmethod
-  - `backend/core/authentication.py` — ApiKeyAuthentication class
-  - `backend/core/views.py` — LoginView, LogoutView
-  - `backend/core/urls.py` — URL routes for auth
-  - `backend/memorybank/settings.py` — REST_FRAMEWORK config
-  - `backend/memorybank/urls.py` — included core.urls at `/api/`
-  - `backend/core/migrations/0008_apikey.py` — migration
+## 2026-03-22 - US-006: Balance computation — settlements and multi-member
+- Added SettlementBalanceTest and MultiMemberBalanceTest to `test_balances.py`
+- 4 new tests: partial settlement, full settlement zeroing, multiple payers net, 3-member cross debts
+- Files changed: `backend/core/tests/test_balances.py` (modified)
 - **Learnings for future iterations:**
-  - ApiKeyAuthentication is listed BEFORE SessionAuthentication so API key takes priority
-  - Login response includes `is_staff` flag for frontend admin checks
+  - Settlement reduces `owes[payer_id][payee_id]` — payer is the one paying back debt
+  - Net balances are derived from pairwise debts, not directly from expenses
+- API tests use `APIClient` from `rest_framework.test`; `force_login()` for auth, `HTTP_X_API_KEY=key` for API key header
 ---
 
-## 2026-03-22 - US-009
-
-- What was implemented: GET/PATCH `/api/users/me/`, POST `/api/users/me/avatar/` (5MB limit), POST/DELETE `/api/users/me/api-key/`
-- Files changed:
-  - `backend/core/serializers.py` — UserSerializer
-  - `backend/core/views.py` — MeView, MeAvatarView, MeApiKeyView
-  - `backend/core/urls.py` — added user routes
----
-
-## 2026-03-22 - US-010
-
-- What was implemented: CRUD ViewSets for `/api/categories/`, `/api/group-types/`, `/api/currencies/` with AdminWritePermission (reads allowed for all authenticated, writes admin-only)
-- Files changed:
-  - `backend/core/serializers.py` — CategorySerializer, GroupTypeSerializer, CurrencySerializer
-  - `backend/core/views.py` — AdminWritePermission, CategoryViewSet, GroupTypeViewSet, CurrencyViewSet
-  - `backend/core/urls.py` — DefaultRouter registrations
+## 2026-03-22 - US-007 & US-008: Auth API tests
+- Created `backend/core/tests/test_auth.py` with 9 tests
+- US-007: login valid/invalid, logout, unauthenticated access
+- US-008: API key create, replace, delete, delete-nonexistent, X-API-Key authentication
+- Files changed: `backend/core/tests/test_auth.py` (new)
 - **Learnings for future iterations:**
-  - AdminWritePermission extends IsAuthenticated; checks `request.user.is_staff` for write methods
-  - DefaultRouter auto-generates list/detail endpoints
+  - APIClient handles CSRF automatically in tests
+  - `HTTP_X_API_KEY=key` kwarg to client methods sets the X-API-Key header
 ---
 
-## 2026-03-22 - US-011
-
-- What was implemented: Group CRUD (`/api/groups/`) admin-write-only; GET lists user's groups (all for admin, member groups for regular users); POST/DELETE `/api/groups/{id}/members/` and `/api/groups/{id}/members/{user_id}/`
-- Files changed:
-  - `backend/core/serializers.py` — GroupSerializer with member_count
-  - `backend/core/views.py` — GroupViewSet, GroupMemberView
-  - `backend/core/urls.py` — group routes
+## 2026-03-22 - US-009: AdminWritePermission API tests
+- Created `backend/core/tests/test_permissions.py` with 5 tests
+- Tests: non-staff GET OK, non-staff POST 403 (categories & groups), staff POST 201, staff DELETE 204
+- Files changed: `backend/core/tests/test_permissions.py` (new)
 ---
 
-## 2026-03-22 - US-012
+## 2026-03-22 - US-010: User profile API tests
+- Created `backend/core/tests/test_users.py` with 3 tests
+- Files changed: `backend/core/tests/test_users.py` (new)
+---
 
-- What was implemented: POST/GET `/api/groups/{id}/expenses/` and PATCH/DELETE `/api/expenses/{id}/`; receipt image upload (5MB); equal split auto-calculates, custom split via `split_data` list
-- Files changed:
-  - `backend/core/serializers.py` — ExpenseSplitSerializer, ExpenseSerializer with split logic
-  - `backend/core/views.py` — GroupExpenseView, ExpenseDetailView
-  - `backend/core/urls.py` — expense routes
+## 2026-03-22 - US-011: Group CRUD and member management
+- Created `backend/core/tests/test_groups.py` with 6 tests
+- Files changed: `backend/core/tests/test_groups.py` (new)
 - **Learnings for future iterations:**
-  - ExpenseSerializer handles split logic in create/update; split_data is write-only list of `{user_id, amount}` dicts
-  - Soft delete: PATCH `is_deleted=True` via ExpenseDetailView.delete; uses `Expense.all_objects.get()` to find it
+  - Migration `0004_default_group` creates a default group — tests must account for pre-existing groups
+  - GroupMemberView uses `IsAdminUser` (staff only), not `AdminWritePermission`
 ---
 
-## 2026-03-22 - US-013
-
-- What was implemented: POST/GET `/api/groups/{id}/settlements/`; payer is set from request.user, group from URL
-- Files changed:
-  - `backend/core/serializers.py` — SettlementSerializer
-  - `backend/core/views.py` — GroupSettlementView
-  - `backend/core/urls.py` — settlement routes
----
-
-## 2026-03-22 - US-014
-
-- What was implemented: `GET /api/groups/{id}/balances/` returns per-member net balance + pairwise debts; `GET /api/users/me/balances/` returns total + per-group breakdown
-- Files changed:
-  - `backend/core/views.py` — _compute_balances helper, GroupBalanceView, MeBalanceView
-  - `backend/core/urls.py` — balance routes
+## 2026-03-22 - US-012: Expense CRUD API tests
+- Created `backend/core/tests/test_expenses.py` with 7 tests
+- Files changed: `backend/core/tests/test_expenses.py` (new)
 - **Learnings for future iterations:**
-  - Balance computed on-the-fly from ExpenseSplit + Settlement; no stored state
-  - _compute_balances simplifies pairwise by netting A->B and B->A debts
+  - ExpenseDetailView checks `created_by == request.user` for PATCH/DELETE
+  - Soft delete sets `is_deleted=True` — use `Expense.all_objects` to verify
 ---
 
-## 2026-03-22 - US-015
-
-- What was implemented: `GET /api/groups/{id}/export/?format=csv|json` and `GET /api/users/me/export/?format=csv|json`; rows include date, amount, description, category, payer, split_user, split_amount
-- Files changed:
-  - `backend/core/views.py` — _expense_rows, _render_export, GroupExportView, MeExportView
-  - `backend/core/urls.py` — export routes
+## 2026-03-22 - US-013: Settlement API tests
+- Created `backend/core/tests/test_settlements.py` with 2 tests
+- Files changed: `backend/core/tests/test_settlements.py` (new)
 ---
 
-## 2026-03-22 - US-016
+## 2026-03-22 - US-014: Balance API endpoint tests
+- Created `backend/core/tests/test_balance_api.py` with 3 tests
+- Files changed: `backend/core/tests/test_balance_api.py` (new)
+---
 
-- What was implemented: Vue 3 + TypeScript + Pinia + Vue Router project scaffolded in `frontend/`; Vite proxy for /api and /media to backend:8000; multi-stage Dockerfile (build + nginx serve); docker-compose.yml updated with frontend service; nginx.conf proxies /api and /media
-- Files changed:
-  - `frontend/` — full Vue 3 scaffold
-  - `frontend/vite.config.ts` — added proxy config
-  - `frontend/Dockerfile` — multi-stage build
-  - `frontend/nginx.conf` — nginx config with SPA fallback and proxy
-  - `docker-compose.yml` — added frontend service
+## 2026-03-22 - US-015: Export API tests
+- Created `backend/core/tests/test_exports.py` with 4 tests
+- Files changed: `backend/core/tests/test_exports.py` (new)
 - **Learnings for future iterations:**
-  - `npm create vue@latest` does NOT support --no-vitest etc; use just `--ts --router --pinia --force`
-  - vite-plugin-vue-devtools removed from config (not needed for production build)
-  - Frontend typecheck: `npm run type-check` (vue-tsc --build)
-  - Run typecheck from `frontend/` dir, not repo root
+  - DRF's `URL_FORMAT_OVERRIDE` defaults to `'format'`, meaning `?format=csv` triggers DRF content negotiation
+  - Export views use `HttpResponse` (not DRF `Response`), but DRF intercepts the `format` query param before the view runs
+  - Fix: `@override_settings(REST_FRAMEWORK={..., 'URL_FORMAT_OVERRIDE': None})` in test class
+  - Consider setting `URL_FORMAT_OVERRIDE = None` in project settings if export endpoints are used in production
 ---
 
-## 2026-03-22 - US-017
-
-- What was implemented: LoginView with username/password form, error display, redirect to dashboard on success; auth store (Pinia) with fetchMe/login/logout; router guard (unauthenticated → /login); api.ts with full API client; App.vue simplified to RouterView only
-- Files changed:
-  - `frontend/src/views/LoginView.vue` — login page
-  - `frontend/src/stores/auth.ts` — auth Pinia store
-  - `frontend/src/router/index.ts` — full route table with auth guard
-  - `frontend/src/api.ts` — API client
-  - `frontend/src/App.vue` — simplified to RouterView
-  - `frontend/src/views/DashboardView.vue`, `GroupDetailView.vue`, `ProfileView.vue`, `AdminView.vue` — stub views
-- **Learnings for future iterations:**
-  - CSRF token read from cookie `csrftoken` and sent as `X-CSRFToken` header
-  - Auth guard calls `auth.fetchMe()` once per navigation if user not loaded; /login is `meta: { public: true }`
----
-
-## 2026-03-22 - US-018
-
-- What was implemented: DashboardView with group grid (name, type, currency, member count); navbar with Profile/Admin/Sign out; clicking group navigates to group-detail
-- Files changed:
-  - `frontend/src/views/DashboardView.vue`
----
-
-## 2026-03-22 - US-019
-
-- What was implemented: GroupDetailView with expenses list, balance summary (green=positive/red=negative), pairwise debts, settlements section
-- Files changed:
-  - `frontend/src/views/GroupDetailView.vue`
-
-## 2026-03-22 - US-020
-
-- What was implemented: AddExpenseForm modal with amount/description/date/category/receipt fields; equal/custom split toggle; pre-fills equal amounts; submits to API and refreshes group detail
-- Files changed:
-  - `frontend/src/components/AddExpenseForm.vue`
-  - `frontend/src/views/GroupDetailView.vue` — integrated AddExpenseForm with Add button
-
-## 2026-03-22 - US-021
-
-- What was implemented: EditExpenseForm modal pre-filled with existing data; edit button visible only for current user's expenses; last-modified timestamp shown
-- Files changed:
-  - `frontend/src/components/EditExpenseForm.vue`
-  - `frontend/src/views/GroupDetailView.vue` — integrated EditExpenseForm, edit button per expense
-
-## 2026-03-22 - US-022
-
-- What was implemented: Delete button visible only for own expenses; browser confirm dialog; calls soft-delete API; refreshes list
-- Files changed:
-  - `frontend/src/views/GroupDetailView.vue` — delete button and confirmDelete()
-
-## 2026-03-22 - US-023
-
-- What was implemented: SettlementForm modal with payee dropdown (other members), amount, date; "Record Payment" button in settlements section; refreshes balances after save
-- Files changed:
-  - `frontend/src/components/SettlementForm.vue`
-  - `frontend/src/views/GroupDetailView.vue` — integrated SettlementForm
-
-## 2026-03-22 - US-024
-
-- What was implemented: ProfileView with avatar, inline display name editing, cross-group balance summary with expandable per-group breakdown, export buttons
-- Files changed:
-  - `frontend/src/views/ProfileView.vue`
-
-## 2026-03-22 - US-025
-
-- What was implemented: API key section in profile — generate (shows key once), revoke with confirmation
-- Files changed:
-  - `frontend/src/views/ProfileView.vue` — API key section
-
-## 2026-03-22 - US-026
-
-- What was implemented: Export CSV/JSON buttons on group detail page; profile already had them from US-024
-- Files changed:
-  - `frontend/src/views/GroupDetailView.vue` — export section
-
-## 2026-03-22 - US-027
-
-- What was implemented: AdminView with categories/group-types/currencies CRUD panels; admin-only route guard already in router
-- Files changed:
-  - `frontend/src/views/AdminView.vue`
-
-## 2026-03-22 - US-028
-
-- What was implemented: AdminView extended with Users section (list/create/deactivate/reactivate) and Groups section (list/create/manage members); backend `/api/admin/users/` ViewSet (admin-only); GroupSerializer now returns `member_ids`
-- Files changed:
-  - `backend/core/serializers.py` — AdminUserSerializer, member_ids in GroupSerializer
-  - `backend/core/views.py` — AdminUserViewSet
-  - `backend/core/urls.py` — registered admin/users route
-  - `frontend/src/api.ts` — adminUsers, createUser, updateUser
-  - `frontend/src/views/AdminView.vue` — Users/Groups sections
-
-## 2026-03-22 - US-029
-
-- What was implemented: Receipt image viewer lightbox in GroupDetailView; "📎 Receipt" button on expenses with receipt_image; placeholder shown implicitly (button not visible if no receipt)
-- Files changed:
-  - `frontend/src/views/GroupDetailView.vue` — receipt viewer overlay
-
-## 2026-03-22 - US-030
-
-- What was implemented: Updated README with setup steps, default admin credential instructions, environment variables table, API usage examples; docker-compose.yml already complete from earlier stories
-- Files changed:
-  - `README.md`
----
-
-
-## 2026-03-22 - US-031
-- Created .github/workflows/publish.yml with workflow skeleton
-- Triggers on push to main and tags matching v*.*.*
-- Four empty jobs: test-backend, test-frontend, publish-backend, publish-frontend
-- publish-backend and publish-frontend declare needs: [test-backend, test-frontend]
-- Workflow-level permissions: contents: read, packages: write
-- Files changed: .github/workflows/publish.yml, prd.json, progress.txt
-- **Learnings for future iterations:**
-  - GitHub Actions requires `steps: []` for empty jobs (not just an empty block) — omitting steps causes a parse error
-  - Created branch ralph/ghcr-publishing from main
----
-
-## 2026-03-22 - US-032
-- Added test-backend job steps to .github/workflows/publish.yml
-- Checks out repo, sets up Python 3.12 (matches backend/Dockerfile FROM python:3.12-slim)
-- Installs backend/requirements.txt, then runs: cd backend && python manage.py test
-- Files changed: .github/workflows/publish.yml, prd.json, progress.txt
-- **Learnings for future iterations:**
-  - Python version pinned to 3.12 from backend/Dockerfile
----
-
-## 2026-03-22 - US-033
-- Added test-frontend job steps to .github/workflows/publish.yml
-- Checks out repo, sets up Node 22 (matches frontend/Dockerfile FROM node:22-alpine)
-- Runs: cd frontend && npm ci && npm run type-check
-- Files changed: .github/workflows/publish.yml, prd.json, progress.txt
-- **Learnings for future iterations:**
-  - Node version pinned to 22 from frontend/Dockerfile
----
-
-## 2026-03-22 - US-034
-- Added publish-backend job steps to .github/workflows/publish.yml
-- Uses docker/setup-buildx-action, docker/login-action (GHCR), docker/metadata-action, docker/build-push-action
-- Image name: ghcr.io/${{ github.repository_owner }}/memorybank-backend (lowercase)
-- Tags: latest (on main), sha-<short>, semver versions; v prefix stripped via flavor
-- GHA layer cache: cache-from: type=gha, cache-to: type=gha,mode=max
-- push: true only when not a pull_request event
-- Files changed: .github/workflows/publish.yml, prd.json, progress.txt
-- **Learnings for future iterations:**
-  - metadata-action flavor block controls v-prefix stripping for semver tags
-  - Use `enable={{is_default_branch}}` for latest tag on main only
----
-
-## 2026-03-22 - US-035
-- Added publish-frontend job steps to .github/workflows/publish.yml
-- Mirrors publish-backend configuration with context: frontend
-- Image name: ghcr.io/${{ github.repository_owner }}/memorybank-frontend (lowercase)
-- Same tagging rules: latest, sha-<short>, semver versions
-- Files changed: .github/workflows/publish.yml, prd.json, progress.txt
----
-
-## 2026-03-22 - US-036
-- Created docker-compose.ghcr.yml at repo root
-- References ghcr.io/awfulwoman/memorybank-backend:latest and memorybank-frontend:latest
-- No build: keys (pull-only)
-- Accepts SQLITE_PATH, MEDIA_ROOT, CSRF_TRUSTED_ORIGINS env vars with defaults
-- Mounts data/db and data/media volumes same as docker-compose.yml
-- Validated with: docker compose -f docker-compose.ghcr.yml config
-- Files changed: docker-compose.ghcr.yml, prd.json, progress.txt
----
-
-## 2026-03-22 - US-037
-- Added ## Deploy section to README.md
-- Section shows commands to pull and run with docker-compose.ghcr.yml
-- Documents SQLITE_PATH, MEDIA_ROOT, CSRF_TRUSTED_ORIGINS with defaults
-- Links to GHCR package pages for both images
-- Existing README content preserved
-- Files changed: README.md, prd.json, progress.txt
+## FULL SUITE: 59 tests, all passing
 ---
