@@ -10,6 +10,32 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'username', 'avatar', 'is_staff']
 
 
+class AdminUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'display_name', 'is_active', 'is_staff', 'password']
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -30,6 +56,7 @@ class CurrencySerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     member_count = serializers.SerializerMethodField()
+    member_ids = serializers.SerializerMethodField()
     group_type_name = serializers.CharField(source='group_type.name', read_only=True)
     currency_code = serializers.CharField(source='currency.code', read_only=True)
 
@@ -38,12 +65,15 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'group_type', 'group_type_name',
             'currency', 'currency_code', 'default_split_method',
-            'created_by', 'member_count',
+            'created_by', 'member_count', 'member_ids',
         ]
         read_only_fields = ['created_by']
 
     def get_member_count(self, obj):
         return obj.members.count()
+
+    def get_member_ids(self, obj):
+        return list(obj.members.values_list('id', flat=True))
 
 
 class ExpenseSplitSerializer(serializers.ModelSerializer):

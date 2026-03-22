@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
 from .serializers import (
-    CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
+    AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, SettlementSerializer, UserSerializer,
 )
 
@@ -47,6 +47,12 @@ class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = Currency.objects.all().order_by('code')
     serializer_class = CurrencySerializer
     permission_classes = [AdminWritePermission]
+
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('username')
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAdminUser]
 
 MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
 

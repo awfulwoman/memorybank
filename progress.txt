@@ -272,4 +272,14 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - What was implemented: AdminView with categories/group-types/currencies CRUD panels; admin-only route guard already in router
 - Files changed:
   - `frontend/src/views/AdminView.vue`
+
+## 2026-03-22 - US-028
+
+- What was implemented: AdminView extended with Users section (list/create/deactivate/reactivate) and Groups section (list/create/manage members); backend `/api/admin/users/` ViewSet (admin-only); GroupSerializer now returns `member_ids`
+- Files changed:
+  - `backend/core/serializers.py` — AdminUserSerializer, member_ids in GroupSerializer
+  - `backend/core/views.py` — AdminUserViewSet
+  - `backend/core/urls.py` — registered admin/users route
+  - `frontend/src/api.ts` — adminUsers, createUser, updateUser
+  - `frontend/src/views/AdminView.vue` — Users/Groups sections
 ---

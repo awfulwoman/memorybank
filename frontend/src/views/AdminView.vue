@@ -70,33 +70,123 @@
           </div>
         </div>
       </section>
+
+      <!-- Users -->
+      <section class="card">
+        <div class="section-header">
+          <h3>Users</h3>
+          <button class="add-btn" @click="startAdd('user')">+ Add User</button>
+        </div>
+        <div v-if="addingType === 'user'" class="inline-form">
+          <input v-model="newUser.username" placeholder="Username" />
+          <input v-model="newUser.display_name" placeholder="Display name" />
+          <input v-model="newUser.password" type="password" placeholder="Password" />
+          <button @click="saveNewUser">Save</button>
+          <button @click="addingType = ''">Cancel</button>
+        </div>
+        <div v-for="user in adminUsers" :key="user.id" class="list-row">
+          <span :class="{ inactive: !user.is_active }">{{ user.username }} <small>{{ user.display_name }}</small></span>
+          <span v-if="user.is_staff" class="badge">admin</span>
+          <span v-if="!user.is_active" class="badge inactive-badge">inactive</span>
+          <div class="row-actions">
+            <button
+              class="small-btn"
+              :class="user.is_active ? 'danger' : ''"
+              @click="toggleActive(user)"
+            >{{ user.is_active ? 'Deactivate' : 'Reactivate' }}</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Groups -->
+      <section class="card">
+        <div class="section-header">
+          <h3>Groups</h3>
+          <button class="add-btn" @click="startAdd('group')">+ Add Group</button>
+        </div>
+        <div v-if="addingType === 'group'" class="inline-form">
+          <input v-model="newGroup.name" placeholder="Group name" />
+          <select v-model="newGroup.group_type">
+            <option value="">— Type —</option>
+            <option v-for="gt in groupTypes" :key="gt.id" :value="gt.id">{{ gt.name }}</option>
+          </select>
+          <select v-model="newGroup.currency">
+            <option value="">— Currency —</option>
+            <option v-for="c in currencies" :key="c.id" :value="c.id">{{ c.code }}</option>
+          </select>
+          <select v-model="newGroup.default_split_method">
+            <option value="equal">Equal</option>
+            <option value="custom">Custom</option>
+          </select>
+          <button @click="saveNewGroup">Save</button>
+          <button @click="addingType = ''">Cancel</button>
+        </div>
+        <div v-for="group in adminGroups" :key="group.id" class="list-row">
+          <span>{{ group.name }} <small>{{ group.group_type_name }} · {{ group.currency_code }} · {{ group.member_count }} members</small></span>
+          <div class="row-actions">
+            <button class="small-btn" @click="managingGroup = group">Members</button>
+          </div>
+        </div>
+        <!-- Member management inline -->
+        <div v-if="managingGroup" class="member-panel">
+          <h4>Members of {{ managingGroup.name }}</h4>
+          <div class="inline-form">
+            <select v-model="addMemberId">
+              <option value="">— Add user —</option>
+              <option v-for="u in adminUsers" :key="u.id" :value="u.id">{{ u.username }}</option>
+            </select>
+            <button @click="addGroupMember">Add</button>
+          </div>
+          <div v-for="uid in managingGroupMemberIds" :key="uid" class="list-row">
+            <span>{{ adminUsers.find(u => u.id === uid)?.username ?? uid }}</span>
+            <button class="small-btn danger" @click="removeGroupMember(uid)">Remove</button>
+          </div>
+          <button class="small-btn" @click="managingGroup = null">Close</button>
+        </div>
+      </section>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { api } from '@/api'
 
 const categories = ref<any[]>([])
 const groupTypes = ref<any[]>([])
 const currencies = ref<any[]>([])
+const adminUsers = ref<any[]>([])
+const adminGroups = ref<any[]>([])
 
 const addingType = ref('')
 const newName = ref('')
 const newCurrency = ref({ name: '', symbol: '', code: '' })
+const newUser = ref({ username: '', display_name: '', password: '' })
+const newGroup = ref({ name: '', group_type: '' as number | '', currency: '' as number | '', default_split_method: 'equal' })
 const editing = ref<{ type: string; id: number; name: string } | null>(null)
+const managingGroup = ref<any>(null)
+const addMemberId = ref<number | ''>('')
+
+const managingGroupMemberIds = ref<number[]>([])
+
+watch(managingGroup, (g) => {
+  managingGroupMemberIds.value = g?.member_ids ?? []
+})
 
 onMounted(async () => {
-  const [cats, gts, curs] = await Promise.all([
+  const [cats, gts, curs, users, groups] = await Promise.all([
     api.categories(),
     api.groupTypes(),
     api.currencies(),
+    api.adminUsers(),
+    api.groups(),
   ])
   categories.value = cats
   groupTypes.value = gts
   currencies.value = curs
+  adminUsers.value = users
+  adminGroups.value = groups
 })
 
 function startAdd(type: string) {
@@ -140,6 +230,51 @@ async function saveEdit() {
     if (idx >= 0) groupTypes.value[idx] = updated
   }
   editing.value = null
+}
+
+async function saveNewUser() {
+  const u = await api.createUser(newUser.value)
+  adminUsers.value.push(u)
+  addingType.value = ''
+  newUser.value = { username: '', display_name: '', password: '' }
+}
+
+async function toggleActive(user: any) {
+  const updated = await api.updateUser(user.id, { is_active: !user.is_active })
+  const idx = adminUsers.value.findIndex(u => u.id === user.id)
+  if (idx >= 0) adminUsers.value[idx] = updated
+}
+
+async function saveNewGroup() {
+  const g = await api.createGroup({
+    name: newGroup.value.name,
+    group_type: newGroup.value.group_type || null,
+    currency: newGroup.value.currency || null,
+    default_split_method: newGroup.value.default_split_method,
+  })
+  adminGroups.value.push(g)
+  addingType.value = ''
+  newGroup.value = { name: '', group_type: '', currency: '', default_split_method: 'equal' }
+}
+
+async function addGroupMember() {
+  if (!managingGroup.value || !addMemberId.value) return
+  await api.addMember(managingGroup.value.id, Number(addMemberId.value))
+  managingGroupMemberIds.value.push(Number(addMemberId.value))
+  addMemberId.value = ''
+  await refreshGroupMembers()
+}
+
+async function removeGroupMember(userId: number) {
+  if (!managingGroup.value) return
+  await api.removeMember(managingGroup.value.id, userId)
+  managingGroupMemberIds.value = managingGroupMemberIds.value.filter(id => id !== userId)
+}
+
+async function refreshGroupMembers() {
+  const groups = await api.groups()
+  const g = groups.find((x: any) => x.id === managingGroup.value?.id)
+  if (g) managingGroup.value = g
 }
 
 async function deleteItem(type: string, id: number) {
@@ -222,4 +357,18 @@ async function deleteItem(type: string, id: number) {
 
 .small-btn.save { border-color: #42b883; color: #42b883; }
 .small-btn.danger { border-color: #e74c3c; color: #e74c3c; }
+
+.badge {
+  font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px;
+  background: #42b883; color: white; margin-left: 0.25rem;
+}
+
+.inactive-badge { background: #ccc; }
+.inactive { color: #aaa; text-decoration: line-through; }
+
+.member-panel {
+  margin-top: 1rem; border-top: 1px solid #f0f0f0; padding-top: 0.75rem;
+}
+
+.member-panel h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: #555; }
 </style>

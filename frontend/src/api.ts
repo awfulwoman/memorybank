@@ -91,4 +91,8 @@ export const api = {
   updateCurrency: (id: number, data: any) =>
     request(`/currencies/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteCurrency: (id: number) => request<void>(`/currencies/${id}/`, { method: 'DELETE' }),
+
+  adminUsers: () => request<any[]>('/admin/users/'),
+  createUser: (data: any) => request('/admin/users/', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id: number, data: any) => request(`/admin/users/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
 }

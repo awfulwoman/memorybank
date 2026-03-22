@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from .views import (
+    AdminUserViewSet,
     CategoryViewSet, CurrencyViewSet, GroupTypeViewSet, GroupViewSet,
     GroupBalanceView, GroupExpenseView, GroupExportView, GroupMemberView, GroupSettlementView,
     ExpenseDetailView,
@@ -12,6 +13,7 @@ router.register('categories', CategoryViewSet, basename='category')
 router.register('group-types', GroupTypeViewSet, basename='grouptype')
 router.register('currencies', CurrencyViewSet, basename='currency')
 router.register('groups', GroupViewSet, basename='group')
+router.register('admin/users', AdminUserViewSet, basename='admin-user')
 
 urlpatterns = [
     path('', include(router.urls)),
