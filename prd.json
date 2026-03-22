@@ -128,7 +128,7 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_security"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

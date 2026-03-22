@@ -8,6 +8,13 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
 ---
 
+## 2026-03-22 - US-008
+- Created `backend/core/tests/test_security.py` with 8 authorization tests
+- Tests: bob (non-member) gets 403 on all 6 group endpoints (GET/POST expenses, GET/POST settlements, GET balances, GET export)
+- Tests: staff non-member gets 200, regular member gets 200
+- Files changed: `backend/core/tests/test_security.py` (new)
+---
+
 ## 2026-03-22 - US-007
 - Removed hardcoded SECRET_KEY fallback; raises RuntimeError if DJANGO_SECRET_KEY not set
 - Test runner gets a safe fallback via `'test' in sys.argv` check
