@@ -1,0 +1,63 @@
+[
+  {
+    "model": "core.user",
+    "pk": 1,
+    "fields": {
+      "username": "admin",
+      "password": "pbkdf2_sha256$1200000$Cn5HEMuIG9tK3hMStkqY0f$9JMMv4NqITgelA/8JsSEo/Noe4MjB3uq18HvoRCJREc=",
+      "is_staff": true,
+      "is_superuser": false,
+      "is_active": true,
+      "display_name": "Admin User",
+      "email": "admin@example.com"
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 2,
+    "fields": {
+      "username": "alice",
+      "password": "pbkdf2_sha256$1200000$Cn5HEMuIG9tK3hMStkqY0f$9JMMv4NqITgelA/8JsSEo/Noe4MjB3uq18HvoRCJREc=",
+      "is_staff": false,
+      "is_superuser": false,
+      "is_active": true,
+      "display_name": "Alice",
+      "email": "alice@example.com"
+    }
+  },
+  {
+    "model": "core.currency",
+    "pk": 1,
+    "fields": {
+      "name": "US Dollar",
+      "symbol": "$",
+      "code": "USD"
+    }
+  },
+  {
+    "model": "core.category",
+    "pk": 1,
+    "fields": {
+      "name": "Food"
+    }
+  },
+  {
+    "model": "core.grouptype",
+    "pk": 1,
+    "fields": {
+      "name": "Home"
+    }
+  },
+  {
+    "model": "core.group",
+    "pk": 1,
+    "fields": {
+      "name": "Test Group",
+      "group_type": 1,
+      "currency": 1,
+      "default_split_method": "equal",
+      "created_by": 1,
+      "members": [1, 2]
+    }
+  }
+]
