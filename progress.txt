@@ -1,3 +1,20 @@
 # Ralph Progress Log
 Started: Sun 22 Mar 2026 20:08:44 CET
 ---
+
+## Codebase Patterns
+- Python venv at `backend/.venv/` — run tests with `.venv/bin/python manage.py test core`
+- Permission classes live in `backend/core/permissions.py`, views import from there
+- Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
+---
+
+## 2026-03-22 - US-001
+- Created `IsGroupMemberOrAdmin` permission class in `backend/core/permissions.py`
+- Extracts group pk from URL kwargs, checks membership via `group.members.filter(pk=user.pk).exists()`
+- Staff users bypass membership check
+- Returns False for non-members, non-staff
+- Files changed: `backend/core/permissions.py` (new)
+- **Learnings for future iterations:**
+  - No venv existed initially — created at `backend/.venv/`
+  - All 59 existing tests pass with the new permission class (no views use it yet)
+---
