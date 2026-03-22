@@ -98,11 +98,12 @@ class ExpenseSerializer(serializers.ModelSerializer):
     )
     created_by_username = serializers.CharField(source='created_by.username', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_icon = serializers.CharField(source='category.icon', read_only=True)
 
     class Meta:
         model = Expense
         fields = [
-            'id', 'amount', 'description', 'date', 'category', 'category_name',
+            'id', 'amount', 'description', 'date', 'category', 'category_name', 'category_icon',
             'group', 'created_by', 'created_by_username', 'receipt_image',
             'is_deleted', 'created_at', 'updated_at', 'splits', 'split_data',
         ]

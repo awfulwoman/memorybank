@@ -65,7 +65,7 @@
             >Delete</button>
           </div>
           <div class="expense-meta">
-            {{ e.date }} · {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
+            {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
             <button v-if="e.receipt_image" class="receipt-btn" @click="viewingReceipt = e.receipt_image">
               📎 Receipt
             </button>

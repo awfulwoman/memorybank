@@ -17,10 +17,13 @@
         </div>
         <div class="field">
           <label>Category</label>
-          <select v-model="form.category">
-            <option value="">— None —</option>
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-          </select>
+          <div class="category-select-wrapper">
+            <span v-if="selectedCategory" class="category-select-icon mdi" :class="selectedCategory.icon || 'mdi-shape-outline'"></span>
+            <select v-model="form.category" :class="{ 'has-icon': selectedCategory }">
+              <option value="">— None —</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
         </div>
         <div class="field">
           <label>Receipt image</label>
@@ -91,6 +94,10 @@ onMounted(async () => {
     customSplits.value[m.id] = ''
   }
 })
+
+const selectedCategory = computed(() =>
+  categories.value.find((c: any) => c.id === form.value.category) ?? null
+)
 
 const equalShare = computed(() => {
   const amt = parseFloat(form.value.amount)
@@ -257,6 +264,25 @@ input, select {
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .error { color: var(--color-danger); font-size: 0.875rem; }
+
+.category-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.category-select-icon {
+  position: absolute;
+  left: 0.5rem;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.category-select-wrapper select.has-icon {
+  padding-left: 2rem;
+}
 
 /* Responsive modal — US-009 */
 @media (max-width: 479px) {
