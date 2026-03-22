@@ -2,7 +2,8 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from .views import (
     CategoryViewSet, CurrencyViewSet, GroupTypeViewSet, GroupViewSet,
-    GroupMemberView,
+    GroupExpenseView, GroupMemberView,
+    ExpenseDetailView,
     LoginView, LogoutView, MeApiKeyView, MeAvatarView, MeView,
 )
 
@@ -21,4 +22,6 @@ urlpatterns = [
     path('users/me/api-key/', MeApiKeyView.as_view(), name='me-api-key'),
     path('groups/<int:pk>/members/', GroupMemberView.as_view(), name='group-members'),
     path('groups/<int:pk>/members/<int:user_id>/', GroupMemberView.as_view(), name='group-member-detail'),
+    path('groups/<int:pk>/expenses/', GroupExpenseView.as_view(), name='group-expenses'),
+    path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expense-detail'),
 ]

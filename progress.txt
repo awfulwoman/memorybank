@@ -137,3 +137,15 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/views.py` — GroupViewSet, GroupMemberView
   - `backend/core/urls.py` — group routes
 ---
+
+## 2026-03-22 - US-012
+
+- What was implemented: POST/GET `/api/groups/{id}/expenses/` and PATCH/DELETE `/api/expenses/{id}/`; receipt image upload (5MB); equal split auto-calculates, custom split via `split_data` list
+- Files changed:
+  - `backend/core/serializers.py` — ExpenseSplitSerializer, ExpenseSerializer with split logic
+  - `backend/core/views.py` — GroupExpenseView, ExpenseDetailView
+  - `backend/core/urls.py` — expense routes
+- **Learnings for future iterations:**
+  - ExpenseSerializer handles split logic in create/update; split_data is write-only list of `{user_id, amount}` dicts
+  - Soft delete: PATCH `is_deleted=True` via ExpenseDetailView.delete; uses `Expense.all_objects.get()` to find it
+---

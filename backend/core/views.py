@@ -5,9 +5,9 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ApiKey, Category, Currency, Group, GroupType, User
+from .models import ApiKey, Category, Currency, Expense, Group, GroupType, User
 from .serializers import (
-    CategorySerializer, CurrencySerializer, GroupSerializer,
+    CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, UserSerializer,
 )
 
@@ -137,4 +137,48 @@ class GroupMemberView(APIView):
         except User.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         group.members.remove(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupExpenseView(APIView):
+    def get(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        expenses = Expense.objects.filter(group=group).select_related(
+            'category', 'created_by'
+        ).prefetch_related('splits__user').order_by('-date', '-created_at')
+        serializer = ExpenseSerializer(expenses, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        serializer = ExpenseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user, group=group)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ExpenseDetailView(APIView):
+    def _get_expense(self, pk, user):
+        try:
+            expense = Expense.all_objects.get(pk=pk)
+        except Expense.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Expense not found.')
+        return expense
+
+    def patch(self, request, pk):
+        expense = self._get_expense(pk, request.user)
+        if expense.created_by != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = ExpenseSerializer(expense, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        expense = self._get_expense(pk, request.user)
+        if expense.created_by != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        expense.is_deleted = True
+        expense.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
