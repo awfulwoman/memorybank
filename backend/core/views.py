@@ -200,6 +200,8 @@ class ExpenseDetailView(APIView):
 
 
 class GroupSettlementView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         settlements = Settlement.objects.filter(group=group).select_related(
