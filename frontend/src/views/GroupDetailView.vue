@@ -51,6 +51,11 @@
               class="edit-btn"
               @click="editingExpense = e"
             >Edit</button>
+            <button
+              v-if="e.created_by_username === auth.user?.username"
+              class="delete-btn"
+              @click="confirmDelete(e)"
+            >Delete</button>
           </div>
           <div class="expense-meta">
             {{ e.date }} · {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
@@ -132,6 +137,12 @@ async function refreshData() {
 async function onExpenseSaved() {
   showAddExpense.value = false
   editingExpense.value = null
+  await refreshData()
+}
+
+async function confirmDelete(e: any) {
+  if (!confirm(`Delete "${e.description}"? This cannot be undone.`)) return
+  await api.deleteExpense(e.id)
   await refreshData()
 }
 
@@ -261,7 +272,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.edit-btn {
+.edit-btn, .delete-btn {
   font-size: 0.75rem;
   padding: 0.15rem 0.5rem;
   border: 1px solid #ddd;
@@ -270,5 +281,10 @@ onMounted(async () => {
   cursor: pointer;
   color: #666;
   margin-left: 0.5rem;
+}
+
+.delete-btn {
+  color: #e74c3c;
+  border-color: #e74c3c;
 }
 </style>

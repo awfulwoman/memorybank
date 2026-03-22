@@ -235,4 +235,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - Files changed:
   - `frontend/src/components/EditExpenseForm.vue`
   - `frontend/src/views/GroupDetailView.vue` — integrated EditExpenseForm, edit button per expense
+
+## 2026-03-22 - US-022
+
+- What was implemented: Delete button visible only for own expenses; browser confirm dialog; calls soft-delete API; refreshes list
+- Files changed:
+  - `frontend/src/views/GroupDetailView.vue` — delete button and confirmDelete()
 ---
