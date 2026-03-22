@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
-from .permissions import IsGroupMemberOrAdmin
+from .permissions import IsGroupMemberOrAdmin, IsGroupOwnerOrAdmin
 from .serializers import (
     AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, SettlementSerializer, UserSerializer,
@@ -119,7 +119,13 @@ class MeApiKeyView(APIView):
 
 class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
-    permission_classes = [AdminWritePermission]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated()]
+        if self.action in ('update', 'partial_update', 'destroy'):
+            return [IsGroupOwnerOrAdmin()]
+        return [AdminWritePermission()]
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -127,17 +133,24 @@ class GroupViewSet(viewsets.ModelViewSet):
         return self.request.user.expense_groups.all().order_by('name')
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        group = serializer.save(created_by=self.request.user)
+        group.members.add(self.request.user)
 
 
 class GroupMemberView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsGroupOwnerOrAdmin]
 
     def post(self, request, pk):
         group = Group.objects.get(pk=pk)
         user_id = request.data.get('user_id')
+        username = request.data.get('username')
         try:
-            user = User.objects.get(pk=user_id)
+            if user_id:
+                user = User.objects.get(pk=user_id)
+            elif username:
+                user = User.objects.get(username=username)
+            else:
+                return Response({'detail': 'user_id or username required.'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         group.members.add(user)

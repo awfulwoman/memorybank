@@ -57,6 +57,8 @@ export const api = {
   deleteGroup: (id: number) => request<void>(`/groups/${id}/`, { method: 'DELETE' }),
   addMember: (groupId: number, userId: number) =>
     request(`/groups/${groupId}/members/`, { method: 'POST', body: JSON.stringify({ user_id: userId }) }),
+  addMemberByUsername: (groupId: number, username: string) =>
+    request(`/groups/${groupId}/members/`, { method: 'POST', body: JSON.stringify({ username }) }),
   removeMember: (groupId: number, userId: number) =>
     request<void>(`/groups/${groupId}/members/${userId}/`, { method: 'DELETE' }),
 

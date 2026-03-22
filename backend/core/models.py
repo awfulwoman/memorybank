@@ -15,6 +15,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    icon = models.CharField(max_length=50, default='mdi-shape-outline', blank=True)
 
     class Meta:
         verbose_name_plural = 'categories'
@@ -51,6 +52,7 @@ class Group(models.Model):
     ]
 
     name = models.CharField(max_length=200)
+    icon = models.CharField(max_length=50, default='mdi-account-group', blank=True)
     group_type = models.ForeignKey(GroupType, on_delete=models.SET_NULL, null=True, blank=True)
     currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
     default_split_method = models.CharField(max_length=10, choices=SPLIT_CHOICES, default=SPLIT_EQUAL)

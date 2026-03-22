@@ -16,7 +16,10 @@
         </div>
       </section>
 
-      <h2>My Groups</h2>
+      <div class="section-header">
+        <h2>My Groups</h2>
+        <button class="btn-create" @click="showCreateModal = true">+ Create Group</button>
+      </div>
       <div v-if="loading" class="loading">Loading groups…</div>
       <div v-else-if="groups.length === 0" class="empty">You are not in any groups yet.</div>
       <div v-else class="group-grid">
@@ -26,11 +29,17 @@
           :to="{ name: 'group-detail', params: { id: group.id } }"
           class="group-card"
         >
-          <h3>{{ group.name }}</h3>
+          <h3><span class="group-icon mdi" :class="group.icon || 'mdi-account-group'"></span>{{ group.name }}</h3>
           <p class="meta">{{ group.group_type_name || 'General' }} · {{ group.currency_code || '—' }}</p>
           <p class="members">{{ group.member_count }} member{{ group.member_count === 1 ? '' : 's' }}</p>
         </RouterLink>
       </div>
+
+      <CreateGroupModal
+        v-if="showCreateModal"
+        @close="showCreateModal = false"
+        @created="onGroupCreated"
+      />
     </main>
   </div>
 </template>
@@ -40,10 +49,12 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { api } from '@/api'
 import AppNavbar from '@/components/AppNavbar.vue'
+import CreateGroupModal from '@/components/CreateGroupModal.vue'
 
 const groups = ref<any[]>([])
 const balances = ref<any[]>([])
 const loading = ref(true)
+const showCreateModal = ref(false)
 
 onMounted(async () => {
   try {
@@ -54,6 +65,11 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function onGroupCreated(group: any) {
+  groups.value.push(group)
+  showCreateModal.value = false
+}
 </script>
 
 <style scoped>
@@ -72,6 +88,27 @@ onMounted(async () => {
 h2 {
   margin-bottom: 1rem;
   color: var(--color-heading);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.btn-create {
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+  margin-bottom: 1rem;
 }
 
 /* Balance summary */
@@ -153,6 +190,14 @@ h2 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
   color: var(--color-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.group-icon {
+  font-size: 1.25rem;
+  color: var(--color-primary);
 }
 
 .meta {
