@@ -52,3 +52,13 @@ Started: Sun 22 Mar 2026
   - ExpenseSerializer requires `created_by` and `group` passed to save() since they're read_only
   - Serializer split validation happens in _create_splits() at save time, not during is_valid()
 ---
+
+## 2026-03-22 - US-005: Balance computation unit tests — basic cases
+- Created `backend/core/tests/test_balances.py` with 3 tests
+- Tests: equal split payer owed half, empty returns empty, null creator skipped
+- Files changed: `backend/core/tests/test_balances.py` (new)
+- **Learnings for future iterations:**
+  - `_compute_balances()` is a standalone function importable from `core.views`
+  - Takes expenses queryset and settlements queryset, returns (net_balances dict, pairwise list)
+  - Must manually create ExpenseSplit records when testing balances (not via serializer)
+---

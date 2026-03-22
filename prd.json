@@ -74,8 +74,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_balances"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 tests covering basic balance scenarios"
     },
     {
       "id": "US-006",
