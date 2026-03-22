@@ -83,3 +83,11 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/models.py` — added ExpenseSplit model
   - `backend/core/migrations/0006_expensesplit.py` — migration
 ---
+
+## 2026-03-22 - US-007
+
+- What was implemented: Settlement model with group (FK), payer (FK), payee (FK), amount, date, created_at
+- Files changed:
+  - `backend/core/models.py` — added Settlement model
+  - `backend/core/migrations/0007_settlement.py` — migration
+---

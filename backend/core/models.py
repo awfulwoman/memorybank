@@ -108,3 +108,19 @@ class ExpenseSplit(models.Model):
 
     def __str__(self):
         return f'{self.user} owes {self.amount} for {self.expense}'
+
+
+class Settlement(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='settlements')
+    payer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='settlements_paid'
+    )
+    payee = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='settlements_received'
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.payer} paid {self.payee} {self.amount}'
