@@ -264,6 +264,8 @@ def _compute_balances(expenses, settlements):
 
 
 class GroupBalanceView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         expenses = (
@@ -377,6 +379,8 @@ def _render_export(rows, fmt, filename):
 
 
 class GroupExportView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         fmt = request.query_params.get('format', 'csv')
         if fmt not in ('csv', 'json'):
