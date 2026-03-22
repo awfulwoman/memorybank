@@ -266,4 +266,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - What was implemented: Export CSV/JSON buttons on group detail page; profile already had them from US-024
 - Files changed:
   - `frontend/src/views/GroupDetailView.vue` — export section
+
+## 2026-03-22 - US-027
+
+- What was implemented: AdminView with categories/group-types/currencies CRUD panels; admin-only route guard already in router
+- Files changed:
+  - `frontend/src/views/AdminView.vue`
 ---
