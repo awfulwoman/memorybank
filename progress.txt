@@ -76,3 +76,13 @@ Started: Sun 22 Mar 2026 18:54:54 CET
 ## 2026-03-22 - US-004 committed
 - Commit: db4846f
 ---
+
+## 2026-03-22 - US-005
+- Made login card responsive for landscape/short viewports: `max-height: calc(100vh - 2rem)` + `overflow-y: auto`
+- Added `padding: 1rem` to container so card doesn't touch screen edges on small devices
+- Added `min-height: 44px` to inputs and button for touch targets
+- Files changed: `LoginView.vue`
+- **Learnings for future iterations:**
+  - Login card was already centered via flexbox — only needed overflow and touch target fixes
+  - Pattern for landscape safety: `max-height: calc(100vh - Xrem)` + `overflow-y: auto` on card
+---
