@@ -221,4 +221,11 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - What was implemented: GroupDetailView with expenses list, balance summary (green=positive/red=negative), pairwise debts, settlements section
 - Files changed:
   - `frontend/src/views/GroupDetailView.vue`
+
+## 2026-03-22 - US-020
+
+- What was implemented: AddExpenseForm modal with amount/description/date/category/receipt fields; equal/custom split toggle; pre-fills equal amounts; submits to API and refreshes group detail
+- Files changed:
+  - `frontend/src/components/AddExpenseForm.vue`
+  - `frontend/src/views/GroupDetailView.vue` — integrated AddExpenseForm with Add button
 ---

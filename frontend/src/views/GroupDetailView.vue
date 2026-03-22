@@ -36,7 +36,10 @@
 
       <!-- Expenses -->
       <section class="card">
-        <h3>Expenses</h3>
+        <div class="section-header">
+          <h3>Expenses</h3>
+          <button class="add-btn" @click="showAddExpense = true">+ Add Expense</button>
+        </div>
         <div v-if="loadingExpenses" class="loading">Loading expenses…</div>
         <div v-else-if="expenses.length === 0" class="empty">No expenses yet.</div>
         <div v-for="e in expenses" :key="e.id" class="expense-row">
@@ -63,13 +66,23 @@
         </div>
       </section>
     </main>
+
+    <AddExpenseForm
+      v-if="showAddExpense && group"
+      :group-id="groupId"
+      :members="groupMembers"
+      :default-split-method="group.default_split_method ?? 'equal'"
+      @close="showAddExpense = false"
+      @saved="onExpenseSaved"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { api } from '@/api'
+import AddExpenseForm from '@/components/AddExpenseForm.vue'
 
 const route = useRoute()
 const groupId = Number(route.params.id)
@@ -81,6 +94,28 @@ const balances = ref<any[]>([])
 const debts = ref<any[]>([])
 const loadingExpenses = ref(true)
 const loadingBalances = ref(true)
+const showAddExpense = ref(false)
+
+const groupMembers = computed(() => group.value?.members_list ?? [])
+
+async function refreshData() {
+  const [exps, setts, bals] = await Promise.allSettled([
+    api.groupExpenses(groupId),
+    api.groupSettlements(groupId),
+    api.groupBalances(groupId),
+  ])
+  if (exps.status === 'fulfilled') expenses.value = exps.value
+  if (setts.status === 'fulfilled') settlements.value = setts.value
+  if (bals.status === 'fulfilled') {
+    balances.value = (bals.value as any).balances ?? []
+    debts.value = (bals.value as any).debts ?? []
+  }
+}
+
+async function onExpenseSaved() {
+  showAddExpense.value = false
+  await refreshData()
+}
 
 onMounted(async () => {
   const [groups, exps, setts, bals] = await Promise.allSettled([
@@ -188,4 +223,23 @@ onMounted(async () => {
 .date { color: #aaa; font-size: 0.8rem; }
 
 .empty, .loading { color: #999; font-size: 0.875rem; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 { margin: 0; }
+
+.add-btn {
+  background: #42b883;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
 </style>
