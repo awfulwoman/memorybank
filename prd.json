@@ -204,8 +204,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_settlements"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "2 tests: create settlement (payer=request.user), list settlements"
     },
     {
       "id": "US-014",

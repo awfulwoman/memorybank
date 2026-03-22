@@ -109,3 +109,8 @@ Started: Sun 22 Mar 2026
   - ExpenseDetailView checks `created_by == request.user` for PATCH/DELETE
   - Soft delete sets `is_deleted=True` — use `Expense.all_objects` to verify
 ---
+
+## 2026-03-22 - US-013: Settlement API tests
+- Created `backend/core/tests/test_settlements.py` with 2 tests
+- Files changed: `backend/core/tests/test_settlements.py` (new)
+---
