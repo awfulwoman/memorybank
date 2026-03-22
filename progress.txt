@@ -1,134 +1,26 @@
 # Ralph Progress Log
-Started: Sun 22 Mar 2026
+Started: Sun 22 Mar 2026 18:54:54 CET
 ---
 
 ## Codebase Patterns
 
-- Django project package is `memorybank` (at `backend/memorybank/`), app is `core` (at `backend/core/`)
-- DJANGO_SETTINGS_MODULE = `memorybank.settings`
-- DB path configurable via `SQLITE_PATH` env var; media path via `MEDIA_ROOT` env var
-- Run Django commands from `backend/` directory: `cd backend && python manage.py ...`
-- Run tests: `cd backend && python manage.py test core`
-- Custom User model: `core.User` extends `AbstractUser` with `display_name` and `avatar`; `AUTH_USER_MODEL = 'core.User'` in settings
-- Balance computed on-the-fly via `_compute_balances()` in views.py — no stored state
-- Soft delete pattern: `ExpenseManager` filters `is_deleted=False`; `Expense.all_objects` for unfiltered
-- ExpenseSerializer handles split logic: `split_data` (write-only) for custom splits, auto equal splits when omitted
-- AdminWritePermission: reads for all auth users, writes for staff only
-- ApiKeyAuthentication via `X-API-Key` header in `core/authentication.py`
-- prd.json branchName drives which git branch to work on; create from main if missing
-- No code volume mount in docker-compose — must `docker compose up --build` to pick up code changes
-- Fixture at `core/fixtures/test_data.json`; password for all fixture users: `password123`
-- Load fixture: `python manage.py loaddata test_data` (6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group)
-- Fixture PKs: admin=1 (staff), alice=2 (regular), currency=1 (USD), category=1 (Food), grouptype=1 (Home), group=1
+- **Breakpoint variables**: `--bp-phone: 768px`, `--bp-tablet: 1024px` defined in `base.css` — use in media queries across all views
+- **Table scroll**: Wrap tables in `.table-scroll-container` for horizontal scroll on small screens
+- **box-sizing**: Already global `border-box` in `base.css` (lines 53-56)
+- **Viewport meta**: Already in `index.html`
+- **Typecheck**: Run `npx vue-tsc --build` from `frontend/` (need `npm install` first if node_modules missing)
+- **main.css**: Has default Vue template grid layout at 1024px that may need cleanup when integrating navbar
 
 ---
 
-## 2026-03-22 - US-001: Create test fixtures
-- Created `backend/core/fixtures/test_data.json` with all required test data
-- Files changed: `backend/core/fixtures/test_data.json` (new)
+## 2026-03-22 - US-001
+- Added CSS custom properties `--bp-phone: 768px` and `--bp-tablet: 1024px` to `:root` in `base.css`
+- Added `.table-scroll-container` utility class (overflow-x auto, width 100%) to `base.css`
+- Confirmed `box-sizing: border-box` already present globally
+- Confirmed viewport meta tag already in `index.html`
+- Files changed: `frontend/src/assets/base.css`
 - **Learnings for future iterations:**
-  - Docker compose has no code volume mount; must rebuild image to pick up file changes
-  - Fixture password hash generated via `make_password('password123')` inside the container
-  - Fixture loads 6 objects: 2 users, 1 currency, 1 category, 1 group type, 1 group with both users as members
----
-
-## 2026-03-22 - US-002: Model unit tests
-- Created `backend/core/tests/__init__.py` and `backend/core/tests/test_models.py`
-- 7 tests: User creation, Category/GroupType/Currency __str__, Group M2M + default_split, ExpenseManager soft delete, ApiKey.generate_key
-- Files changed: `backend/core/tests/__init__.py` (new), `backend/core/tests/test_models.py` (new)
-- **Learnings for future iterations:**
-  - Django test runner uses in-memory SQLite — no need to worry about fixture conflicts with dev DB
-  - Use `Expense.all_objects.create()` to create expenses (default manager filters is_deleted=False)
-- ExpenseSerializer.save() needs `created_by` and `group` passed explicitly (read_only fields)
-- Serializer tests don't need HTTP — instantiate serializer directly, call is_valid() + save()
----
-
-## 2026-03-22 - US-003 & US-004: Serializer unit tests
-- Created `backend/core/tests/test_serializers.py` with 6 tests
-- US-003: equal split, custom split, invalid split rejection
-- US-004: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids
-- Files changed: `backend/core/tests/test_serializers.py` (new)
-- **Learnings for future iterations:**
-  - ExpenseSerializer requires `created_by` and `group` passed to save() since they're read_only
-  - Serializer split validation happens in _create_splits() at save time, not during is_valid()
----
-
-## 2026-03-22 - US-005: Balance computation unit tests — basic cases
-- Created `backend/core/tests/test_balances.py` with 3 tests
-- Tests: equal split payer owed half, empty returns empty, null creator skipped
-- Files changed: `backend/core/tests/test_balances.py` (new)
-- **Learnings for future iterations:**
-  - `_compute_balances()` is a standalone function importable from `core.views`
-  - Takes expenses queryset and settlements queryset, returns (net_balances dict, pairwise list)
-  - Must manually create ExpenseSplit records when testing balances (not via serializer)
----
-
-## 2026-03-22 - US-006: Balance computation — settlements and multi-member
-- Added SettlementBalanceTest and MultiMemberBalanceTest to `test_balances.py`
-- 4 new tests: partial settlement, full settlement zeroing, multiple payers net, 3-member cross debts
-- Files changed: `backend/core/tests/test_balances.py` (modified)
-- **Learnings for future iterations:**
-  - Settlement reduces `owes[payer_id][payee_id]` — payer is the one paying back debt
-  - Net balances are derived from pairwise debts, not directly from expenses
-- API tests use `APIClient` from `rest_framework.test`; `force_login()` for auth, `HTTP_X_API_KEY=key` for API key header
----
-
-## 2026-03-22 - US-007 & US-008: Auth API tests
-- Created `backend/core/tests/test_auth.py` with 9 tests
-- US-007: login valid/invalid, logout, unauthenticated access
-- US-008: API key create, replace, delete, delete-nonexistent, X-API-Key authentication
-- Files changed: `backend/core/tests/test_auth.py` (new)
-- **Learnings for future iterations:**
-  - APIClient handles CSRF automatically in tests
-  - `HTTP_X_API_KEY=key` kwarg to client methods sets the X-API-Key header
----
-
-## 2026-03-22 - US-009: AdminWritePermission API tests
-- Created `backend/core/tests/test_permissions.py` with 5 tests
-- Tests: non-staff GET OK, non-staff POST 403 (categories & groups), staff POST 201, staff DELETE 204
-- Files changed: `backend/core/tests/test_permissions.py` (new)
----
-
-## 2026-03-22 - US-010: User profile API tests
-- Created `backend/core/tests/test_users.py` with 3 tests
-- Files changed: `backend/core/tests/test_users.py` (new)
----
-
-## 2026-03-22 - US-011: Group CRUD and member management
-- Created `backend/core/tests/test_groups.py` with 6 tests
-- Files changed: `backend/core/tests/test_groups.py` (new)
-- **Learnings for future iterations:**
-  - Migration `0004_default_group` creates a default group — tests must account for pre-existing groups
-  - GroupMemberView uses `IsAdminUser` (staff only), not `AdminWritePermission`
----
-
-## 2026-03-22 - US-012: Expense CRUD API tests
-- Created `backend/core/tests/test_expenses.py` with 7 tests
-- Files changed: `backend/core/tests/test_expenses.py` (new)
-- **Learnings for future iterations:**
-  - ExpenseDetailView checks `created_by == request.user` for PATCH/DELETE
-  - Soft delete sets `is_deleted=True` — use `Expense.all_objects` to verify
----
-
-## 2026-03-22 - US-013: Settlement API tests
-- Created `backend/core/tests/test_settlements.py` with 2 tests
-- Files changed: `backend/core/tests/test_settlements.py` (new)
----
-
-## 2026-03-22 - US-014: Balance API endpoint tests
-- Created `backend/core/tests/test_balance_api.py` with 3 tests
-- Files changed: `backend/core/tests/test_balance_api.py` (new)
----
-
-## 2026-03-22 - US-015: Export API tests
-- Created `backend/core/tests/test_exports.py` with 4 tests
-- Files changed: `backend/core/tests/test_exports.py` (new)
-- **Learnings for future iterations:**
-  - DRF's `URL_FORMAT_OVERRIDE` defaults to `'format'`, meaning `?format=csv` triggers DRF content negotiation
-  - Export views use `HttpResponse` (not DRF `Response`), but DRF intercepts the `format` query param before the view runs
-  - Fix: `@override_settings(REST_FRAMEWORK={..., 'URL_FORMAT_OVERRIDE': None})` in test class
-  - Consider setting `URL_FORMAT_OVERRIDE = None` in project settings if export endpoints are used in production
----
-
-## FULL SUITE: 59 tests, all passing
+  - `base.css` already has comprehensive reset including box-sizing
+  - `main.css` has Vue template default styles (grid layout at 1024px) that will likely need modification for navbar integration (US-004)
+  - `npm install` needed before typecheck if fresh checkout
 ---

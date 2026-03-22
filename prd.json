@@ -1,242 +1,180 @@
 {
   "project": "MemoryBank",
-  "branchName": "ralph/backend-tests",
-  "description": "Comprehensive backend test suite covering models, serializers, balance logic, and all API endpoints",
+  "branchName": "ralph/responsive-design",
+  "description": "Full responsive design overhaul — hamburger nav, responsive layouts for all views, mobile-friendly modals and tables",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create test fixtures",
-      "description": "As a developer, I need shared test fixtures so all tests use consistent, realistic data.",
+      "title": "Global responsive breakpoints and base styles",
+      "description": "As a developer, I need consistent breakpoint variables and base responsive styles so all views use the same responsive behavior.",
       "acceptanceCriteria": [
-        "Create backend/core/fixtures/test_data.json with: 2 users (1 staff 'admin', 1 regular 'alice'), 1 currency (USD), 1 category (Food), 1 group type (Home), 1 group with both users as members",
-        "Fixture loads successfully via: cd backend && python manage.py loaddata test_data",
+        "Add CSS custom properties in base.css or main.css for breakpoints: --bp-phone: 768px, --bp-tablet: 1024px",
+        "Add global box-sizing: border-box rule if not already present",
+        "Confirm viewport meta tag in index.html: <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+        "Add .table-scroll-container utility class: overflow-x auto, width 100%",
         "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Fixture: 2 users (admin/alice), USD currency, Food category, Home group type, 1 group with both members. Password: password123"
+      "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Model unit tests",
-      "description": "As a developer, I want unit tests for all models so field constraints, managers, and methods are verified.",
+      "title": "Create AppNavbar component — desktop layout",
+      "description": "As a user, I want a consistent navigation bar component so all pages share the same nav.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/__init__.py and backend/core/tests/test_models.py",
-        "Test User creation with display_name field",
-        "Test Category, GroupType, Currency __str__ methods return expected strings",
-        "Test Group creation with members M2M and default_split_method",
-        "Test ExpenseManager excludes soft-deleted expenses (Expense.objects vs Expense.all_objects)",
-        "Test ApiKey.generate_key() returns a 64-character hex string",
-        "Tests pass: cd backend && python manage.py test core.tests.test_models"
+        "Create frontend/src/components/AppNavbar.vue",
+        "Desktop layout (>=1024px): horizontal bar with app name/logo on left, nav links (Dashboard, Profile, Admin if staff) in center/right, logout button on far right",
+        "Active route link is visually highlighted",
+        "Uses auth store for user info, isStaff, logout action",
+        "Uses Vue Router for navigation and active route detection",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 1280px width"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "7 tests covering all models"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Serializer unit tests — equal and custom splits",
-      "description": "As a developer, I want unit tests for ExpenseSerializer split logic.",
+      "title": "AppNavbar — hamburger menu for mobile/tablet",
+      "description": "As a user, I want the navbar to collapse into a hamburger menu on small screens so I can navigate on mobile.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_serializers.py",
-        "Test ExpenseSerializer creates equal splits across group members when split_data omitted",
-        "Test ExpenseSerializer creates custom splits when split_data is provided",
-        "Test ExpenseSerializer rejects split_data where amounts don't sum to expense total",
-        "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
+        "Below 1024px: nav links hidden, hamburger icon button shown",
+        "Clicking hamburger toggles a dropdown/overlay menu with all nav links",
+        "Menu closes when a link is clicked",
+        "Menu closes when clicking outside the menu",
+        "Hamburger icon animates to X when open (CSS transition)",
+        "Minimum 44px touch target for hamburger button",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px width"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "3 tests: equal split, custom split, invalid split rejection"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Serializer unit tests — admin user and group serializers",
-      "description": "As a developer, I want unit tests for AdminUserSerializer password hashing and GroupSerializer computed fields.",
+      "title": "Integrate AppNavbar into all views",
+      "description": "As a developer, I want to replace per-view navbar code with the shared AppNavbar component.",
       "acceptanceCriteria": [
-        "Test AdminUserSerializer create hashes password (check_password returns True, raw password not stored)",
-        "Test AdminUserSerializer update with new password hashes it",
-        "Test GroupSerializer returns correct member_count and member_ids",
-        "Tests pass: cd backend && python manage.py test core.tests.test_serializers"
+        "Import and use AppNavbar in DashboardView, GroupDetailView, ProfileView, AdminView",
+        "Remove existing inline navbar markup from each view",
+        "LoginView does NOT use AppNavbar (no nav needed on login page)",
+        "Each view still renders its own content below the navbar",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 1280px widths"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "3 tests: AdminUserSerializer create/update password hashing, GroupSerializer member_count/member_ids"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Balance computation unit tests — basic cases",
-      "description": "As a developer, I want thorough tests for _compute_balances() simple scenarios.",
+      "title": "Responsive Login View",
+      "description": "As a user, I want the login page to look correct on all screen sizes and orientations.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_balances.py",
-        "Test: 1 expense, 2 members, equal split — verify payer is owed half by the other member",
-        "Test: no expenses or settlements returns empty balances",
-        "Test: expense with created_by=None is skipped (no error, empty balances)",
-        "Tests pass: cd backend && python manage.py test core.tests.test_balances"
+        "Login card centers vertically and horizontally on all screen sizes",
+        "Card does not overflow viewport in phone landscape (short viewport height) — use max-height with overflow-y auto if needed",
+        "Form inputs and button have min 44px height for touch targets",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "3 tests covering basic balance scenarios"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Balance computation unit tests — settlements and multi-member",
-      "description": "As a developer, I want tests for settlement offsets and 3+ member scenarios.",
+      "title": "Responsive Dashboard View",
+      "description": "As a user, I want the dashboard group cards to reflow properly on all screen sizes.",
       "acceptanceCriteria": [
-        "Test: settlement partially reduces a debt (net balance decreases but not zero)",
-        "Test: settlement fully zeros a debt between two members",
-        "Test: multiple expenses by different payers produce correct net balances",
-        "Test: 3 members with cross-debts simplify to minimal pairwise debts",
-        "Tests pass: cd backend && python manage.py test core.tests.test_balances"
+        "Group card grid: 1 column on phone (<768px), 2 columns on tablet (768-1023px), 3+ on desktop (>=1024px)",
+        "Cards don't overflow or get clipped in landscape orientation",
+        "Balance summary section stacks vertically on screens below 768px",
+        "No horizontal body overflow at any width",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px, 768px, and 1280px widths"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "4 tests: partial settlement, full settlement, multiple payers, 3-member cross debts"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Auth API tests — login and logout",
-      "description": "As a developer, I want API tests for login, logout, and unauthenticated access.",
+      "title": "Responsive Group Detail View — expense list and actions",
+      "description": "As a user, I want the group detail expense list and action buttons to be usable on small screens.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_auth.py",
-        "POST /api/auth/login/ with valid credentials returns 200 and username",
-        "POST /api/auth/login/ with invalid credentials returns 401",
-        "POST /api/auth/logout/ returns 200",
-        "Unauthenticated GET /api/users/me/ returns 401 or 403",
-        "Tests pass: cd backend && python manage.py test core.tests.test_auth"
+        "Expense list items stack content vertically on screens below 768px (no horizontal overflow)",
+        "Action buttons (add expense, settle) remain visible and accessible — don't overlap content",
+        "Action buttons stack vertically or shrink gracefully on phone widths",
+        "Tab/section navigation is horizontally scrollable if it overflows on small screens",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "4 tests: login valid, login invalid, logout, unauthenticated access"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-008",
-      "title": "API key auth tests",
-      "description": "As a developer, I want tests for API key CRUD and authentication via X-API-Key header.",
+      "title": "Responsive Group Detail View — balances and debts",
+      "description": "As a user, I want balance and debt summaries to reflow on small screens.",
       "acceptanceCriteria": [
-        "POST /api/users/me/api-key/ creates key and returns it (201)",
-        "POST /api/users/me/api-key/ again replaces old key with new one",
-        "DELETE /api/users/me/api-key/ removes key (204)",
-        "DELETE /api/users/me/api-key/ with no key returns 404",
-        "Request with valid X-API-Key header authenticates successfully",
-        "Tests pass: cd backend && python manage.py test core.tests.test_auth"
+        "Balance summary cards reflow to single column on phone (<768px)",
+        "Debt/settlement lists stack vertically on narrow screens",
+        "No horizontal overflow on any group detail section",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px width"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "5 tests: create key, replace key, delete key, delete nonexistent, X-API-Key auth"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-009",
-      "title": "AdminWritePermission API tests",
-      "description": "As a developer, I want tests verifying read access for all auth users and write access for staff only.",
+      "title": "Responsive modal forms",
+      "description": "As a user, I want modal forms to be usable on small screens and in landscape orientation.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_permissions.py",
-        "Non-staff GET /api/categories/ returns 200",
-        "Non-staff POST /api/categories/ returns 403",
-        "Staff POST /api/categories/ returns 201",
-        "Staff DELETE /api/categories/{id}/ returns 204",
-        "Non-staff POST /api/groups/ returns 403",
-        "Tests pass: cd backend && python manage.py test core.tests.test_permissions"
+        "Modals take full width (minus 16px margin) on screens below 480px",
+        "Modal content scrolls vertically when it exceeds viewport height",
+        "Form inputs have min 44px height for touch-friendly sizing",
+        "Submit/cancel buttons remain visible at bottom of modal (sticky or visible after scroll)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "5 tests covering read/write permission boundaries"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-010",
-      "title": "User profile API tests",
-      "description": "As a developer, I want tests for the /api/users/me/ endpoints.",
+      "title": "Responsive Profile View",
+      "description": "As a user, I want the profile page to work on all screen sizes.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_users.py",
-        "GET /api/users/me/ returns current user's data (username, display_name)",
-        "PATCH /api/users/me/ updates display_name",
-        "POST /api/users/me/avatar/ with no file returns 400",
-        "Tests pass: cd backend && python manage.py test core.tests.test_users"
+        "Avatar upload area and form fields stack vertically on phone (<768px)",
+        "API key section text wraps or truncates with ellipsis on narrow screens (no horizontal overflow)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "3 tests: GET me, PATCH display_name, avatar no file 400"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-011",
-      "title": "Group CRUD and member management API tests",
-      "description": "As a developer, I want tests for group creation, listing, and member add/remove.",
+      "title": "Responsive Admin View",
+      "description": "As an admin, I want admin data tables to be accessible on small screens via horizontal scrolling.",
       "acceptanceCriteria": [
-        "Create backend/core/tests/test_groups.py",
-        "Staff POST /api/groups/ creates group (201)",
-        "Non-staff GET /api/groups/ returns only groups they belong to",
-        "Staff GET /api/groups/ returns all groups",
-        "POST /api/groups/{id}/members/ with valid user_id adds member",
-        "POST /api/groups/{id}/members/ with non-existent user returns 404",
-        "DELETE /api/groups/{id}/members/{user_id}/ removes member (204)",
-        "Tests pass: cd backend && python manage.py test core.tests.test_groups"
+        "Wrap all admin tables in .table-scroll-container for horizontal scroll on small screens",
+        "Table headers remain readable (no extreme column compression)",
+        "Admin add/edit forms adapt to narrow screens (inputs stack vertically below 768px)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": "6 tests: staff create, non-staff filtered list, staff all list, add/remove member, nonexistent user 404"
-    },
-    {
-      "id": "US-012",
-      "title": "Expense CRUD API tests",
-      "description": "As a developer, I want tests for creating, listing, updating, and soft-deleting expenses.",
-      "acceptanceCriteria": [
-        "Create backend/core/tests/test_expenses.py",
-        "POST /api/groups/{id}/expenses/ creates expense with equal splits (201)",
-        "POST /api/groups/{id}/expenses/ with split_data creates custom splits",
-        "GET /api/groups/{id}/expenses/ lists non-deleted expenses only",
-        "PATCH /api/expenses/{id}/ by creator updates expense",
-        "PATCH /api/expenses/{id}/ by non-creator returns 403",
-        "DELETE /api/expenses/{id}/ soft-deletes (is_deleted=True, returns 204)",
-        "Soft-deleted expense no longer appears in GET /api/groups/{id}/expenses/",
-        "Tests pass: cd backend && python manage.py test core.tests.test_expenses"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": "7 tests: create equal/custom, list excludes deleted, PATCH creator/non-creator, DELETE soft-deletes"
-    },
-    {
-      "id": "US-013",
-      "title": "Settlement API tests",
-      "description": "As a developer, I want tests for creating and listing settlements.",
-      "acceptanceCriteria": [
-        "Create backend/core/tests/test_settlements.py",
-        "POST /api/groups/{id}/settlements/ creates settlement with request.user as payer (201)",
-        "GET /api/groups/{id}/settlements/ lists settlements for the group",
-        "Tests pass: cd backend && python manage.py test core.tests.test_settlements"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": "2 tests: create settlement (payer=request.user), list settlements"
-    },
-    {
-      "id": "US-014",
-      "title": "Balance API endpoint tests",
-      "description": "As a developer, I want API tests for balance endpoints to verify end-to-end correctness.",
-      "acceptanceCriteria": [
-        "Create backend/core/tests/test_balance_api.py",
-        "GET /api/groups/{id}/balances/ returns correct balances after expenses and settlements",
-        "GET /api/users/me/balances/ returns correct aggregate across user's groups",
-        "Empty group returns empty balances list",
-        "Tests pass: cd backend && python manage.py test core.tests.test_balance_api"
-      ],
-      "priority": 14,
-      "passes": true,
-      "notes": "3 tests: group balances with expense+settlement, empty group, me balances aggregate"
-    },
-    {
-      "id": "US-015",
-      "title": "Export API tests",
-      "description": "As a developer, I want tests for CSV and JSON export endpoints.",
-      "acceptanceCriteria": [
-        "Create backend/core/tests/test_exports.py",
-        "GET /api/groups/{id}/export/?format=csv returns text/csv with correct headers",
-        "GET /api/groups/{id}/export/?format=json returns application/json array",
-        "GET /api/groups/{id}/export/?format=xml returns 400",
-        "GET /api/users/me/export/?format=csv exports only current user's expenses",
-        "Tests pass: cd backend && python manage.py test core.tests.test_exports"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "4 tests: CSV export, JSON export, XML 400, me export filters own expenses. Uses URL_FORMAT_OVERRIDE=None to avoid DRF format negotiation conflict."
+      "passes": false,
+      "notes": ""
     }
   ]
 }
