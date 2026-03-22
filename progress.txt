@@ -135,3 +135,17 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - SettlementForm was missing max-height/overflow-y — always check all modals share the same base responsive setup
   - All three modals share identical overlay/modal base CSS — could be extracted to a shared class in base.css if more modals are added
 ---
+
+## 2026-03-22 - US-010
+- Added responsive styles for ProfileView at <768px
+- Avatar section stacks vertically (flex-direction: column) on phone
+- Avatar upload button, inline buttons, and export buttons get 44px touch targets
+- Display name row wraps on narrow screens
+- API key code block already had word-break: break-all; key status gets text-overflow ellipsis
+- Export buttons stack vertically on phone
+- Files changed: `ProfileView.vue`
+- **Learnings for future iterations:**
+  - ProfileView was already well-structured with max-width 640px — only needed media query additions
+  - The `code` element already had `word-break: break-all` from base styles, so API key display was mostly handled
+  - Pattern: `flex-direction: column` on avatar sections for phone stacking, same as balance rows in US-008
+---

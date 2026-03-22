@@ -229,4 +229,54 @@ input {
 code { display: block; background: #f5f5f5; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; word-break: break-all; margin-bottom: 0.5rem; }
 .key-status { color: #888; font-size: 0.875rem; margin: 0 0 0.75rem; }
 .export-btn.danger { color: #e74c3c; border-color: #e74c3c; }
+
+/* Responsive: phone (<768px) */
+@media (max-width: 767px) {
+  .avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avatar-upload-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .display-name-row {
+    flex-wrap: wrap;
+  }
+
+  .display-name-row input {
+    min-height: 44px;
+  }
+
+  .inline-btn {
+    min-height: 44px;
+  }
+
+  .key-display code {
+    overflow-wrap: break-word;
+    word-break: break-all;
+  }
+
+  .key-status {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
 </style>
