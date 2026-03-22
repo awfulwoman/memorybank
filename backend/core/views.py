@@ -5,8 +5,11 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ApiKey, Category, Currency, GroupType
-from .serializers import CategorySerializer, CurrencySerializer, GroupTypeSerializer, UserSerializer
+from .models import ApiKey, Category, Currency, Group, GroupType, User
+from .serializers import (
+    CategorySerializer, CurrencySerializer, GroupSerializer,
+    GroupTypeSerializer, UserSerializer,
+)
 
 
 class AdminWritePermission(IsAuthenticated):
@@ -98,4 +101,40 @@ class MeApiKeyView(APIView):
         deleted, _ = ApiKey.objects.filter(user=request.user).delete()
         if not deleted:
             return Response({'detail': 'No API key found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    serializer_class = GroupSerializer
+    permission_classes = [AdminWritePermission]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Group.objects.all().order_by('name')
+        return self.request.user.expense_groups.all().order_by('name')
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class GroupMemberView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        user_id = request.data.get('user_id')
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        group.members.add(user)
+        return Response({'detail': f'{user.username} added to group.'}, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk, user_id):
+        group = Group.objects.get(pk=pk)
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        group.members.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)

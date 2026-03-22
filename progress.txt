@@ -128,3 +128,12 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - AdminWritePermission extends IsAuthenticated; checks `request.user.is_staff` for write methods
   - DefaultRouter auto-generates list/detail endpoints
 ---
+
+## 2026-03-22 - US-011
+
+- What was implemented: Group CRUD (`/api/groups/`) admin-write-only; GET lists user's groups (all for admin, member groups for regular users); POST/DELETE `/api/groups/{id}/members/` and `/api/groups/{id}/members/{user_id}/`
+- Files changed:
+  - `backend/core/serializers.py` — GroupSerializer with member_count
+  - `backend/core/views.py` — GroupViewSet, GroupMemberView
+  - `backend/core/urls.py` — group routes
+---
