@@ -129,3 +129,17 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - Inline confirmation pattern (toggle `confirmingDelete` ref) is better UX than `window.confirm()`
   - `api.deleteGroup` already existed in api.ts — always check before adding new API methods
 ---
+
+## 2026-03-22 - US-012
+- Added IconPicker to admin category creation form (shows icon preview + picker below name input)
+- Added icon display to category list rows (MDI icon rendered before name)
+- Added IconPicker to category edit mode (appears below row when editing)
+- Updated `saveNew` to send `icon` field with `createCategory` API call
+- Updated `saveEdit` to send `icon` field with `updateCategory` API call
+- Updated `editing` ref type to include optional `icon` field
+- Files changed: `frontend/src/views/AdminView.vue`
+- **Learnings for future iterations:**
+  - The admin view uses inline editing pattern — for icon editing, an expandable IconPicker below the row works well
+  - `startEdit` must copy all editable fields (including `icon`) to the editing ref
+  - Category API already accepts `icon` field from US-001 serializer work — no backend changes needed
+---
