@@ -1,0 +1,165 @@
+# Ralph Progress Log
+Started: Sun 22 Mar 2026
+---
+
+## Codebase Patterns
+
+- **Breakpoint variables**: `--bp-phone: 768px`, `--bp-tablet: 1024px` defined in `base.css` — use in media queries across all views
+- **Table scroll**: Wrap tables in `.table-scroll-container` for horizontal scroll on small screens
+- **box-sizing**: Already global `border-box` in `base.css` (lines 53-56)
+- **Viewport meta**: Already in `index.html`
+- **Typecheck**: Run `npx vue-tsc --build` from `frontend/` (need `npm install` first if node_modules missing)
+- **main.css**: Cleaned up — removed default Vue template grid/padding; `#app` now only sets `font-weight: normal`
+- **AppNavbar integration**: Import `AppNavbar` from `@/components/AppNavbar.vue` and use `<AppNavbar />` at top of view template, removing inline navbar markup and related CSS/JS
+- **Responsive visibility**: Use `.desktop-only` / `.mobile-only` classes with `@media (max-width: 1023px)` and `@media (min-width: 1024px)` — matches `--bp-tablet: 1024px`
+
+---
+
+## 2026-03-22 - US-001
+- Added CSS custom properties `--bp-phone: 768px` and `--bp-tablet: 1024px` to `:root` in `base.css`
+- Added `.table-scroll-container` utility class (overflow-x auto, width 100%) to `base.css`
+- Confirmed `box-sizing: border-box` already present globally
+- Confirmed viewport meta tag already in `index.html`
+- Files changed: `frontend/src/assets/base.css`
+- **Learnings for future iterations:**
+  - `base.css` already has comprehensive reset including box-sizing
+  - `main.css` has Vue template default styles (grid layout at 1024px) that will likely need modification for navbar integration (US-004)
+  - `npm install` needed before typecheck if fresh checkout
+---
+
+## 2026-03-22 - US-002
+- Created `frontend/src/components/AppNavbar.vue` — desktop horizontal navbar
+- Brand "MemoryBank" on left, nav links (Dashboard, Profile, Admin if staff) center-right, Sign out far right
+- Active route highlighted via `exact-active-class` (Dashboard) and `active-class` (others)
+- Uses auth store for user info, isStaff check, logout action
+- Uses Vue Router for navigation and active route detection
+- Files changed: `frontend/src/components/AppNavbar.vue`
+- **Learnings for future iterations:**
+  - Dashboard link needs `exact-active-class` not `active-class` since `/` would match all routes
+  - Existing views all have inline `.navbar` CSS — US-004 will need to remove these and import AppNavbar
+  - Navbar pattern: flex with gap, brand left, links auto-margin-left, logout margin-left
+---
+
+## 2026-03-22 - US-003
+- Added hamburger menu to AppNavbar for screens below 1024px
+- Desktop nav links/logout hidden on mobile, replaced by hamburger button
+- Hamburger animates to X via CSS transforms on the 3 lines
+- Dropdown menu with all nav links + sign out appears below navbar
+- Click-outside-to-close via document click listener + overlay backdrop
+- Menu closes on link click
+- 44px min touch target on hamburger button
+- Files changed: `frontend/src/components/AppNavbar.vue`
+- **Learnings for future iterations:**
+  - Use `@click.stop` on hamburger and mobile menu to prevent document click handler from immediately closing
+  - CSS approach: `.desktop-only` / `.mobile-only` classes with media queries + `!important` to override scoped display values
+  - Hamburger animation: 3 spans, middle fades out, top/bottom rotate ±45deg with translateY to meet at center
+  - Overlay div must be outside the `<header>` to cover the full viewport
+---
+
+## 2026-03-22 - US-003 committed
+- Commit: d034ada
+---
+
+## 2026-03-22 - US-004
+- Replaced inline navbar markup with `<AppNavbar />` in DashboardView, GroupDetailView, ProfileView, AdminView
+- Removed per-view navbar CSS and related JS (handleLogout, unused router imports)
+- LoginView left unchanged (no navbar on login page)
+- Cleaned up `main.css` — removed default Vue template grid layout and padding that constrained `#app` width
+- GroupDetailView: moved group name into an `<h2>` inside content since navbar no longer shows it
+- Files changed: `DashboardView.vue`, `GroupDetailView.vue`, `ProfileView.vue`, `AdminView.vue`, `main.css`
+- **Learnings for future iterations:**
+  - `main.css` had default Vue template styles (`max-width: 1280px`, grid layout at 1024px) that broke full-width navbar — always check for inherited layout constraints
+  - When removing inline navbars, also remove related imports (RouterLink if unused, useRouter if only used for logout)
+  - GroupDetailView had the group name in the old navbar — needed to relocate it to content area
+---
+
+## 2026-03-22 - US-004 committed
+- Commit: db4846f
+---
+
+## 2026-03-22 - US-005
+- Made login card responsive for landscape/short viewports: `max-height: calc(100vh - 2rem)` + `overflow-y: auto`
+- Added `padding: 1rem` to container so card doesn't touch screen edges on small devices
+- Added `min-height: 44px` to inputs and button for touch targets
+- Files changed: `LoginView.vue`
+- **Learnings for future iterations:**
+  - Login card was already centered via flexbox — only needed overflow and touch target fixes
+  - Pattern for landscape safety: `max-height: calc(100vh - Xrem)` + `overflow-y: auto` on card
+---
+
+## 2026-03-22 - US-006
+- Made group card grid responsive: 1 column phone (<768px), 2 columns tablet (768-1023px), 3 columns desktop (>=1024px)
+- Added balance summary section using `api.meBalances()` — shows non-zero balances per group
+- Balance cards use flexbox, stack vertically on phone (<768px)
+- Added `overflow-x: hidden` on `.dashboard` to prevent horizontal overflow
+- Files changed: `DashboardView.vue`
+- **Learnings for future iterations:**
+  - `api.meBalances()` returns array of `{group_id, group_name, balance, debts}` — filter by non-zero balance for summary display
+  - Explicit media query breakpoints preferred over `auto-fill` for precise column control per AC
+  - `Promise.all` pattern for parallel API calls in `onMounted`
+---
+
+## 2026-03-22 - US-007
+- Added responsive styles for GroupDetailView expense list and actions at <768px
+- Expense `.expense-main` wraps: description takes full width, amount + buttons flow below
+- Section header action buttons (Add Expense, Record Payment) go full-width on phone with 44px touch targets
+- Edit/delete buttons get 44px min-height for touch
+- Export buttons stack vertically on phone
+- Balance/debt/settlement rows flex-wrap for narrow screens
+- Files changed: `GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - `flex-wrap: wrap` + `flex: 1 1 100%` on description is a clean pattern for stacking flex children on mobile
+  - Touch targets: always add `min-height: 44px` to interactive elements in mobile media query
+---
+
+## 2026-03-22 - US-008
+- Enhanced responsive styles for balance/debt/settlement rows on GroupDetailView at <768px
+- Balance rows: `flex-direction: column` so username stacks above balance amount
+- Debt rows: stack vertically so "X owes Y amount" reads top-to-bottom on narrow screens
+- Settlement rows: same vertical stacking treatment
+- Added `overflow-wrap: break-word` and `overflow: hidden` on `.card` to prevent horizontal overflow
+- Files changed: `GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - `flex-direction: column` is cleaner than `flex-wrap: wrap` for true single-column reflow on mobile
+  - `overflow-wrap: break-word` + `overflow: hidden` on card containers prevents any child from causing horizontal scroll
+---
+
+## 2026-03-22 - US-009
+- Added responsive styles to all three modal forms: AddExpenseForm, EditExpenseForm, SettlementForm
+- Below 480px: modal takes full width minus 16px margin
+- Below 768px: inputs get min-height 44px for touch targets, action buttons become sticky at modal bottom
+- Added missing `max-height: 90vh; overflow-y: auto` to SettlementForm modal (AddExpense/EditExpense already had it)
+- Files changed: `AddExpenseForm.vue`, `EditExpenseForm.vue`, `SettlementForm.vue`
+- **Learnings for future iterations:**
+  - Sticky actions inside overflow-y container: `position: sticky; bottom: -Xrem` where X matches parent padding, with background color to cover scrolling content
+  - SettlementForm was missing max-height/overflow-y — always check all modals share the same base responsive setup
+  - All three modals share identical overlay/modal base CSS — could be extracted to a shared class in base.css if more modals are added
+---
+
+## 2026-03-22 - US-010
+- Added responsive styles for ProfileView at <768px
+- Avatar section stacks vertically (flex-direction: column) on phone
+- Avatar upload button, inline buttons, and export buttons get 44px touch targets
+- Display name row wraps on narrow screens
+- API key code block already had word-break: break-all; key status gets text-overflow ellipsis
+- Export buttons stack vertically on phone
+- Files changed: `ProfileView.vue`
+- **Learnings for future iterations:**
+  - ProfileView was already well-structured with max-width 640px — only needed media query additions
+  - The `code` element already had `word-break: break-all` from base styles, so API key display was mostly handled
+  - Pattern: `flex-direction: column` on avatar sections for phone stacking, same as balance rows in US-008
+---
+
+## 2026-03-22 - US-011
+- Added responsive styles for AdminView at <768px
+- Wrapped all list sections in `.table-scroll-container` for horizontal scroll safety
+- Inline forms (add category, add currency, add user, add group) stack vertically on phone via `flex-direction: column`
+- All inputs/selects/buttons get 44px min-height for touch targets
+- List rows wrap: label takes full width, action buttons flow below
+- Cards get `overflow-x: auto` for scroll containment
+- Files changed: `AdminView.vue`
+- **Learnings for future iterations:**
+  - AdminView uses list rows not HTML tables, but `.table-scroll-container` wrapper still provides overflow-x safety
+  - Currency inline form had inline `style="width:60px"` — overridden with `!important` in media query for full-width on mobile
+  - `flex: 1` on `.small-btn` inside wrapped `.row-actions` makes action buttons evenly sized on mobile
+---
