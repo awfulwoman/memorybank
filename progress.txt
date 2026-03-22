@@ -114,3 +114,8 @@ Started: Sun 22 Mar 2026
 - Created `backend/core/tests/test_settlements.py` with 2 tests
 - Files changed: `backend/core/tests/test_settlements.py` (new)
 ---
+
+## 2026-03-22 - US-014: Balance API endpoint tests
+- Created `backend/core/tests/test_balance_api.py` with 3 tests
+- Files changed: `backend/core/tests/test_balance_api.py` (new)
+---

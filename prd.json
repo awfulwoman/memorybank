@@ -219,8 +219,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_balance_api"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 tests: group balances with expense+settlement, empty group, me balances aggregate"
     },
     {
       "id": "US-015",
