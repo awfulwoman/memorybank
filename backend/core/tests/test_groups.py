@@ -128,3 +128,46 @@ class GroupMemberTest(TestCase):
         resp = self.client.delete(f"/api/groups/{self.group.pk}/members/{self.alice.pk}/")
         self.assertEqual(resp.status_code, 204)
         self.assertNotIn(self.alice, self.group.members.all())
+
+
+class GroupMemberOwnerPermissionTest(TestCase):
+    """Integration tests for US-005: group owner can manage members."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
+        self.owner = User.objects.create_user(username="owner", password="pass", is_staff=False)
+        self.other = User.objects.create_user(username="other", password="pass", is_staff=False)
+        self.target = User.objects.create_user(username="target", password="pass", is_staff=False)
+        self.group = Group.objects.create(name="OwnedGroup", created_by=self.owner)
+        self.group.members.add(self.owner, self.other)
+
+    def test_owner_add_member(self):
+        self.client.force_login(self.owner)
+        resp = self.client.post(f"/api/groups/{self.group.pk}/members/", {"user_id": self.target.pk})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(self.target, self.group.members.all())
+
+    def test_owner_remove_member(self):
+        self.group.members.add(self.target)
+        self.client.force_login(self.owner)
+        resp = self.client.delete(f"/api/groups/{self.group.pk}/members/{self.target.pk}/")
+        self.assertEqual(resp.status_code, 204)
+        self.assertNotIn(self.target, self.group.members.all())
+
+    def test_non_owner_non_staff_add_member_returns_403(self):
+        self.client.force_login(self.other)
+        resp = self.client.post(f"/api/groups/{self.group.pk}/members/", {"user_id": self.target.pk})
+        self.assertEqual(resp.status_code, 403)
+
+    def test_non_owner_non_staff_remove_member_returns_403(self):
+        self.group.members.add(self.target)
+        self.client.force_login(self.other)
+        resp = self.client.delete(f"/api/groups/{self.group.pk}/members/{self.target.pk}/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_staff_can_add_member_to_any_group(self):
+        self.client.force_login(self.staff)
+        resp = self.client.post(f"/api/groups/{self.group.pk}/members/", {"user_id": self.target.pk})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(self.target, self.group.members.all())

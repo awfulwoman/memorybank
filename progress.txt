@@ -50,3 +50,13 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - `get_permissions()` pattern supports easy per-action branching — just add more `if self.action in (...)` clauses
   - Integration tests for ViewSet permissions need `content_type="application/json"` for PATCH requests
 ---
+
+## 2026-03-22 - US-005
+- Changed `GroupMemberView` permission from `IsAdminUser` to `IsGroupOwnerOrAdmin`
+- This allows group owners (created_by) to add/remove members, not just staff
+- Added 5 integration tests: owner add, owner remove, non-owner add 403, non-owner remove 403, staff add to any group
+- Files changed: `core/views.py`, `core/tests/test_groups.py`
+- **Learnings for future iterations:**
+  - `IsGroupOwnerOrAdmin` reuses cleanly for any view that takes `pk` as a group identifier in URL kwargs
+  - Existing `GroupMemberTest` tests still pass since they use staff user (who is also group creator)
+---

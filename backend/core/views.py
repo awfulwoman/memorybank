@@ -138,7 +138,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class GroupMemberView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsGroupOwnerOrAdmin]
 
     def post(self, request, pk):
         group = Group.objects.get(pk=pk)
