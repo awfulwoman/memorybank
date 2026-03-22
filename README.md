@@ -73,6 +73,47 @@ curl -H "X-API-Key: <your-key>" http://localhost:8000/api/users/me/
 | `/api/currencies/` | CRUD | Currencies (write: admin only) |
 | `/api/group-types/` | CRUD | Group types (write: admin only) |
 
+## Deploy
+
+Run MemoryBank from pre-built images published to GitHub Container Registry — no need to clone the repository.
+
+### Images
+
+- Backend: [ghcr.io/awfulwoman/memorybank-backend](https://github.com/awfulwoman/memorybank/pkgs/container/memorybank-backend)
+- Frontend: [ghcr.io/awfulwoman/memorybank-frontend](https://github.com/awfulwoman/memorybank/pkgs/container/memorybank-frontend)
+
+### Steps
+
+1. Download the Compose file:
+   ```bash
+   curl -O https://raw.githubusercontent.com/awfulwoman/memorybank/main/docker-compose.ghcr.yml
+   ```
+
+2. Create the data directories:
+   ```bash
+   mkdir -p data/db data/media
+   ```
+
+3. Start the stack:
+   ```bash
+   docker compose -f docker-compose.ghcr.yml up -d
+   ```
+
+The app will be available at http://localhost (frontend) and http://localhost:8000 (API).
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `SQLITE_PATH` | `/data/db/db.sqlite3` | Path to SQLite database file inside the container |
+| `MEDIA_ROOT` | `/data/media` | Path to media file storage inside the container |
+| `CSRF_TRUSTED_ORIGINS` | `http://localhost` | Comma-separated trusted origins for CSRF (set to your domain in production) |
+
+Pass them inline or via a `.env` file:
+```bash
+CSRF_TRUSTED_ORIGINS=https://expenses.example.com docker compose -f docker-compose.ghcr.yml up -d
+```
+
 ## LLM Disclaimer
 
 I'm testing out a Ralph loop to create this. Don't even think of using it yourself.
