@@ -169,3 +169,11 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - Balance computed on-the-fly from ExpenseSplit + Settlement; no stored state
   - _compute_balances simplifies pairwise by netting A->B and B->A debts
 ---
+
+## 2026-03-22 - US-015
+
+- What was implemented: `GET /api/groups/{id}/export/?format=csv|json` and `GET /api/users/me/export/?format=csv|json`; rows include date, amount, description, category, payer, split_user, split_amount
+- Files changed:
+  - `backend/core/views.py` — _expense_rows, _render_export, GroupExportView, MeExportView
+  - `backend/core/urls.py` — export routes
+---

@@ -1,7 +1,10 @@
+import csv
+import json
 from collections import defaultdict
 from decimal import Decimal
 
 from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse
 from rest_framework import mixins, status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -316,3 +319,78 @@ class MeBalanceView(APIView):
             'total_balance': str(total_net.get(user.id, Decimal('0'))),
             'groups': group_details,
         })
+
+
+def _expense_rows(expenses):
+    rows = []
+    for e in expenses:
+        for split in e.splits.all():
+            rows.append({
+                'date': str(e.date),
+                'amount': str(e.amount),
+                'description': e.description,
+                'category': e.category.name if e.category else '',
+                'payer': e.created_by.username if e.created_by else '',
+                'split_user': split.user.username,
+                'split_amount': str(split.amount),
+            })
+        if not e.splits.exists():
+            rows.append({
+                'date': str(e.date),
+                'amount': str(e.amount),
+                'description': e.description,
+                'category': e.category.name if e.category else '',
+                'payer': e.created_by.username if e.created_by else '',
+                'split_user': '',
+                'split_amount': '',
+            })
+    return rows
+
+
+def _render_export(rows, fmt, filename):
+    if fmt == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+        if rows:
+            writer = csv.DictWriter(response, fieldnames=rows[0].keys())
+            writer.writeheader()
+            writer.writerows(rows)
+        return response
+    else:
+        response = HttpResponse(
+            json.dumps(rows, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}.json"'
+        return response
+
+
+class GroupExportView(APIView):
+    def get(self, request, pk):
+        fmt = request.query_params.get('format', 'csv')
+        if fmt not in ('csv', 'json'):
+            return Response({'detail': 'format must be csv or json'}, status=status.HTTP_400_BAD_REQUEST)
+        group = Group.objects.get(pk=pk)
+        expenses = (
+            Expense.objects.filter(group=group)
+            .select_related('category', 'created_by')
+            .prefetch_related('splits__user')
+            .order_by('date')
+        )
+        rows = _expense_rows(expenses)
+        return _render_export(rows, fmt, f'group_{pk}_expenses')
+
+
+class MeExportView(APIView):
+    def get(self, request):
+        fmt = request.query_params.get('format', 'csv')
+        if fmt not in ('csv', 'json'):
+            return Response({'detail': 'format must be csv or json'}, status=status.HTTP_400_BAD_REQUEST)
+        expenses = (
+            Expense.objects.filter(created_by=request.user)
+            .select_related('category', 'created_by', 'group')
+            .prefetch_related('splits__user')
+            .order_by('date')
+        )
+        rows = _expense_rows(expenses)
+        return _render_export(rows, fmt, 'my_expenses')
