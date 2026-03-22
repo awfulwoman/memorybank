@@ -72,3 +72,7 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - When removing inline navbars, also remove related imports (RouterLink if unused, useRouter if only used for logout)
   - GroupDetailView had the group name in the old navbar — needed to relocate it to content area
 ---
+
+## 2026-03-22 - US-004 committed
+- Commit: db4846f
+---
