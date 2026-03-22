@@ -175,10 +175,10 @@ class SettlementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Settlement
         fields = ['id', 'group', 'payer', 'payer_username', 'payer_display_name', 'payee', 'payee_username', 'payee_display_name', 'amount', 'date', 'created_at']
+        read_only_fields = ['payer', 'group', 'created_at']
 
     def get_payer_display_name(self, obj):
         return obj.payer.display_name or obj.payer.username if obj.payer else ''
 
     def get_payee_display_name(self, obj):
         return obj.payee.display_name or obj.payee.username if obj.payee else ''
-        read_only_fields = ['payer', 'group', 'created_at']
