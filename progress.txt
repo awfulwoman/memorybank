@@ -282,4 +282,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/urls.py` — registered admin/users route
   - `frontend/src/api.ts` — adminUsers, createUser, updateUser
   - `frontend/src/views/AdminView.vue` — Users/Groups sections
+
+## 2026-03-22 - US-029
+
+- What was implemented: Receipt image viewer lightbox in GroupDetailView; "📎 Receipt" button on expenses with receipt_image; placeholder shown implicitly (button not visible if no receipt)
+- Files changed:
+  - `frontend/src/views/GroupDetailView.vue` — receipt viewer overlay
 ---
