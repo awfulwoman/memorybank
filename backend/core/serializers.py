@@ -39,7 +39,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'icon']
 
 
 class GroupTypeSerializer(serializers.ModelSerializer):
@@ -63,7 +63,7 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = [
-            'id', 'name', 'group_type', 'group_type_name',
+            'id', 'name', 'icon', 'group_type', 'group_type_name',
             'currency', 'currency_code', 'default_split_method',
             'created_by', 'member_count', 'member_ids',
         ]

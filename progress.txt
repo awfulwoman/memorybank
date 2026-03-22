@@ -1,78 +1,19 @@
-# Ralph Progress Log
-Started: Sun 22 Mar 2026 20:08:44 CET
----
-
 ## Codebase Patterns
-- Python venv at `backend/.venv/` — run tests with `.venv/bin/python manage.py test core`
-- Permission classes live in `backend/core/permissions.py`, views import from there
-- Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
----
+- Backend venv: `backend/.venv/bin/python`
+- Django requires `DJANGO_SECRET_KEY=dev-secret-key` env var for manage.py commands
+- Run tests: `cd backend && DJANGO_SECRET_KEY=dev-secret-key .venv/bin/python manage.py test core`
+- Migrations dir: `backend/core/migrations/`
 
-## 2026-03-22 - US-009
-- Added 4 validation tests to `backend/core/tests/test_security.py`
-- Tests: settlement with non-member payee → 400, expense with non-member split → 400
-- Tests: settlement with valid payee → 201, expense with valid splits → 201
-- Files changed: `backend/core/tests/test_security.py`
-- Full suite: 71 tests pass
----
-
-## 2026-03-22 - US-008
-- Created `backend/core/tests/test_security.py` with 8 authorization tests
-- Tests: bob (non-member) gets 403 on all 6 group endpoints (GET/POST expenses, GET/POST settlements, GET balances, GET export)
-- Tests: staff non-member gets 200, regular member gets 200
-- Files changed: `backend/core/tests/test_security.py` (new)
----
-
-## 2026-03-22 - US-007
-- Removed hardcoded SECRET_KEY fallback; raises RuntimeError if DJANGO_SECRET_KEY not set
-- Test runner gets a safe fallback via `'test' in sys.argv` check
-- Changed DEBUG default from 'true' to 'false'
-- Updated docker-compose.yml and docker-compose.ghcr.yml with DJANGO_SECRET_KEY and DJANGO_DEBUG=false
-- Files changed: `backend/memorybank/settings.py`, `docker-compose.yml`, `docker-compose.ghcr.yml`
----
-
-## 2026-03-22 - US-006
-- Added group membership validation for split user_ids in `ExpenseSerializer._create_splits()`
-- Checks all user_ids in split_data against `members.values_list('id', flat=True)`
-- Returns 400 with descriptive error listing non-member user IDs
-- Equal splits (no split_data) unaffected — already uses group members
-- Files changed: `backend/core/serializers.py`
----
-
-## 2026-03-22 - US-005
-- Added payee group membership validation in `GroupSettlementView.post()`
-- Checks `group.members.filter(pk=payee_id).exists()` before saving
-- Returns 400 with descriptive error if payee is not a group member
-- Files changed: `backend/core/views.py`
-- **Learnings for future iterations:**
-  - `SettlementSerializer` has `payee` as a writable field — validated_data contains the User object
----
-
-## 2026-03-22 - US-004
-- Applied `IsGroupMemberOrAdmin` permission to `GroupBalanceView` and `GroupExportView`
-- Files changed: `backend/core/views.py`
----
-
-## 2026-03-22 - US-003
-- Applied `IsGroupMemberOrAdmin` permission to `GroupSettlementView`
-- Files changed: `backend/core/views.py`
----
-
-## 2026-03-22 - US-002
-- Applied `IsGroupMemberOrAdmin` permission to `GroupExpenseView`
-- Files changed: `backend/core/views.py`
-- **Learnings for future iterations:**
-  - Just add `permission_classes = [IsGroupMemberOrAdmin]` and import — minimal change
-  - All 59 tests still pass (existing tests use group members or staff)
+# Ralph Progress Log
+Started: Sun 22 Mar 2026 20:32:57 CET
 ---
 
 ## 2026-03-22 - US-001
-- Created `IsGroupMemberOrAdmin` permission class in `backend/core/permissions.py`
-- Extracts group pk from URL kwargs, checks membership via `group.members.filter(pk=user.pk).exists()`
-- Staff users bypass membership check
-- Returns False for non-members, non-staff
-- Files changed: `backend/core/permissions.py` (new)
+- Added `icon` CharField to Category (default: `mdi-shape-outline`) and Group (default: `mdi-account-group`) models
+- Added `icon` to CategorySerializer and GroupSerializer fields
+- Generated migration `0009_category_icon_group_icon.py`
+- Files changed: `core/models.py`, `core/serializers.py`, `core/migrations/0009_category_icon_group_icon.py`
 - **Learnings for future iterations:**
-  - No venv existed initially — created at `backend/.venv/`
-  - All 59 existing tests pass with the new permission class (no views use it yet)
+  - Django SECRET_KEY is required via env var since security hardening (US-007 from prior PRD)
+  - python3 not in path with django; must use `.venv/bin/python`
 ---
