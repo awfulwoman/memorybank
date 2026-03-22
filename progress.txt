@@ -111,3 +111,15 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - `flex-wrap: wrap` + `flex: 1 1 100%` on description is a clean pattern for stacking flex children on mobile
   - Touch targets: always add `min-height: 44px` to interactive elements in mobile media query
 ---
+
+## 2026-03-22 - US-008
+- Enhanced responsive styles for balance/debt/settlement rows on GroupDetailView at <768px
+- Balance rows: `flex-direction: column` so username stacks above balance amount
+- Debt rows: stack vertically so "X owes Y amount" reads top-to-bottom on narrow screens
+- Settlement rows: same vertical stacking treatment
+- Added `overflow-wrap: break-word` and `overflow: hidden` on `.card` to prevent horizontal overflow
+- Files changed: `GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - `flex-direction: column` is cleaner than `flex-wrap: wrap` for true single-column reflow on mobile
+  - `overflow-wrap: break-word` + `overflow: hidden` on card containers prevents any child from causing horizontal scroll
+---
