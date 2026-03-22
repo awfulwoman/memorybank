@@ -98,3 +98,16 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - Explicit media query breakpoints preferred over `auto-fill` for precise column control per AC
   - `Promise.all` pattern for parallel API calls in `onMounted`
 ---
+
+## 2026-03-22 - US-007
+- Added responsive styles for GroupDetailView expense list and actions at <768px
+- Expense `.expense-main` wraps: description takes full width, amount + buttons flow below
+- Section header action buttons (Add Expense, Record Payment) go full-width on phone with 44px touch targets
+- Edit/delete buttons get 44px min-height for touch
+- Export buttons stack vertically on phone
+- Balance/debt/settlement rows flex-wrap for narrow screens
+- Files changed: `GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - `flex-wrap: wrap` + `flex: 1 1 100%` on description is a clean pattern for stacking flex children on mobile
+  - Touch targets: always add `min-height: 44px` to interactive elements in mobile media query
+---
