@@ -8,6 +8,14 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
 ---
 
+## 2026-03-22 - US-006
+- Added group membership validation for split user_ids in `ExpenseSerializer._create_splits()`
+- Checks all user_ids in split_data against `members.values_list('id', flat=True)`
+- Returns 400 with descriptive error listing non-member user IDs
+- Equal splits (no split_data) unaffected — already uses group members
+- Files changed: `backend/core/serializers.py`
+---
+
 ## 2026-03-22 - US-005
 - Added payee group membership validation in `GroupSettlementView.post()`
 - Checks `group.members.filter(pk=payee_id).exists()` before saving

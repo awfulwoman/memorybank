@@ -109,6 +109,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
     def _create_splits(self, expense, split_data, members):
         expense.splits.all().delete()
         if split_data:
+            member_ids = set(members.values_list('id', flat=True))
+            split_user_ids = {s['user_id'] for s in split_data}
+            non_members = split_user_ids - member_ids
+            if non_members:
+                raise serializers.ValidationError(
+                    f'Users {non_members} are not members of this group.'
+                )
             total = sum(Decimal(str(s['amount'])) for s in split_data)
             if total != expense.amount:
                 raise serializers.ValidationError('Sum of splits must equal expense amount.')
