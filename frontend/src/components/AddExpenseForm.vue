@@ -144,6 +144,7 @@ async function submit() {
       await fetch(`/api/expenses/${expense.id}/`, {
         method: 'PATCH',
         credentials: 'include',
+        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '' },
         body: form2,
       })
     }

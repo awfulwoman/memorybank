@@ -99,6 +99,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
         child=serializers.DictField(), write_only=True, required=False
     )
     created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    created_by_display_name = serializers.SerializerMethodField()
     category_name = serializers.CharField(source='category.name', read_only=True)
     category_icon = serializers.CharField(source='category.icon', read_only=True)
 
@@ -106,10 +107,15 @@ class ExpenseSerializer(serializers.ModelSerializer):
         model = Expense
         fields = [
             'id', 'amount', 'description', 'date', 'category', 'category_name', 'category_icon',
-            'group', 'created_by', 'created_by_username', 'receipt_image',
+            'group', 'created_by', 'created_by_username', 'created_by_display_name', 'receipt_image',
             'is_deleted', 'created_at', 'updated_at', 'splits', 'split_data',
         ]
         read_only_fields = ['created_by', 'group', 'is_deleted', 'created_at', 'updated_at']
+
+    def get_created_by_display_name(self, obj):
+        if obj.created_by:
+            return obj.created_by.display_name or obj.created_by.username
+        return ''
 
     def validate_receipt_image(self, value):
         if value and value.size > 5 * 1024 * 1024:
@@ -163,8 +169,16 @@ class ExpenseSerializer(serializers.ModelSerializer):
 class SettlementSerializer(serializers.ModelSerializer):
     payer_username = serializers.CharField(source='payer.username', read_only=True)
     payee_username = serializers.CharField(source='payee.username', read_only=True)
+    payer_display_name = serializers.SerializerMethodField()
+    payee_display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Settlement
-        fields = ['id', 'group', 'payer', 'payer_username', 'payee', 'payee_username', 'amount', 'date', 'created_at']
+        fields = ['id', 'group', 'payer', 'payer_username', 'payer_display_name', 'payee', 'payee_username', 'payee_display_name', 'amount', 'date', 'created_at']
+
+    def get_payer_display_name(self, obj):
+        return obj.payer.display_name or obj.payer.username if obj.payer else ''
+
+    def get_payee_display_name(self, obj):
+        return obj.payee.display_name or obj.payee.username if obj.payee else ''
         read_only_fields = ['payer', 'group', 'created_at']

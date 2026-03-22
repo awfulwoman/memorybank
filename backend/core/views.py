@@ -4,6 +4,8 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from rest_framework import mixins, status, viewsets
 from rest_framework.parsers import MultiPartParser
@@ -58,7 +60,9 @@ class AdminUserViewSet(viewsets.ModelViewSet):
 MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class LoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -304,12 +308,16 @@ class GroupBalanceView(APIView):
         users = {u.id: u for u in User.objects.filter(id__in=user_ids)}
 
         for item in pairwise:
-            item['from_username'] = users[item['from_user_id']].username if item['from_user_id'] in users else ''
-            item['to_username'] = users[item['to_user_id']].username if item['to_user_id'] in users else ''
+            from_user = users.get(item['from_user_id'])
+            to_user = users.get(item['to_user_id'])
+            item['from_username'] = from_user.username if from_user else ''
+            item['from_display_name'] = (from_user.display_name or from_user.username) if from_user else ''
+            item['to_username'] = to_user.username if to_user else ''
+            item['to_display_name'] = (to_user.display_name or to_user.username) if to_user else ''
             item['amount'] = str(item['amount'])
 
         member_balances = [
-            {'user_id': uid, 'username': users.get(uid, None) and users[uid].username, 'balance': str(bal)}
+            {'user_id': uid, 'username': users.get(uid, None) and users[uid].username, 'display_name': (users[uid].display_name or users[uid].username) if uid in users else '', 'balance': str(bal)}
             for uid, bal in net_balances.items()
         ]
 

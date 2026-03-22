@@ -42,7 +42,10 @@ export const api = {
       credentials: 'include',
       headers: { 'X-CSRFToken': getCsrfToken() },
       body: form,
-    }).then(r => r.json())
+    }).then(r => {
+      if (!r.ok) throw new Error(`Upload failed: ${r.status}`)
+      return r.json()
+    })
   },
 
   generateApiKey: () => request<{ key: string }>('/users/me/api-key/', { method: 'POST' }),

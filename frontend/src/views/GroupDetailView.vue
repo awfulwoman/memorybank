@@ -21,7 +21,7 @@
         <div v-if="loadingBalances" class="loading">Loading balances…</div>
         <div v-else>
           <div v-for="b in balances" :key="b.user_id" class="balance-row">
-            <span>{{ b.username }}</span>
+            <span>{{ b.display_name }}</span>
             <span :class="Number(b.balance) >= 0 ? 'positive' : 'negative'">
               {{ Number(b.balance) >= 0 ? '+' : '-' }}{{ sym }}{{ Math.abs(Number(b.balance)).toFixed(2) }}
             </span>
@@ -35,9 +35,9 @@
         <h3>Who owes whom</h3>
         <div v-if="debts.length === 0" class="empty">All settled up!</div>
         <div v-for="d in debts" :key="`${d.from_user_id}-${d.to_user_id}`" class="debt-row">
-          <span class="negative">{{ d.from_username }}</span>
+          <span class="negative">{{ d.from_display_name }}</span>
           owes
-          <span class="positive">{{ d.to_username }}</span>
+          <span class="positive">{{ d.to_display_name }}</span>
           <strong>{{ sym }}{{ d.amount }}</strong>
         </div>
       </section>
@@ -60,7 +60,7 @@
             </span>
           </div>
           <div class="expense-meta">
-            {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
+            {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_display_name }}
             <button v-if="e.receipt_image" class="receipt-btn" @click="viewingReceipt = e.receipt_image">
               📎 Receipt
             </button>
@@ -85,9 +85,9 @@
         </div>
         <div v-if="settlements.length === 0" class="empty">No settlements yet.</div>
         <div v-for="s in settlements" :key="s.id" class="settlement-row">
-          <span>{{ s.payer_username }}</span>
+          <span>{{ s.payer_display_name }}</span>
           paid
-          <span>{{ s.payee_username }}</span>
+          <span>{{ s.payee_display_name }}</span>
           <strong>{{ sym }}{{ s.amount }}</strong>
           <span class="date">{{ s.date }}</span>
         </div>
@@ -310,10 +310,12 @@ onMounted(async () => {
 
 .balance-row span:first-child {
   flex: 1;
+  font-weight: 700;
+  color: var(--color-heading);
 }
 
-.positive { color: var(--color-success); font-weight: 600; }
-.negative { color: var(--color-danger); font-weight: 600; }
+.positive { color: var(--color-success); font-weight: 600; background: rgba(39, 174, 96, 0.1); padding: 0.15rem 0.5rem; border-radius: 4px; }
+.negative { color: var(--color-danger); font-weight: 600; background: rgba(231, 76, 60, 0.1); padding: 0.15rem 0.5rem; border-radius: 4px; }
 
 .expense-row {
   padding: 0.5rem 0;

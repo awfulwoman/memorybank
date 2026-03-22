@@ -16,7 +16,7 @@
         </div>
         <div class="field">
           <label>Username</label>
-          <input :value="auth.user?.username" readonly />
+          <span class="username-display">{{ auth.user?.username }}</span>
         </div>
         <div class="field">
           <label>Display Name</label>
@@ -50,8 +50,8 @@
             </div>
             <div v-if="expandedGroups.has(g.group_id)" class="debt-list">
               <div v-for="d in g.debts" :key="`${d.from_user_id}-${d.to_user_id}`" class="debt-row">
-                <span class="negative">{{ d.from_username }}</span> owes
-                <span class="positive">{{ d.to_username }}</span>
+                <span class="negative">{{ d.from_display_name }}</span> owes
+                <span class="positive">{{ d.to_display_name }}</span>
                 <strong>{{ g.currency_symbol ?? '' }}{{ d.amount }}</strong>
               </div>
               <div v-if="g.debts.length === 0" class="empty-small">Settled up!</div>
@@ -184,6 +184,7 @@ async function uploadAvatar(e: Event) {
 }
 
 .field { margin-bottom: 0.75rem; }
+.username-display { font-size: 0.95rem; color: var(--color-text); }
 label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; }
 input {
   width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--color-input-border);
