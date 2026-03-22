@@ -89,7 +89,7 @@ class GroupSerializerTest(TestCase):
         u1 = User.objects.create_user(username="u1", password="pass")
         u2 = User.objects.create_user(username="u2", password="pass")
         gt = GroupType.objects.create(name="Home")
-        cur = Currency.objects.create(name="USD", symbol="$", code="USD")
+        cur = Currency.objects.get_or_create(code="USD", defaults={"name": "USD", "symbol": "$"})[0]
         group = Group.objects.create(
             name="G", group_type=gt, currency=cur, created_by=u1
         )

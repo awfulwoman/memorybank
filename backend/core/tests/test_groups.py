@@ -9,7 +9,7 @@ class GroupCRUDTest(TestCase):
         self.client = APIClient()
         self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
         self.regular = User.objects.create_user(username="alice", password="pass", is_staff=False)
-        self.cur = Currency.objects.create(name="USD", symbol="$", code="USD")
+        self.cur = Currency.objects.get_or_create(code="USD", defaults={"name": "USD", "symbol": "$"})[0]
         self.gt = GroupType.objects.create(name="Home")
 
     def test_staff_create_group(self):
@@ -71,7 +71,7 @@ class GroupOwnershipPermissionTest(TestCase):
         self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
         self.owner = User.objects.create_user(username="owner", password="pass", is_staff=False)
         self.other = User.objects.create_user(username="other", password="pass", is_staff=False)
-        self.cur = Currency.objects.create(name="USD", symbol="$", code="USD")
+        self.cur = Currency.objects.get_or_create(code="USD", defaults={"name": "USD", "symbol": "$"})[0]
         self.group = Group.objects.create(name="OwnedGroup", created_by=self.owner)
         self.group.members.add(self.owner, self.other)
 

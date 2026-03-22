@@ -33,7 +33,7 @@ class AdminWritePermissionTest(TestCase):
 
     def test_non_staff_post_groups_allowed(self):
         self.client.force_login(self.regular)
-        cur = Currency.objects.create(name="USD", symbol="$", code="USD")
+        cur = Currency.objects.get_or_create(code="USD", defaults={"name": "USD", "symbol": "$"})[0]
         gt = GroupType.objects.create(name="Home")
         resp = self.client.post("/api/groups/", {
             "name": "New Group",

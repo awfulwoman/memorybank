@@ -35,7 +35,7 @@ class GroupTypeModelTest(TestCase):
 
 class CurrencyModelTest(TestCase):
     def test_str(self):
-        cur = Currency.objects.create(name="US Dollar", symbol="$", code="USD")
+        cur = Currency.objects.get_or_create(code="USD", defaults={"name": "US Dollar", "symbol": "$"})[0]
         self.assertEqual(str(cur), "USD ($)")
 
 
