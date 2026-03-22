@@ -5,9 +5,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 **MemoryBank** is a self-hosted shared expense splitting application (Splitwise alternative). It is a monorepo with a Django REST API backend and a Vue 3 TypeScript frontend, deployed via Docker Compose.
-
-The full implementation lives on the `ralph/memorybank-expense-splitter` branch. The `main` branch contains only scaffolding and specs.
-
 ## Commands
 
 ### Docker (primary workflow)
