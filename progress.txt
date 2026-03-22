@@ -41,3 +41,12 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - Unit-testing permission classes directly (with APIRequestFactory + fake view) avoids coupling to ViewSet wiring
   - Permission class tests should cover: owner allowed, staff allowed, non-owner denied, nonexistent group, missing pk
 ---
+
+## 2026-03-22 - US-004
+- Wired `IsGroupOwnerOrAdmin` into `GroupViewSet.get_permissions()` for `update`, `partial_update`, and `destroy` actions
+- Added 5 integration tests in `test_groups.py`: non-owner PATCH 403, owner PATCH 200, staff PATCH 200, owner DELETE 204, non-owner DELETE 403
+- Files changed: `core/views.py`, `core/tests/test_groups.py`
+- **Learnings for future iterations:**
+  - `get_permissions()` pattern supports easy per-action branching — just add more `if self.action in (...)` clauses
+  - Integration tests for ViewSet permissions need `content_type="application/json"` for PATCH requests
+---

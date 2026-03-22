@@ -63,6 +63,47 @@ class GroupCRUDTest(TestCase):
         self.assertEqual(len(resp.json()), before + 2)
 
 
+class GroupOwnershipPermissionTest(TestCase):
+    """Integration tests for US-004: ownership permission on update/delete."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.staff = User.objects.create_user(username="admin", password="pass", is_staff=True)
+        self.owner = User.objects.create_user(username="owner", password="pass", is_staff=False)
+        self.other = User.objects.create_user(username="other", password="pass", is_staff=False)
+        self.cur = Currency.objects.create(name="USD", symbol="$", code="USD")
+        self.group = Group.objects.create(name="OwnedGroup", created_by=self.owner)
+        self.group.members.add(self.owner, self.other)
+
+    def test_non_owner_non_staff_patch_returns_403(self):
+        self.client.force_login(self.other)
+        resp = self.client.patch(f"/api/groups/{self.group.pk}/", {"name": "Hacked"}, content_type="application/json")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_owner_patch_returns_200(self):
+        self.client.force_login(self.owner)
+        resp = self.client.patch(f"/api/groups/{self.group.pk}/", {"name": "Renamed"}, content_type="application/json")
+        self.assertEqual(resp.status_code, 200)
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.name, "Renamed")
+
+    def test_staff_patch_returns_200(self):
+        self.client.force_login(self.staff)
+        resp = self.client.patch(f"/api/groups/{self.group.pk}/", {"name": "StaffEdit"}, content_type="application/json")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_owner_delete_returns_204(self):
+        self.client.force_login(self.owner)
+        resp = self.client.delete(f"/api/groups/{self.group.pk}/")
+        self.assertEqual(resp.status_code, 204)
+        self.assertFalse(Group.objects.filter(pk=self.group.pk).exists())
+
+    def test_non_owner_non_staff_delete_returns_403(self):
+        self.client.force_login(self.other)
+        resp = self.client.delete(f"/api/groups/{self.group.pk}/")
+        self.assertEqual(resp.status_code, 403)
+
+
 class GroupMemberTest(TestCase):
     def setUp(self):
         self.client = APIClient()

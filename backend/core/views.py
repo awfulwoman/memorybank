@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
-from .permissions import IsGroupMemberOrAdmin
+from .permissions import IsGroupMemberOrAdmin, IsGroupOwnerOrAdmin
 from .serializers import (
     AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, SettlementSerializer, UserSerializer,
@@ -123,6 +123,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [IsAuthenticated()]
+        if self.action in ('update', 'partial_update', 'destroy'):
+            return [IsGroupOwnerOrAdmin()]
         return [AdminWritePermission()]
 
     def get_queryset(self):
