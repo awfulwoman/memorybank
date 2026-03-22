@@ -371,8 +371,8 @@ def _expense_rows(expenses):
                 'amount': str(e.amount),
                 'description': e.description,
                 'category': e.category.name if e.category else '',
-                'payer': e.created_by.username if e.created_by else '',
-                'split_user': split.user.username,
+                'paid_by': (e.created_by.display_name or e.created_by.username) if e.created_by else '',
+                'split_member': split.user.display_name or split.user.username,
                 'split_amount': str(split.amount),
             })
         if not e.splits.exists():
@@ -381,8 +381,8 @@ def _expense_rows(expenses):
                 'amount': str(e.amount),
                 'description': e.description,
                 'category': e.category.name if e.category else '',
-                'payer': e.created_by.username if e.created_by else '',
-                'split_user': '',
+                'paid_by': (e.created_by.display_name or e.created_by.username) if e.created_by else '',
+                'split_member': '',
                 'split_amount': '',
             })
     return rows
