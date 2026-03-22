@@ -4,12 +4,22 @@ Django settings for memorybank project.
 
 from pathlib import Path
 import os
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-)=fk15%%jv3ih_qj#mod*r8xz#0y5+3m62s82l#51st3y5m&$e')
+_secret_key = os.environ.get('DJANGO_SECRET_KEY', '')
+if not _secret_key:
+    if 'test' in sys.argv:
+        _secret_key = 'django-insecure-test-only-key-not-for-production'
+    else:
+        raise RuntimeError(
+            'DJANGO_SECRET_KEY environment variable is required. '
+            'Set it to a unique, unpredictable value.'
+        )
+SECRET_KEY = _secret_key
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 

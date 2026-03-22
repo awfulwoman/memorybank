@@ -5,6 +5,8 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=memorybank.settings
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
+      - DJANGO_DEBUG=false
       - DJANGO_ALLOWED_HOSTS=*
       - SQLITE_PATH=${SQLITE_PATH:-/data/db/db.sqlite3}
       - MEDIA_ROOT=${MEDIA_ROOT:-/data/media}

@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
+from .permissions import IsGroupMemberOrAdmin
 from .serializers import (
     AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, SettlementSerializer, UserSerializer,
@@ -153,6 +154,8 @@ class GroupMemberView(APIView):
 
 
 class GroupExpenseView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         expenses = Expense.objects.filter(group=group).select_related(
@@ -197,6 +200,8 @@ class ExpenseDetailView(APIView):
 
 
 class GroupSettlementView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         settlements = Settlement.objects.filter(group=group).select_related(
@@ -209,6 +214,12 @@ class GroupSettlementView(APIView):
         group = Group.objects.get(pk=pk)
         serializer = SettlementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        payee_id = serializer.validated_data.get('payee').id if serializer.validated_data.get('payee') else request.data.get('payee')
+        if not group.members.filter(pk=payee_id).exists():
+            return Response(
+                {'payee': ['Payee must be a member of the group.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer.save(payer=request.user, group=group)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -259,6 +270,8 @@ def _compute_balances(expenses, settlements):
 
 
 class GroupBalanceView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         expenses = (
@@ -372,6 +385,8 @@ def _render_export(rows, fmt, filename):
 
 
 class GroupExportView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         fmt = request.query_params.get('format', 'csv')
         if fmt not in ('csv', 'json'):
