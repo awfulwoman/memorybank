@@ -63,6 +63,23 @@
         </div>
       </section>
 
+      <!-- API Key -->
+      <section class="card">
+        <h3>API Key</h3>
+        <div v-if="newKey" class="key-display">
+          <p class="key-notice">Copy this key — it won't be shown again:</p>
+          <code>{{ newKey }}</code>
+          <button class="inline-btn" @click="newKey = ''">Dismiss</button>
+        </div>
+        <div v-else>
+          <p class="key-status">{{ hasKey ? '••••••••••••••••' : 'No key generated' }}</p>
+        </div>
+        <div class="export-buttons">
+          <button class="export-btn" @click="generateKey">Generate New Key</button>
+          <button v-if="hasKey" class="export-btn danger" @click="revokeKey">Revoke Key</button>
+        </div>
+      </section>
+
       <!-- Export -->
       <section class="card">
         <h3>Export My Expenses</h3>
@@ -87,6 +104,22 @@ const nameInput = ref('')
 const loadingBalances = ref(true)
 const balanceData = ref<any>(null)
 const expandedGroups = ref(new Set<number>())
+
+const hasKey = ref(false)
+const newKey = ref('')
+
+async function generateKey() {
+  const result = await api.generateApiKey()
+  newKey.value = result.key
+  hasKey.value = true
+}
+
+async function revokeKey() {
+  if (!confirm('Revoke your API key? Any integrations using it will stop working.')) return
+  await api.revokeApiKey()
+  hasKey.value = false
+  newKey.value = ''
+}
 
 const initials = computed(() => {
   const name = auth.user?.display_name || auth.user?.username || '?'
@@ -202,4 +235,10 @@ input {
   color: #42b883; text-decoration: none; font-size: 0.9rem;
 }
 .loading { color: #999; font-size: 0.875rem; }
+
+.key-display { margin-bottom: 0.75rem; }
+.key-notice { font-size: 0.8rem; color: #666; margin: 0 0 0.25rem; }
+code { display: block; background: #f5f5f5; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; word-break: break-all; margin-bottom: 0.5rem; }
+.key-status { color: #888; font-size: 0.875rem; margin: 0 0 0.75rem; }
+.export-btn.danger { color: #e74c3c; border-color: #e74c3c; }
 </style>

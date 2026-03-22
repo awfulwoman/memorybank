@@ -254,4 +254,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - What was implemented: ProfileView with avatar, inline display name editing, cross-group balance summary with expandable per-group breakdown, export buttons
 - Files changed:
   - `frontend/src/views/ProfileView.vue`
+
+## 2026-03-22 - US-025
+
+- What was implemented: API key section in profile — generate (shows key once), revoke with confirmation
+- Files changed:
+  - `frontend/src/views/ProfileView.vue` — API key section
 ---
