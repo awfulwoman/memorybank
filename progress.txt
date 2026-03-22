@@ -107,3 +107,12 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - ApiKeyAuthentication is listed BEFORE SessionAuthentication so API key takes priority
   - Login response includes `is_staff` flag for frontend admin checks
 ---
+
+## 2026-03-22 - US-009
+
+- What was implemented: GET/PATCH `/api/users/me/`, POST `/api/users/me/avatar/` (5MB limit), POST/DELETE `/api/users/me/api-key/`
+- Files changed:
+  - `backend/core/serializers.py` — UserSerializer
+  - `backend/core/views.py` — MeView, MeAvatarView, MeApiKeyView
+  - `backend/core/urls.py` — added user routes
+---
