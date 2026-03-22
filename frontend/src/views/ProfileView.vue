@@ -1,9 +1,6 @@
 <template>
   <div class="profile-page">
-    <header class="navbar">
-      <RouterLink to="/" class="back">← Dashboard</RouterLink>
-      <span class="brand">Profile</span>
-    </header>
+    <AppNavbar />
 
     <main class="content">
       <!-- Profile info -->
@@ -94,9 +91,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/api'
+import AppNavbar from '@/components/AppNavbar.vue'
 
 const auth = useAuthStore()
 const editingName = ref(false)
@@ -156,15 +153,6 @@ async function uploadAvatar(e: Event) {
 
 <style scoped>
 .profile-page { min-height: 100vh; background: #f5f5f5; }
-
-.navbar {
-  background: white; padding: 0.75rem 1.5rem;
-  display: flex; align-items: center; gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.back { color: #42b883; text-decoration: none; font-size: 0.9rem; }
-.brand { font-weight: 700; font-size: 1.1rem; color: #2c3e50; }
 
 .content {
   max-width: 640px; margin: 2rem auto; padding: 0 1rem;

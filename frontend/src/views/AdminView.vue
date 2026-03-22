@@ -1,9 +1,6 @@
 <template>
   <div class="admin-page">
-    <header class="navbar">
-      <RouterLink to="/" class="back">← Dashboard</RouterLink>
-      <span class="brand">Admin Console</span>
-    </header>
+    <AppNavbar />
 
     <main class="content">
       <!-- Categories -->
@@ -150,8 +147,8 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { api } from '@/api'
+import AppNavbar from '@/components/AppNavbar.vue'
 
 const categories = ref<any[]>([])
 const groupTypes = ref<any[]>([])
@@ -294,15 +291,6 @@ async function deleteItem(type: string, id: number) {
 
 <style scoped>
 .admin-page { min-height: 100vh; background: #f5f5f5; }
-
-.navbar {
-  background: white; padding: 0.75rem 1.5rem;
-  display: flex; align-items: center; gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.back { color: #42b883; text-decoration: none; font-size: 0.9rem; }
-.brand { font-weight: 700; font-size: 1.1rem; color: #2c3e50; }
 
 .content {
   max-width: 700px; margin: 2rem auto; padding: 0 1rem;

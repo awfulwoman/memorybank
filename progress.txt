@@ -9,7 +9,8 @@ Started: Sun 22 Mar 2026 18:54:54 CET
 - **box-sizing**: Already global `border-box` in `base.css` (lines 53-56)
 - **Viewport meta**: Already in `index.html`
 - **Typecheck**: Run `npx vue-tsc --build` from `frontend/` (need `npm install` first if node_modules missing)
-- **main.css**: Has default Vue template grid layout at 1024px that may need cleanup when integrating navbar
+- **main.css**: Cleaned up — removed default Vue template grid/padding; `#app` now only sets `font-weight: normal`
+- **AppNavbar integration**: Import `AppNavbar` from `@/components/AppNavbar.vue` and use `<AppNavbar />` at top of view template, removing inline navbar markup and related CSS/JS
 - **Responsive visibility**: Use `.desktop-only` / `.mobile-only` classes with `@media (max-width: 1023px)` and `@media (min-width: 1024px)` — matches `--bp-tablet: 1024px`
 
 ---
@@ -57,4 +58,17 @@ Started: Sun 22 Mar 2026 18:54:54 CET
 
 ## 2026-03-22 - US-003 committed
 - Commit: d034ada
+---
+
+## 2026-03-22 - US-004
+- Replaced inline navbar markup with `<AppNavbar />` in DashboardView, GroupDetailView, ProfileView, AdminView
+- Removed per-view navbar CSS and related JS (handleLogout, unused router imports)
+- LoginView left unchanged (no navbar on login page)
+- Cleaned up `main.css` — removed default Vue template grid layout and padding that constrained `#app` width
+- GroupDetailView: moved group name into an `<h2>` inside content since navbar no longer shows it
+- Files changed: `DashboardView.vue`, `GroupDetailView.vue`, `ProfileView.vue`, `AdminView.vue`, `main.css`
+- **Learnings for future iterations:**
+  - `main.css` had default Vue template styles (`max-width: 1280px`, grid layout at 1024px) that broke full-width navbar — always check for inherited layout constraints
+  - When removing inline navbars, also remove related imports (RouterLink if unused, useRouter if only used for logout)
+  - GroupDetailView had the group name in the old navbar — needed to relocate it to content area
 ---

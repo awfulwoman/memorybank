@@ -1,12 +1,9 @@
 <template>
   <div class="group-detail">
-    <header class="navbar">
-      <RouterLink to="/" class="back">← Groups</RouterLink>
-      <span class="brand">{{ group?.name ?? 'Loading…' }}</span>
-      <RouterLink to="/profile" class="nav-link">Profile</RouterLink>
-    </header>
+    <AppNavbar />
 
     <main class="content">
+      <h2>{{ group?.name ?? 'Loading…' }}</h2>
       <!-- Balance Summary -->
       <section class="card">
         <h3>Balances</h3>
@@ -127,9 +124,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
+import AppNavbar from '@/components/AppNavbar.vue'
 import AddExpenseForm from '@/components/AddExpenseForm.vue'
 import EditExpenseForm from '@/components/EditExpenseForm.vue'
 import SettlementForm from '@/components/SettlementForm.vue'
@@ -209,28 +207,6 @@ onMounted(async () => {
 .group-detail {
   min-height: 100vh;
   background: #f5f5f5;
-}
-
-.navbar {
-  background: white;
-  padding: 0.75rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.back, .nav-link {
-  color: #42b883;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.brand {
-  flex: 1;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #2c3e50;
 }
 
 .content {

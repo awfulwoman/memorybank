@@ -1,13 +1,6 @@
 <template>
   <div class="dashboard">
-    <header class="navbar">
-      <span class="brand">MemoryBank</span>
-      <nav>
-        <RouterLink to="/profile">Profile</RouterLink>
-        <RouterLink v-if="auth.user?.is_staff" to="/admin">Admin</RouterLink>
-        <button class="logout-btn" @click="handleLogout">Sign out</button>
-      </nav>
-    </header>
+    <AppNavbar />
 
     <main class="content">
       <h2>My Groups</h2>
@@ -31,12 +24,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { RouterLink } from 'vue-router'
 import { api } from '@/api'
+import AppNavbar from '@/components/AppNavbar.vue'
 
-const auth = useAuthStore()
-const router = useRouter()
 const groups = ref<any[]>([])
 const loading = ref(true)
 
@@ -47,54 +38,12 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-async function handleLogout() {
-  await auth.logout()
-  router.push({ name: 'login' })
-}
 </script>
 
 <style scoped>
 .dashboard {
   min-height: 100vh;
   background: #f5f5f5;
-}
-
-.navbar {
-  background: white;
-  padding: 0.75rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.brand {
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: #2c3e50;
-}
-
-nav {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-nav a {
-  color: #42b883;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.logout-btn {
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.25rem 0.75rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: #666;
 }
 
 .content {
