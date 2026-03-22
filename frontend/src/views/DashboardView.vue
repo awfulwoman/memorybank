@@ -3,6 +3,19 @@
     <AppNavbar />
 
     <main class="content">
+      <!-- Balance Summary -->
+      <section v-if="balances.length > 0" class="balance-summary">
+        <h2>My Balances</h2>
+        <div class="balance-cards">
+          <div v-for="b in balances" :key="b.group_id" class="balance-card">
+            <span class="balance-group">{{ b.group_name }}</span>
+            <span class="balance-amount" :class="{ positive: Number(b.balance) > 0, negative: Number(b.balance) < 0 }">
+              {{ Number(b.balance) >= 0 ? '+' : '' }}{{ Number(b.balance).toFixed(2) }}
+            </span>
+          </div>
+        </div>
+      </section>
+
       <h2>My Groups</h2>
       <div v-if="loading" class="loading">Loading groups…</div>
       <div v-else-if="groups.length === 0" class="empty">You are not in any groups yet.</div>
@@ -29,11 +42,14 @@ import { api } from '@/api'
 import AppNavbar from '@/components/AppNavbar.vue'
 
 const groups = ref<any[]>([])
+const balances = ref<any[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
   try {
-    groups.value = await api.groups()
+    const [g, b] = await Promise.all([api.groups(), api.meBalances()])
+    groups.value = g
+    balances.value = (b as any[]).filter((item: any) => Number(item.balance) !== 0)
   } finally {
     loading.value = false
   }
@@ -44,6 +60,7 @@ onMounted(async () => {
 .dashboard {
   min-height: 100vh;
   background: #f5f5f5;
+  overflow-x: hidden;
 }
 
 .content {
@@ -57,10 +74,65 @@ h2 {
   color: #2c3e50;
 }
 
+/* Balance summary */
+.balance-summary {
+  margin-bottom: 2rem;
+}
+
+.balance-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.balance-card {
+  background: white;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.balance-group {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.balance-amount {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.balance-amount.positive {
+  color: #27ae60;
+}
+
+.balance-amount.negative {
+  color: #e74c3c;
+}
+
+/* Group grid — responsive columns */
 .group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .group-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .group-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .group-card {
@@ -97,5 +169,17 @@ h2 {
 
 .loading, .empty {
   color: #666;
+}
+
+/* Phone: balance cards stack vertically */
+@media (max-width: 767px) {
+  .balance-cards {
+    flex-direction: column;
+  }
+
+  .balance-card {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
 }
 </style>
