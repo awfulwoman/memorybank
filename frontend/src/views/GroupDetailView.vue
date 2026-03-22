@@ -223,6 +223,8 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 1.25rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .card h3 {
@@ -370,8 +372,25 @@ onMounted(async () => {
     font-size: 0.85rem;
   }
 
-  .balance-row, .debt-row, .settlement-row {
-    flex-wrap: wrap;
+  .balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.6rem 0;
+  }
+
+  .debt-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.6rem 0;
+  }
+
+  .settlement-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.6rem 0;
   }
 
   .export-buttons {
