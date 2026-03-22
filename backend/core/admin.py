@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Category, Currency, GroupType, User
+from .models import Category, Currency, Group, GroupType, User
 
 
 @admin.register(User)
@@ -29,3 +29,9 @@ class GroupTypeAdmin(admin.ModelAdmin):
 class CurrencyAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'symbol')
     search_fields = ('code', 'name')
+
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'group_type', 'currency', 'default_split_method', 'created_by')
+    filter_horizontal = ('members',)

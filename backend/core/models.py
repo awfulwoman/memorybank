@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -37,3 +38,27 @@ class Currency(models.Model):
 
     def __str__(self):
         return f'{self.code} ({self.symbol})'
+
+
+class Group(models.Model):
+    SPLIT_EQUAL = 'equal'
+    SPLIT_CUSTOM = 'custom'
+    SPLIT_CHOICES = [
+        (SPLIT_EQUAL, 'Equal'),
+        (SPLIT_CUSTOM, 'Custom'),
+    ]
+
+    name = models.CharField(max_length=200)
+    group_type = models.ForeignKey(GroupType, on_delete=models.SET_NULL, null=True, blank=True)
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
+    default_split_method = models.CharField(max_length=10, choices=SPLIT_CHOICES, default=SPLIT_EQUAL)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='created_groups'
+    )
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='expense_groups', blank=True
+    )
+
+    def __str__(self):
+        return self.name

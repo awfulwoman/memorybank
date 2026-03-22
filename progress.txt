@@ -52,3 +52,16 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - `backend/core/admin.py` — registered all three with list_display
   - `backend/core/migrations/0002_category_currency_grouptype.py` — migration
 ---
+
+## 2026-03-22 - US-004
+
+- What was implemented: Group model with name, group_type (FK), currency (FK), default_split_method (equal/custom), created_by (FK to User), members (M2M to User); data migration creates Default group; admin registered
+- Files changed:
+  - `backend/core/models.py` — added Group model
+  - `backend/core/admin.py` — registered GroupAdmin with filter_horizontal for members
+  - `backend/core/migrations/0003_group.py` — schema migration
+  - `backend/core/migrations/0004_default_group.py` — data migration creating Default group
+- **Learnings for future iterations:**
+  - Group model conflicts with django.contrib.auth.models.Group — use `related_name='expense_groups'` on members M2M and `related_name='created_groups'` on created_by to avoid clash
+  - The Group model is in `core` app, not `auth`; no django Group name clash since we import from models directly
+---
