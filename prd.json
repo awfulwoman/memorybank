@@ -30,8 +30,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_models"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "7 tests covering all models"
     },
     {
       "id": "US-003",
