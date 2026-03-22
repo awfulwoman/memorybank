@@ -326,4 +326,64 @@ onMounted(async () => {
   border: none; border-radius: 50%; width: 2rem; height: 2rem;
   font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
+
+/* ── Responsive: phone (<768px) ── */
+@media (max-width: 767px) {
+  .content {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+
+  .expense-main {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .expense-main .desc {
+    flex: 1 1 100%;
+  }
+
+  .expense-main .amount {
+    margin-right: auto;
+  }
+
+  .expense-meta {
+    word-break: break-word;
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .add-btn {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .edit-btn, .delete-btn {
+    min-height: 44px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .balance-row, .debt-row, .settlement-row {
+    flex-wrap: wrap;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    text-align: center;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 </style>
