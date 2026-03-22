@@ -171,8 +171,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_groups"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "6 tests: staff create, non-staff filtered list, staff all list, add/remove member, nonexistent user 404"
     },
     {
       "id": "US-012",

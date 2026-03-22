@@ -93,3 +93,11 @@ Started: Sun 22 Mar 2026
 - Created `backend/core/tests/test_users.py` with 3 tests
 - Files changed: `backend/core/tests/test_users.py` (new)
 ---
+
+## 2026-03-22 - US-011: Group CRUD and member management
+- Created `backend/core/tests/test_groups.py` with 6 tests
+- Files changed: `backend/core/tests/test_groups.py` (new)
+- **Learnings for future iterations:**
+  - Migration `0004_default_group` creates a default group — tests must account for pre-existing groups
+  - GroupMemberView uses `IsAdminUser` (staff only), not `AdminWritePermission`
+---
