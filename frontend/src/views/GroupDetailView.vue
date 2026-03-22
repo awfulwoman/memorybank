@@ -65,7 +65,10 @@
 
       <!-- Settlements -->
       <section class="card">
-        <h3>Settlements</h3>
+        <div class="section-header">
+          <h3>Settlements</h3>
+          <button class="add-btn" @click="showSettlement = true">+ Record Payment</button>
+        </div>
         <div v-if="settlements.length === 0" class="empty">No settlements yet.</div>
         <div v-for="s in settlements" :key="s.id" class="settlement-row">
           <span>{{ s.payer_username }}</span>
@@ -76,6 +79,14 @@
         </div>
       </section>
     </main>
+
+    <SettlementForm
+      v-if="showSettlement && group"
+      :group-id="groupId"
+      :members="groupMembers"
+      @close="showSettlement = false"
+      @saved="onSettlementSaved"
+    />
 
     <EditExpenseForm
       v-if="editingExpense"
@@ -103,6 +114,7 @@ import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import AddExpenseForm from '@/components/AddExpenseForm.vue'
 import EditExpenseForm from '@/components/EditExpenseForm.vue'
+import SettlementForm from '@/components/SettlementForm.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -116,6 +128,7 @@ const debts = ref<any[]>([])
 const loadingExpenses = ref(true)
 const loadingBalances = ref(true)
 const showAddExpense = ref(false)
+const showSettlement = ref(false)
 const editingExpense = ref<any>(null)
 
 const groupMembers = computed(() => group.value?.members_list ?? [])
@@ -137,6 +150,11 @@ async function refreshData() {
 async function onExpenseSaved() {
   showAddExpense.value = false
   editingExpense.value = null
+  await refreshData()
+}
+
+async function onSettlementSaved() {
+  showSettlement.value = false
   await refreshData()
 }
 
