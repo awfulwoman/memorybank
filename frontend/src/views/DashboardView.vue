@@ -26,7 +26,7 @@
           :to="{ name: 'group-detail', params: { id: group.id } }"
           class="group-card"
         >
-          <h3>{{ group.name }}</h3>
+          <h3><span class="group-icon mdi" :class="group.icon || 'mdi-account-group'"></span>{{ group.name }}</h3>
           <p class="meta">{{ group.group_type_name || 'General' }} · {{ group.currency_code || '—' }}</p>
           <p class="members">{{ group.member_count }} member{{ group.member_count === 1 ? '' : 's' }}</p>
         </RouterLink>
@@ -153,6 +153,14 @@ h2 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
   color: var(--color-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.group-icon {
+  font-size: 1.25rem;
+  color: var(--color-primary);
 }
 
 .meta {
