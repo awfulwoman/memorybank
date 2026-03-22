@@ -63,6 +63,15 @@
         </div>
       </section>
 
+      <!-- Export -->
+      <section class="card">
+        <h3>Export Expenses</h3>
+        <div class="export-buttons">
+          <a :href="api.groupExport(groupId, 'csv')" class="export-btn">Download CSV</a>
+          <a :href="api.groupExport(groupId, 'json')" class="export-btn">Download JSON</a>
+        </div>
+      </section>
+
       <!-- Settlements -->
       <section class="card">
         <div class="section-header">
@@ -304,5 +313,11 @@ onMounted(async () => {
 .delete-btn {
   color: #e74c3c;
   border-color: #e74c3c;
+}
+
+.export-buttons { display: flex; gap: 0.75rem; }
+.export-btn {
+  padding: 0.4rem 1rem; border: 1px solid #42b883; border-radius: 4px;
+  color: #42b883; text-decoration: none; font-size: 0.9rem;
 }
 </style>
