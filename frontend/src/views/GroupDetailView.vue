@@ -4,6 +4,7 @@
 
     <main class="content">
       <div class="page-header">
+        <span v-if="group" class="group-title-icon mdi" :class="group.icon || 'mdi-account-group'"></span>
         <h2>{{ group?.name ?? 'Loading…' }}</h2>
         <button
           v-if="canEditGroup"
@@ -22,7 +23,7 @@
           <div v-for="b in balances" :key="b.user_id" class="balance-row">
             <span>{{ b.username }}</span>
             <span :class="Number(b.balance) >= 0 ? 'positive' : 'negative'">
-              {{ Number(b.balance) >= 0 ? '+' : '' }}{{ b.balance }}
+              {{ Number(b.balance) >= 0 ? '+' : '-' }}{{ sym }}{{ Math.abs(Number(b.balance)).toFixed(2) }}
             </span>
           </div>
           <div v-if="balances.length === 0" class="empty">No balances yet.</div>
@@ -37,7 +38,7 @@
           <span class="negative">{{ d.from_username }}</span>
           owes
           <span class="positive">{{ d.to_username }}</span>
-          <strong>{{ d.amount }}</strong>
+          <strong>{{ sym }}{{ d.amount }}</strong>
         </div>
       </section>
 
@@ -51,18 +52,12 @@
         <div v-else-if="expenses.length === 0" class="empty">No expenses yet.</div>
         <div v-for="e in expenses" :key="e.id" class="expense-row">
           <div class="expense-main">
+            <span class="amount">{{ sym }}{{ e.amount }}</span>
             <span class="desc">{{ e.description }}</span>
-            <span class="amount">{{ e.amount }}</span>
-            <button
-              v-if="e.created_by_username === auth.user?.username"
-              class="edit-btn"
-              @click="editingExpense = e"
-            >Edit</button>
-            <button
-              v-if="e.created_by_username === auth.user?.username"
-              class="delete-btn"
-              @click="confirmDelete(e)"
-            >Delete</button>
+            <span v-if="e.created_by_username === auth.user?.username" class="expense-actions">
+              <button class="edit-btn" @click="editingExpense = e">Edit</button>
+              <button class="delete-btn" @click="confirmDelete(e)">Delete</button>
+            </span>
           </div>
           <div class="expense-meta">
             {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
@@ -93,7 +88,7 @@
           <span>{{ s.payer_username }}</span>
           paid
           <span>{{ s.payee_username }}</span>
-          <strong>{{ s.amount }}</strong>
+          <strong>{{ sym }}{{ s.amount }}</strong>
           <span class="date">{{ s.date }}</span>
         </div>
       </section>
@@ -180,6 +175,7 @@ const canEditGroup = computed(() => {
 })
 
 const groupMembers = computed(() => group.value?.members_list ?? [])
+const sym = computed(() => group.value?.currency_symbol ?? '')
 
 async function refreshData() {
   const [exps, setts, bals] = await Promise.allSettled([
@@ -267,6 +263,11 @@ onMounted(async () => {
 
 .page-header h2 { margin: 0; }
 
+.group-title-icon {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+}
+
 .settings-btn {
   background: none;
   border: 1px solid var(--color-border);
@@ -321,8 +322,29 @@ onMounted(async () => {
 
 .expense-main {
   display: flex;
-  justify-content: space-between;
-  font-weight: 500;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.expense-main .amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-heading);
+  white-space: nowrap;
+  min-width: 5rem;
+}
+
+.expense-main .desc {
+  flex: 1;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.expense-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .expense-meta {
@@ -361,7 +383,6 @@ onMounted(async () => {
   background: var(--color-card-bg);
   cursor: pointer;
   color: var(--color-text-subtle);
-  margin-left: 0.5rem;
 }
 
 .delete-btn {

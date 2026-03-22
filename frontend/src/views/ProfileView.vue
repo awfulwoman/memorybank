@@ -38,13 +38,13 @@
         <div v-if="loadingBalances" class="loading">Loading…</div>
         <div v-else>
           <p class="total-balance" :class="Number(balanceData?.total_balance) >= 0 ? 'positive' : 'negative'">
-            Total: {{ Number(balanceData?.total_balance) >= 0 ? '+' : '' }}{{ balanceData?.total_balance }}
+            Total: {{ Number(balanceData?.total_balance) >= 0 ? '+' : '-' }}{{ Math.abs(Number(balanceData?.total_balance)).toFixed(2) }}
           </p>
           <div v-for="g in balanceData?.groups ?? []" :key="g.group_id" class="group-balance">
             <div class="group-balance-header" @click="toggleGroup(g.group_id)">
               <span>{{ g.group_name }}</span>
               <span :class="Number(g.balance) >= 0 ? 'positive' : 'negative'">
-                {{ Number(g.balance) >= 0 ? '+' : '' }}{{ g.balance }}
+                {{ Number(g.balance) >= 0 ? '+' : '-' }}{{ g.currency_symbol ?? '' }}{{ Math.abs(Number(g.balance)).toFixed(2) }}
               </span>
               <span class="toggle-arrow">{{ expandedGroups.has(g.group_id) ? '▲' : '▼' }}</span>
             </div>
@@ -52,7 +52,7 @@
               <div v-for="d in g.debts" :key="`${d.from_user_id}-${d.to_user_id}`" class="debt-row">
                 <span class="negative">{{ d.from_username }}</span> owes
                 <span class="positive">{{ d.to_username }}</span>
-                <strong>{{ d.amount }}</strong>
+                <strong>{{ g.currency_symbol ?? '' }}{{ d.amount }}</strong>
               </div>
               <div v-if="g.debts.length === 0" class="empty-small">Settled up!</div>
             </div>

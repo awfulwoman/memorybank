@@ -10,7 +10,7 @@
           <div v-for="b in balances" :key="b.group_id" class="balance-card">
             <span class="balance-group">{{ b.group_name }}</span>
             <span class="balance-amount" :class="{ positive: Number(b.balance) > 0, negative: Number(b.balance) < 0 }">
-              {{ Number(b.balance) >= 0 ? '+' : '' }}{{ Number(b.balance).toFixed(2) }}
+              {{ Number(b.balance) >= 0 ? '+' : '-' }}{{ b.currency_symbol ?? '' }}{{ Math.abs(Number(b.balance)).toFixed(2) }}
             </span>
           </div>
         </div>

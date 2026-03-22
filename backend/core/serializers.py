@@ -60,12 +60,14 @@ class GroupSerializer(serializers.ModelSerializer):
     members_list = serializers.SerializerMethodField()
     group_type_name = serializers.CharField(source='group_type.name', read_only=True)
     currency_code = serializers.CharField(source='currency.code', read_only=True)
+    currency_symbol = serializers.CharField(source='currency.symbol', read_only=True)
+    currency = serializers.PrimaryKeyRelatedField(queryset=Currency.objects.all())
 
     class Meta:
         model = Group
         fields = [
             'id', 'name', 'icon', 'group_type', 'group_type_name',
-            'currency', 'currency_code', 'default_split_method',
+            'currency', 'currency_code', 'currency_symbol', 'default_split_method',
             'created_by', 'member_count', 'member_ids', 'members_list',
         ]
         read_only_fields = ['created_by']

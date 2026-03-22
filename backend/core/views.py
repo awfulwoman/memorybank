@@ -343,6 +343,7 @@ class MeBalanceView(APIView):
             group_details.append({
                 'group_id': group.id,
                 'group_name': group.name,
+                'currency_symbol': group.currency.symbol if group.currency else '',
                 'balance': str(user_balance),
                 'debts': [{**d, 'amount': str(d['amount'])} for d in user_debts],
             })
