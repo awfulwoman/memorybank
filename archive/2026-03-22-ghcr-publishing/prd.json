@@ -1,0 +1,120 @@
+{
+  "project": "MemoryBank",
+  "branchName": "ralph/ghcr-publishing",
+  "description": "Build and publish backend and frontend container images to GitHub Container Registry via GitHub Actions with CI quality gates",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create GitHub Actions publish workflow skeleton",
+      "description": "As a maintainer, I want a single workflow file that defines the job graph so subsequent stories can add job content to it.",
+      "acceptanceCriteria": [
+        "File .github/workflows/publish.yml is created",
+        "Workflow triggers on push to main and on push of tags matching v*.*.*",
+        "Workflow defines four empty jobs: test-backend, test-frontend, publish-backend, publish-frontend",
+        "publish-backend and publish-frontend each declare needs: [test-backend, test-frontend]",
+        "Workflow-level permissions set: contents: read, packages: write",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Backend test gate job",
+      "description": "As a maintainer, I want the test-backend job to run the Django test suite so broken code is never published.",
+      "acceptanceCriteria": [
+        "test-backend job checks out the repo",
+        "Job sets up Python with version pinned to match backend/Dockerfile",
+        "Job runs: pip install -r backend/requirements.txt",
+        "Job runs: cd backend && python manage.py test",
+        "Workflow fails (publish jobs do not run) if tests fail",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Frontend type-check gate job",
+      "description": "As a maintainer, I want the test-frontend job to run vue-tsc so type errors are caught before publishing.",
+      "acceptanceCriteria": [
+        "test-frontend job checks out the repo",
+        "Job sets up Node with version pinned to match frontend/Dockerfile",
+        "Job runs: cd frontend && npm ci && npm run type-check",
+        "Workflow fails (publish jobs do not run) if type-check fails",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Build and publish backend image to GHCR",
+      "description": "As a maintainer, I want the publish-backend job to build and push the backend image to GHCR after CI passes.",
+      "acceptanceCriteria": [
+        "publish-backend job logs in to GHCR using GITHUB_TOKEN",
+        "Job uses docker/setup-buildx-action to enable BuildKit",
+        "Job uses docker/metadata-action to compute tags: latest + sha-<short-sha> on main push; additionally 1.2.3 / 1.2 / 1 on semver tag (v prefix stripped via flavor)",
+        "Image name follows pattern: ghcr.io/${{ github.repository_owner }}/memorybank-backend (lowercase)",
+        "Job uses docker/build-push-action with context: backend, cache-from: type=gha, cache-to: type=gha,mode=max",
+        "push: true only when not a pull_request event",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Build and publish frontend image to GHCR",
+      "description": "As a maintainer, I want the publish-frontend job to build and push the frontend image to GHCR after CI passes.",
+      "acceptanceCriteria": [
+        "publish-frontend job mirrors publish-backend configuration",
+        "Image name: ghcr.io/${{ github.repository_owner }}/memorybank-frontend (lowercase)",
+        "Job uses docker/build-push-action with context: frontend",
+        "Same tagging rules as publish-backend (latest, sha-<short-sha>, semver)",
+        "GHA layer cache enabled",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "docker-compose.ghcr.yml for operators",
+      "description": "As an operator, I want a ready-to-use Compose file that pulls published images so I can deploy without cloning the repo.",
+      "acceptanceCriteria": [
+        "File docker-compose.ghcr.yml is created at the repo root",
+        "References ghcr.io/<owner>/memorybank-backend:latest and ghcr.io/<owner>/memorybank-frontend:latest",
+        "Contains no build: keys (pull-only)",
+        "Accepts environment variables: SQLITE_PATH, MEDIA_ROOT, CSRF_TRUSTED_ORIGINS (same as docker-compose.yml)",
+        "Mounts data/db and data/media volumes identically to docker-compose.yml",
+        "File passes: docker compose -f docker-compose.ghcr.yml config",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "README deploy section for operators",
+      "description": "As an operator, I want clear deployment instructions in the README so I can run MemoryBank from published images without reading source code.",
+      "acceptanceCriteria": [
+        "README.md gains a ## Deploy section distinct from the existing developer quick-start",
+        "Section shows commands to run the stack with docker-compose.ghcr.yml",
+        "Section documents SQLITE_PATH, MEDIA_ROOT, and CSRF_TRUSTED_ORIGINS with their defaults",
+        "Section links to the GHCR package pages for both images",
+        "Existing README content is not removed or duplicated",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}
