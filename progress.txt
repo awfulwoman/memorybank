@@ -24,3 +24,16 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - `main.css` has Vue template default styles (grid layout at 1024px) that will likely need modification for navbar integration (US-004)
   - `npm install` needed before typecheck if fresh checkout
 ---
+
+## 2026-03-22 - US-002
+- Created `frontend/src/components/AppNavbar.vue` — desktop horizontal navbar
+- Brand "MemoryBank" on left, nav links (Dashboard, Profile, Admin if staff) center-right, Sign out far right
+- Active route highlighted via `exact-active-class` (Dashboard) and `active-class` (others)
+- Uses auth store for user info, isStaff check, logout action
+- Uses Vue Router for navigation and active route detection
+- Files changed: `frontend/src/components/AppNavbar.vue`
+- **Learnings for future iterations:**
+  - Dashboard link needs `exact-active-class` not `active-class` since `/` would match all routes
+  - Existing views all have inline `.navbar` CSS — US-004 will need to remove these and import AppNavbar
+  - Navbar pattern: flex with gap, brand left, links auto-margin-left, logout margin-left
+---
