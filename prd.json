@@ -50,7 +50,7 @@
         "Verify in browser using dev-browser skill at 375px width"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

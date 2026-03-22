@@ -10,6 +10,7 @@ Started: Sun 22 Mar 2026 18:54:54 CET
 - **Viewport meta**: Already in `index.html`
 - **Typecheck**: Run `npx vue-tsc --build` from `frontend/` (need `npm install` first if node_modules missing)
 - **main.css**: Has default Vue template grid layout at 1024px that may need cleanup when integrating navbar
+- **Responsive visibility**: Use `.desktop-only` / `.mobile-only` classes with `@media (max-width: 1023px)` and `@media (min-width: 1024px)` — matches `--bp-tablet: 1024px`
 
 ---
 
@@ -36,4 +37,20 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - Dashboard link needs `exact-active-class` not `active-class` since `/` would match all routes
   - Existing views all have inline `.navbar` CSS — US-004 will need to remove these and import AppNavbar
   - Navbar pattern: flex with gap, brand left, links auto-margin-left, logout margin-left
+---
+
+## 2026-03-22 - US-003
+- Added hamburger menu to AppNavbar for screens below 1024px
+- Desktop nav links/logout hidden on mobile, replaced by hamburger button
+- Hamburger animates to X via CSS transforms on the 3 lines
+- Dropdown menu with all nav links + sign out appears below navbar
+- Click-outside-to-close via document click listener + overlay backdrop
+- Menu closes on link click
+- 44px min touch target on hamburger button
+- Files changed: `frontend/src/components/AppNavbar.vue`
+- **Learnings for future iterations:**
+  - Use `@click.stop` on hamburger and mobile menu to prevent document click handler from immediately closing
+  - CSS approach: `.desktop-only` / `.mobile-only` classes with media queries + `!important` to override scoped display values
+  - Hamburger animation: 3 spans, middle fades out, top/bottom rotate ±45deg with translateY to meet at center
+  - Overlay div must be outside the `<header>` to cover the full viewport
 ---
