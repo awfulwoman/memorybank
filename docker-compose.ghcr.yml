@@ -1,0 +1,24 @@
+services:
+  backend:
+    image: ghcr.io/awfulwoman/memorybank-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=memorybank.settings
+      - DJANGO_ALLOWED_HOSTS=*
+      - SQLITE_PATH=${SQLITE_PATH:-/data/db/db.sqlite3}
+      - MEDIA_ROOT=${MEDIA_ROOT:-/data/media}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost}
+    volumes:
+      - ./data/db:/data/db
+      - ./data/media:/data/media
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn memorybank.wsgi:application --bind 0.0.0.0:8000 --workers 2"
+
+  frontend:
+    image: ghcr.io/awfulwoman/memorybank-frontend:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
