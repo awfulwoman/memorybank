@@ -54,3 +54,7 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - Hamburger animation: 3 spans, middle fades out, top/bottom rotate ±45deg with translateY to meet at center
   - Overlay div must be outside the `<header>` to cover the full viewport
 ---
+
+## 2026-03-22 - US-003 committed
+- Commit: d034ada
+---
