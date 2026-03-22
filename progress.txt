@@ -82,3 +82,9 @@ Started: Sun 22 Mar 2026
   - APIClient handles CSRF automatically in tests
   - `HTTP_X_API_KEY=key` kwarg to client methods sets the X-API-Key header
 ---
+
+## 2026-03-22 - US-009: AdminWritePermission API tests
+- Created `backend/core/tests/test_permissions.py` with 5 tests
+- Tests: non-staff GET OK, non-staff POST 403 (categories & groups), staff POST 201, staff DELETE 204
+- Files changed: `backend/core/tests/test_permissions.py` (new)
+---

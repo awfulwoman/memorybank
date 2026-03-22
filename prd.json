@@ -138,8 +138,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_permissions"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "5 tests covering read/write permission boundaries"
     },
     {
       "id": "US-010",
