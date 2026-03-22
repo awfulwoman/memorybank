@@ -9,19 +9,33 @@
           <h3>Categories</h3>
           <button class="add-btn" @click="startAdd('category')">+ Add</button>
         </div>
-        <div v-if="addingType === 'category'" class="inline-form">
-          <input v-model="newName" placeholder="Category name" @keyup.enter="saveNew('category')" />
-          <button @click="saveNew('category')">Save</button>
-          <button @click="addingType = ''">Cancel</button>
+        <div v-if="addingType === 'category'" class="category-form">
+          <div class="inline-form">
+            <span class="mdi" :class="newCategoryIcon" style="font-size:1.25rem"></span>
+            <input v-model="newName" placeholder="Category name" @keyup.enter="saveNew('category')" />
+            <button @click="saveNew('category')">Save</button>
+            <button @click="addingType = ''">Cancel</button>
+          </div>
+          <IconPicker v-model="newCategoryIcon" />
         </div>
         <div class="table-scroll-container">
-          <div v-for="item in categories" :key="item.id" class="list-row">
-            <span v-if="editing?.type !== 'category' || editing.id !== item.id">{{ item.name }}</span>
-            <input v-else v-model="editing.name" @keyup.enter="saveEdit" />
-            <div class="row-actions">
-              <button class="small-btn" @click="startEdit('category', item)">Edit</button>
-              <button v-if="editing?.type === 'category' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
-              <button class="small-btn danger" @click="deleteItem('category', item.id)">Delete</button>
+          <div v-for="item in categories" :key="item.id">
+            <div class="list-row">
+              <span v-if="editing?.type !== 'category' || editing.id !== item.id">
+                <span class="mdi" :class="item.icon || 'mdi-shape-outline'" style="font-size:1.1rem; margin-right:0.4rem; color:var(--color-primary)"></span>{{ item.name }}
+              </span>
+              <template v-else>
+                <span class="mdi" :class="editing.icon || 'mdi-shape-outline'" style="font-size:1.1rem; margin-right:0.4rem; color:var(--color-primary)"></span>
+                <input v-model="editing.name" @keyup.enter="saveEdit" />
+              </template>
+              <div class="row-actions">
+                <button class="small-btn" @click="startEdit('category', item)">Edit</button>
+                <button v-if="editing?.type === 'category' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
+                <button class="small-btn danger" @click="deleteItem('category', item.id)">Delete</button>
+              </div>
+            </div>
+            <div v-if="editing?.type === 'category' && editing.id === item.id" class="edit-icon-picker">
+              <IconPicker v-model="editing.icon" />
             </div>
           </div>
         </div>
@@ -159,6 +173,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { api } from '@/api'
 import AppNavbar from '@/components/AppNavbar.vue'
+import IconPicker from '@/components/IconPicker.vue'
 
 const categories = ref<any[]>([])
 const groupTypes = ref<any[]>([])
@@ -168,10 +183,11 @@ const adminGroups = ref<any[]>([])
 
 const addingType = ref('')
 const newName = ref('')
+const newCategoryIcon = ref('mdi-shape-outline')
 const newCurrency = ref({ name: '', symbol: '', code: '' })
 const newUser = ref({ username: '', display_name: '', password: '' })
 const newGroup = ref({ name: '', group_type: '' as number | '', currency: '' as number | '', default_split_method: 'equal' })
-const editing = ref<{ type: string; id: number; name: string } | null>(null)
+const editing = ref<{ type: string; id: number; name: string; icon?: string } | null>(null)
 const managingGroup = ref<any>(null)
 const addMemberId = ref<number | ''>('')
 
@@ -199,16 +215,17 @@ onMounted(async () => {
 function startAdd(type: string) {
   addingType.value = type
   newName.value = ''
+  newCategoryIcon.value = 'mdi-shape-outline'
   newCurrency.value = { name: '', symbol: '', code: '' }
 }
 
 function startEdit(type: string, item: any) {
-  editing.value = { type, id: item.id, name: item.name }
+  editing.value = { type, id: item.id, name: item.name, icon: item.icon }
 }
 
 async function saveNew(type: string) {
   if (type === 'category') {
-    const c = await api.createCategory({ name: newName.value })
+    const c = await api.createCategory({ name: newName.value, icon: newCategoryIcon.value })
     categories.value.push(c)
   } else if (type === 'grouptype') {
     const g = await api.createGroupType({ name: newName.value })
@@ -228,7 +245,7 @@ async function saveEdit() {
   if (!editing.value) return
   const { type, id, name } = editing.value
   if (type === 'category') {
-    const updated = await api.updateCategory(id, { name })
+    const updated = await api.updateCategory(id, { name, icon: editing.value.icon })
     const idx = categories.value.findIndex(c => c.id === id)
     if (idx >= 0) categories.value[idx] = updated
   } else if (type === 'grouptype') {
@@ -365,6 +382,9 @@ async function deleteItem(type: string, id: number) {
 
 .inactive-badge { background: var(--color-badge-inactive); }
 .inactive { color: var(--color-text-faint); text-decoration: line-through; }
+
+.category-form { margin-bottom: 0.75rem; }
+.edit-icon-picker { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); }
 
 .member-panel {
   margin-top: 1rem; border-top: 1px solid var(--color-border); padding-top: 0.75rem;
