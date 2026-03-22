@@ -46,6 +46,11 @@
           <div class="expense-main">
             <span class="desc">{{ e.description }}</span>
             <span class="amount">{{ e.amount }}</span>
+            <button
+              v-if="e.created_by_username === auth.user?.username"
+              class="edit-btn"
+              @click="editingExpense = e"
+            >Edit</button>
           </div>
           <div class="expense-meta">
             {{ e.date }} · {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_username }}
@@ -67,6 +72,14 @@
       </section>
     </main>
 
+    <EditExpenseForm
+      v-if="editingExpense"
+      :expense="editingExpense"
+      :members="groupMembers"
+      @close="editingExpense = null"
+      @saved="onExpenseSaved"
+    />
+
     <AddExpenseForm
       v-if="showAddExpense && group"
       :group-id="groupId"
@@ -82,9 +95,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { api } from '@/api'
+import { useAuthStore } from '@/stores/auth'
 import AddExpenseForm from '@/components/AddExpenseForm.vue'
+import EditExpenseForm from '@/components/EditExpenseForm.vue'
 
 const route = useRoute()
+const auth = useAuthStore()
 const groupId = Number(route.params.id)
 
 const group = ref<any>(null)
@@ -95,6 +111,7 @@ const debts = ref<any[]>([])
 const loadingExpenses = ref(true)
 const loadingBalances = ref(true)
 const showAddExpense = ref(false)
+const editingExpense = ref<any>(null)
 
 const groupMembers = computed(() => group.value?.members_list ?? [])
 
@@ -114,6 +131,7 @@ async function refreshData() {
 
 async function onExpenseSaved() {
   showAddExpense.value = false
+  editingExpense.value = null
   await refreshData()
 }
 
@@ -241,5 +259,16 @@ onMounted(async () => {
   padding: 0.3rem 0.75rem;
   font-size: 0.875rem;
   cursor: pointer;
+}
+
+.edit-btn {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  color: #666;
+  margin-left: 0.5rem;
 }
 </style>

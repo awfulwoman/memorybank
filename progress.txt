@@ -228,4 +228,11 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - Files changed:
   - `frontend/src/components/AddExpenseForm.vue`
   - `frontend/src/views/GroupDetailView.vue` — integrated AddExpenseForm with Add button
+
+## 2026-03-22 - US-021
+
+- What was implemented: EditExpenseForm modal pre-filled with existing data; edit button visible only for current user's expenses; last-modified timestamp shown
+- Files changed:
+  - `frontend/src/components/EditExpenseForm.vue`
+  - `frontend/src/views/GroupDetailView.vue` — integrated EditExpenseForm, edit button per expense
 ---
