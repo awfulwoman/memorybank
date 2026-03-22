@@ -101,3 +101,11 @@ Started: Sun 22 Mar 2026
   - Migration `0004_default_group` creates a default group — tests must account for pre-existing groups
   - GroupMemberView uses `IsAdminUser` (staff only), not `AdminWritePermission`
 ---
+
+## 2026-03-22 - US-012: Expense CRUD API tests
+- Created `backend/core/tests/test_expenses.py` with 7 tests
+- Files changed: `backend/core/tests/test_expenses.py` (new)
+- **Learnings for future iterations:**
+  - ExpenseDetailView checks `created_by == request.user` for PATCH/DELETE
+  - Soft delete sets `is_deleted=True` — use `Expense.all_objects` to verify
+---

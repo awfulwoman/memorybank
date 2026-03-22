@@ -190,8 +190,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_expenses"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "7 tests: create equal/custom, list excludes deleted, PATCH creator/non-creator, DELETE soft-deletes"
     },
     {
       "id": "US-013",
