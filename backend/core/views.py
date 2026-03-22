@@ -214,6 +214,12 @@ class GroupSettlementView(APIView):
         group = Group.objects.get(pk=pk)
         serializer = SettlementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        payee_id = serializer.validated_data.get('payee').id if serializer.validated_data.get('payee') else request.data.get('payee')
+        if not group.members.filter(pk=payee_id).exists():
+            return Response(
+                {'payee': ['Payee must be a member of the group.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer.save(payer=request.user, group=group)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

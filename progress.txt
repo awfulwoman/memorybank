@@ -8,6 +8,15 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
 ---
 
+## 2026-03-22 - US-005
+- Added payee group membership validation in `GroupSettlementView.post()`
+- Checks `group.members.filter(pk=payee_id).exists()` before saving
+- Returns 400 with descriptive error if payee is not a group member
+- Files changed: `backend/core/views.py`
+- **Learnings for future iterations:**
+  - `SettlementSerializer` has `payee` as a writable field — validated_data contains the User object
+---
+
 ## 2026-03-22 - US-004
 - Applied `IsGroupMemberOrAdmin` permission to `GroupBalanceView` and `GroupExportView`
 - Files changed: `backend/core/views.py`
