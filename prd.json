@@ -153,8 +153,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_users"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 tests: GET me, PATCH display_name, avatar no file 400"
     },
     {
       "id": "US-011",
