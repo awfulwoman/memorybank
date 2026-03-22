@@ -75,3 +75,11 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - **Learnings for future iterations:**
   - Soft delete pattern: custom Manager filtering `is_deleted=False`; `all_objects = models.Manager()` for unfiltered access
 ---
+
+## 2026-03-22 - US-006
+
+- What was implemented: ExpenseSplit model with expense (FK), user (FK), amount (DecimalField); clean() validates sum of splits equals expense amount
+- Files changed:
+  - `backend/core/models.py` — added ExpenseSplit model
+  - `backend/core/migrations/0006_expensesplit.py` — migration
+---

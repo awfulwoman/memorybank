@@ -89,3 +89,22 @@ class Expense(models.Model):
 
     def __str__(self):
         return f'{self.description} ({self.amount})'
+
+
+class ExpenseSplit(models.Model):
+    expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='splits')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='expense_splits'
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        total = self.expense.splits.exclude(pk=self.pk).aggregate(
+            total=models.Sum('amount')
+        )['total'] or 0
+        if total + self.amount != self.expense.amount:
+            raise ValidationError('Sum of splits must equal expense amount.')
+
+    def __str__(self):
+        return f'{self.user} owes {self.amount} for {self.expense}'
