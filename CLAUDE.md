@@ -24,6 +24,10 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver 0.0.0.0:8000
+
+# Run tests
+python manage.py test core
+python manage.py test core.tests.TestClassName.test_method_name  # single test
 ```
 
 ### Frontend (Vue 3 + Vite)
