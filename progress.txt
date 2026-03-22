@@ -149,3 +149,17 @@ Started: Sun 22 Mar 2026 18:54:54 CET
   - The `code` element already had `word-break: break-all` from base styles, so API key display was mostly handled
   - Pattern: `flex-direction: column` on avatar sections for phone stacking, same as balance rows in US-008
 ---
+
+## 2026-03-22 - US-011
+- Added responsive styles for AdminView at <768px
+- Wrapped all list sections in `.table-scroll-container` for horizontal scroll safety
+- Inline forms (add category, add currency, add user, add group) stack vertically on phone via `flex-direction: column`
+- All inputs/selects/buttons get 44px min-height for touch targets
+- List rows wrap: label takes full width, action buttons flow below
+- Cards get `overflow-x: auto` for scroll containment
+- Files changed: `AdminView.vue`
+- **Learnings for future iterations:**
+  - AdminView uses list rows not HTML tables, but `.table-scroll-container` wrapper still provides overflow-x safety
+  - Currency inline form had inline `style="width:60px"` — overridden with `!important` in media query for full-width on mobile
+  - `flex: 1` on `.small-btn` inside wrapped `.row-actions` makes action buttons evenly sized on mobile
+---

@@ -14,13 +14,15 @@
           <button @click="saveNew('category')">Save</button>
           <button @click="addingType = ''">Cancel</button>
         </div>
-        <div v-for="item in categories" :key="item.id" class="list-row">
-          <span v-if="editing?.type !== 'category' || editing.id !== item.id">{{ item.name }}</span>
-          <input v-else v-model="editing.name" @keyup.enter="saveEdit" />
-          <div class="row-actions">
-            <button class="small-btn" @click="startEdit('category', item)">Edit</button>
-            <button v-if="editing?.type === 'category' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
-            <button class="small-btn danger" @click="deleteItem('category', item.id)">Delete</button>
+        <div class="table-scroll-container">
+          <div v-for="item in categories" :key="item.id" class="list-row">
+            <span v-if="editing?.type !== 'category' || editing.id !== item.id">{{ item.name }}</span>
+            <input v-else v-model="editing.name" @keyup.enter="saveEdit" />
+            <div class="row-actions">
+              <button class="small-btn" @click="startEdit('category', item)">Edit</button>
+              <button v-if="editing?.type === 'category' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
+              <button class="small-btn danger" @click="deleteItem('category', item.id)">Delete</button>
+            </div>
           </div>
         </div>
       </section>
@@ -36,13 +38,15 @@
           <button @click="saveNew('grouptype')">Save</button>
           <button @click="addingType = ''">Cancel</button>
         </div>
-        <div v-for="item in groupTypes" :key="item.id" class="list-row">
-          <span v-if="editing?.type !== 'grouptype' || editing.id !== item.id">{{ item.name }}</span>
-          <input v-else v-model="editing.name" @keyup.enter="saveEdit" />
-          <div class="row-actions">
-            <button class="small-btn" @click="startEdit('grouptype', item)">Edit</button>
-            <button v-if="editing?.type === 'grouptype' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
-            <button class="small-btn danger" @click="deleteItem('grouptype', item.id)">Delete</button>
+        <div class="table-scroll-container">
+          <div v-for="item in groupTypes" :key="item.id" class="list-row">
+            <span v-if="editing?.type !== 'grouptype' || editing.id !== item.id">{{ item.name }}</span>
+            <input v-else v-model="editing.name" @keyup.enter="saveEdit" />
+            <div class="row-actions">
+              <button class="small-btn" @click="startEdit('grouptype', item)">Edit</button>
+              <button v-if="editing?.type === 'grouptype' && editing.id === item.id" class="small-btn save" @click="saveEdit">Save</button>
+              <button class="small-btn danger" @click="deleteItem('grouptype', item.id)">Delete</button>
+            </div>
           </div>
         </div>
       </section>
@@ -60,10 +64,12 @@
           <button @click="saveCurrencyNew">Save</button>
           <button @click="addingType = ''">Cancel</button>
         </div>
-        <div v-for="item in currencies" :key="item.id" class="list-row">
-          <span>{{ item.code }} — {{ item.name }} ({{ item.symbol }})</span>
-          <div class="row-actions">
-            <button class="small-btn danger" @click="deleteItem('currency', item.id)">Delete</button>
+        <div class="table-scroll-container">
+          <div v-for="item in currencies" :key="item.id" class="list-row">
+            <span>{{ item.code }} — {{ item.name }} ({{ item.symbol }})</span>
+            <div class="row-actions">
+              <button class="small-btn danger" @click="deleteItem('currency', item.id)">Delete</button>
+            </div>
           </div>
         </div>
       </section>
@@ -81,16 +87,18 @@
           <button @click="saveNewUser">Save</button>
           <button @click="addingType = ''">Cancel</button>
         </div>
-        <div v-for="user in adminUsers" :key="user.id" class="list-row">
-          <span :class="{ inactive: !user.is_active }">{{ user.username }} <small>{{ user.display_name }}</small></span>
-          <span v-if="user.is_staff" class="badge">admin</span>
-          <span v-if="!user.is_active" class="badge inactive-badge">inactive</span>
-          <div class="row-actions">
-            <button
-              class="small-btn"
-              :class="user.is_active ? 'danger' : ''"
-              @click="toggleActive(user)"
-            >{{ user.is_active ? 'Deactivate' : 'Reactivate' }}</button>
+        <div class="table-scroll-container">
+          <div v-for="user in adminUsers" :key="user.id" class="list-row">
+            <span :class="{ inactive: !user.is_active }">{{ user.username }} <small>{{ user.display_name }}</small></span>
+            <span v-if="user.is_staff" class="badge">admin</span>
+            <span v-if="!user.is_active" class="badge inactive-badge">inactive</span>
+            <div class="row-actions">
+              <button
+                class="small-btn"
+                :class="user.is_active ? 'danger' : ''"
+                @click="toggleActive(user)"
+              >{{ user.is_active ? 'Deactivate' : 'Reactivate' }}</button>
+            </div>
           </div>
         </div>
       </section>
@@ -118,10 +126,12 @@
           <button @click="saveNewGroup">Save</button>
           <button @click="addingType = ''">Cancel</button>
         </div>
-        <div v-for="group in adminGroups" :key="group.id" class="list-row">
-          <span>{{ group.name }} <small>{{ group.group_type_name }} · {{ group.currency_code }} · {{ group.member_count }} members</small></span>
-          <div class="row-actions">
-            <button class="small-btn" @click="managingGroup = group">Members</button>
+        <div class="table-scroll-container">
+          <div v-for="group in adminGroups" :key="group.id" class="list-row">
+            <span>{{ group.name }} <small>{{ group.group_type_name }} · {{ group.currency_code }} · {{ group.member_count }} members</small></span>
+            <div class="row-actions">
+              <button class="small-btn" @click="managingGroup = group">Members</button>
+            </div>
           </div>
         </div>
         <!-- Member management inline -->
@@ -359,4 +369,48 @@ async function deleteItem(type: string, id: number) {
 }
 
 .member-panel h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: #555; }
+
+/* Responsive: phone (<768px) */
+@media (max-width: 767px) {
+  .inline-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inline-form input,
+  .inline-form select {
+    min-height: 44px;
+    width: 100% !important;
+  }
+
+  .inline-form button {
+    min-height: 44px;
+  }
+
+  .list-row {
+    flex-wrap: wrap;
+  }
+
+  .list-row span {
+    flex: 1 1 100%;
+  }
+
+  .row-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .small-btn {
+    min-height: 44px;
+    flex: 1;
+  }
+
+  .add-btn {
+    min-height: 44px;
+  }
+
+  .card {
+    overflow-x: auto;
+  }
+}
 </style>
