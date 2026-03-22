@@ -288,4 +288,10 @@ Started: Sun 22 Mar 15:20:19 CET 2026
 - What was implemented: Receipt image viewer lightbox in GroupDetailView; "📎 Receipt" button on expenses with receipt_image; placeholder shown implicitly (button not visible if no receipt)
 - Files changed:
   - `frontend/src/views/GroupDetailView.vue` — receipt viewer overlay
+
+## 2026-03-22 - US-030
+
+- What was implemented: Updated README with setup steps, default admin credential instructions, environment variables table, API usage examples; docker-compose.yml already complete from earlier stories
+- Files changed:
+  - `README.md`
 ---
