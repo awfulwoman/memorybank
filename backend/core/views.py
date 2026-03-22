@@ -1,3 +1,6 @@
+from collections import defaultdict
+from decimal import Decimal
+
 from django.contrib.auth import authenticate, login, logout
 from rest_framework import mixins, status, viewsets
 from rest_framework.parsers import MultiPartParser
@@ -199,3 +202,117 @@ class GroupSettlementView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(payer=request.user, group=group)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+def _compute_balances(expenses, settlements):
+    """
+    Returns (net_balances, pairwise_debts).
+    net_balances: dict {user_id: Decimal}  (positive = owed money, negative = owes money)
+    pairwise_debts: list of {from_user_id, from_username, to_user_id, to_username, amount}
+    """
+    # amount owed[debtor][creditor] = amount
+    owes = defaultdict(lambda: defaultdict(Decimal))
+
+    for expense in expenses:
+        payer = expense.created_by
+        if payer is None:
+            continue
+        for split in expense.splits.all():
+            if split.user != payer:
+                owes[split.user_id][payer.id] += split.amount
+
+    for settlement in settlements:
+        # payer paid payee => reduces payer's debt to payee
+        owes[settlement.payer_id][settlement.payee_id] -= settlement.amount
+
+    # Simplify: net out A->B and B->A
+    pairs = set()
+    for a in list(owes.keys()):
+        for b in list(owes[a].keys()):
+            if (b, a) not in pairs:
+                pairs.add((a, b))
+
+    pairwise = []
+    for a, b in pairs:
+        net = owes[a][b] - owes[b][a]
+        if net > 0:
+            pairwise.append({'from_user_id': a, 'to_user_id': b, 'amount': net})
+        elif net < 0:
+            pairwise.append({'from_user_id': b, 'to_user_id': a, 'amount': -net})
+
+    # Net per user (positive = others owe them)
+    net_balances = defaultdict(Decimal)
+    for item in pairwise:
+        net_balances[item['from_user_id']] -= item['amount']
+        net_balances[item['to_user_id']] += item['amount']
+
+    return net_balances, pairwise
+
+
+class GroupBalanceView(APIView):
+    def get(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        expenses = (
+            Expense.objects.filter(group=group)
+            .select_related('created_by')
+            .prefetch_related('splits__user')
+        )
+        settlements = Settlement.objects.filter(group=group).select_related('payer', 'payee')
+
+        net_balances, pairwise = _compute_balances(expenses, settlements)
+
+        # Enrich pairwise with usernames
+        user_ids = set()
+        for item in pairwise:
+            user_ids.add(item['from_user_id'])
+            user_ids.add(item['to_user_id'])
+        users = {u.id: u for u in User.objects.filter(id__in=user_ids)}
+
+        for item in pairwise:
+            item['from_username'] = users[item['from_user_id']].username if item['from_user_id'] in users else ''
+            item['to_username'] = users[item['to_user_id']].username if item['to_user_id'] in users else ''
+            item['amount'] = str(item['amount'])
+
+        member_balances = [
+            {'user_id': uid, 'username': users.get(uid, None) and users[uid].username, 'balance': str(bal)}
+            for uid, bal in net_balances.items()
+        ]
+
+        return Response({'balances': member_balances, 'debts': pairwise})
+
+
+class MeBalanceView(APIView):
+    def get(self, request):
+        user = request.user
+        groups = user.expense_groups.all()
+        total_net = defaultdict(Decimal)
+        group_details = []
+
+        for group in groups:
+            expenses = (
+                Expense.objects.filter(group=group)
+                .select_related('created_by')
+                .prefetch_related('splits__user')
+            )
+            settlements = Settlement.objects.filter(group=group).select_related('payer', 'payee')
+            net_balances, pairwise = _compute_balances(expenses, settlements)
+
+            user_balance = net_balances.get(user.id, Decimal('0'))
+            total_net[user.id] += user_balance
+
+            # filter pairwise to only involving this user
+            user_debts = [
+                item for item in pairwise
+                if item['from_user_id'] == user.id or item['to_user_id'] == user.id
+            ]
+            group_details.append({
+                'group_id': group.id,
+                'group_name': group.name,
+                'balance': str(user_balance),
+                'debts': [{**d, 'amount': str(d['amount'])} for d in user_debts],
+            })
+
+        return Response({
+            'total_balance': str(total_net.get(user.id, Decimal('0'))),
+            'groups': group_details,
+        })
