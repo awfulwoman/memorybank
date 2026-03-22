@@ -143,3 +143,14 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - `startEdit` must copy all editable fields (including `icon`) to the editing ref
   - Category API already accepts `icon` field from US-001 serializer work — no backend changes needed
 ---
+
+## 2026-03-22 - US-013
+- Added `category_icon` field to ExpenseSerializer (source: `category.icon`, read-only)
+- Added icon display next to category name in expense list rows (GroupDetailView) with `mdi-shape-outline` fallback
+- Added icon preview in category `<select>` dropdowns in AddExpenseForm and EditExpenseForm using absolute-positioned icon overlay
+- Files changed: `core/serializers.py`, `frontend/src/components/AddExpenseForm.vue`, `frontend/src/components/EditExpenseForm.vue`, `frontend/src/views/GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - HTML `<select>` options can't render icons — use an absolute-positioned `<span>` next to the select to show the selected category's icon
+  - `selectedCategory` computed from categories array + form.category value pattern works well for derived display data
+  - ExpenseSerializer can expose related model fields via `source='category.icon'` — no migration needed
+---
