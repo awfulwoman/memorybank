@@ -1,0 +1,180 @@
+{
+  "project": "MemoryBank",
+  "branchName": "ralph/responsive-design",
+  "description": "Full responsive design overhaul — hamburger nav, responsive layouts for all views, mobile-friendly modals and tables",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Global responsive breakpoints and base styles",
+      "description": "As a developer, I need consistent breakpoint variables and base responsive styles so all views use the same responsive behavior.",
+      "acceptanceCriteria": [
+        "Add CSS custom properties in base.css or main.css for breakpoints: --bp-phone: 768px, --bp-tablet: 1024px",
+        "Add global box-sizing: border-box rule if not already present",
+        "Confirm viewport meta tag in index.html: <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+        "Add .table-scroll-container utility class: overflow-x auto, width 100%",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Create AppNavbar component — desktop layout",
+      "description": "As a user, I want a consistent navigation bar component so all pages share the same nav.",
+      "acceptanceCriteria": [
+        "Create frontend/src/components/AppNavbar.vue",
+        "Desktop layout (>=1024px): horizontal bar with app name/logo on left, nav links (Dashboard, Profile, Admin if staff) in center/right, logout button on far right",
+        "Active route link is visually highlighted",
+        "Uses auth store for user info, isStaff, logout action",
+        "Uses Vue Router for navigation and active route detection",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 1280px width"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "AppNavbar — hamburger menu for mobile/tablet",
+      "description": "As a user, I want the navbar to collapse into a hamburger menu on small screens so I can navigate on mobile.",
+      "acceptanceCriteria": [
+        "Below 1024px: nav links hidden, hamburger icon button shown",
+        "Clicking hamburger toggles a dropdown/overlay menu with all nav links",
+        "Menu closes when a link is clicked",
+        "Menu closes when clicking outside the menu",
+        "Hamburger icon animates to X when open (CSS transition)",
+        "Minimum 44px touch target for hamburger button",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px width"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Integrate AppNavbar into all views",
+      "description": "As a developer, I want to replace per-view navbar code with the shared AppNavbar component.",
+      "acceptanceCriteria": [
+        "Import and use AppNavbar in DashboardView, GroupDetailView, ProfileView, AdminView",
+        "Remove existing inline navbar markup from each view",
+        "LoginView does NOT use AppNavbar (no nav needed on login page)",
+        "Each view still renders its own content below the navbar",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 1280px widths"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Responsive Login View",
+      "description": "As a user, I want the login page to look correct on all screen sizes and orientations.",
+      "acceptanceCriteria": [
+        "Login card centers vertically and horizontally on all screen sizes",
+        "Card does not overflow viewport in phone landscape (short viewport height) — use max-height with overflow-y auto if needed",
+        "Form inputs and button have min 44px height for touch targets",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Responsive Dashboard View",
+      "description": "As a user, I want the dashboard group cards to reflow properly on all screen sizes.",
+      "acceptanceCriteria": [
+        "Group card grid: 1 column on phone (<768px), 2 columns on tablet (768-1023px), 3+ on desktop (>=1024px)",
+        "Cards don't overflow or get clipped in landscape orientation",
+        "Balance summary section stacks vertically on screens below 768px",
+        "No horizontal body overflow at any width",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px, 768px, and 1280px widths"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Responsive Group Detail View — expense list and actions",
+      "description": "As a user, I want the group detail expense list and action buttons to be usable on small screens.",
+      "acceptanceCriteria": [
+        "Expense list items stack content vertically on screens below 768px (no horizontal overflow)",
+        "Action buttons (add expense, settle) remain visible and accessible — don't overlap content",
+        "Action buttons stack vertically or shrink gracefully on phone widths",
+        "Tab/section navigation is horizontally scrollable if it overflows on small screens",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Responsive Group Detail View — balances and debts",
+      "description": "As a user, I want balance and debt summaries to reflow on small screens.",
+      "acceptanceCriteria": [
+        "Balance summary cards reflow to single column on phone (<768px)",
+        "Debt/settlement lists stack vertically on narrow screens",
+        "No horizontal overflow on any group detail section",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px width"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Responsive modal forms",
+      "description": "As a user, I want modal forms to be usable on small screens and in landscape orientation.",
+      "acceptanceCriteria": [
+        "Modals take full width (minus 16px margin) on screens below 480px",
+        "Modal content scrolls vertically when it exceeds viewport height",
+        "Form inputs have min 44px height for touch-friendly sizing",
+        "Submit/cancel buttons remain visible at bottom of modal (sticky or visible after scroll)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px x 667px and 667px x 375px"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Responsive Profile View",
+      "description": "As a user, I want the profile page to work on all screen sizes.",
+      "acceptanceCriteria": [
+        "Avatar upload area and form fields stack vertically on phone (<768px)",
+        "API key section text wraps or truncates with ellipsis on narrow screens (no horizontal overflow)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Responsive Admin View",
+      "description": "As an admin, I want admin data tables to be accessible on small screens via horizontal scrolling.",
+      "acceptanceCriteria": [
+        "Wrap all admin tables in .table-scroll-container for horizontal scroll on small screens",
+        "Table headers remain readable (no extreme column compression)",
+        "Admin add/edit forms adapt to narrow screens (inputs stack vertically below 768px)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px and 768px widths"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
