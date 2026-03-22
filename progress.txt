@@ -60,3 +60,36 @@ Started: Sun 22 Mar 2026 20:32:57 CET
   - `IsGroupOwnerOrAdmin` reuses cleanly for any view that takes `pk` as a group identifier in URL kwargs
   - Existing `GroupMemberTest` tests still pass since they use staff user (who is also group creator)
 ---
+
+## 2026-03-22 - US-006
+- Installed `@mdi/font` npm package
+- Imported `@mdi/font/css/materialdesignicons.min.css` in `main.ts`
+- Created `IconPicker.vue` with search input, scrollable grid of 75 curated icons, v-model support
+- Uses `update:modelValue` emit for v-model binding pattern
+- Files changed: `frontend/package.json`, `frontend/package-lock.json`, `frontend/src/main.ts`, `frontend/src/components/IconPicker.vue`
+- **Learnings for future iterations:**
+  - IconPicker uses v-model pattern (`modelValue` prop + `update:modelValue` emit) for easy parent integration
+  - Curated icon list of 75 common MDI icons covers categories like food, transport, health, entertainment, household, tech
+  - CSS vars `--color-border`, `--color-background-soft`, `--color-text`, `--color-primary` used for theming consistency
+---
+
+## 2026-03-22 - US-007
+- Added MDI icon display to dashboard group cards next to group name
+- Icon renders via `<span class="mdi" :class="group.icon">` with fallback to `mdi-account-group`
+- Styled at 1.25rem size with `var(--color-primary)` color, using flexbox for alignment
+- Files changed: `frontend/src/views/DashboardView.vue`
+- **Learnings for future iterations:**
+  - MDI icons render via `<span class="mdi mdi-icon-name">` — use `:class` binding for dynamic icons
+  - Group cards use h3 with flexbox for icon+text alignment
+---
+
+## 2026-03-22 - US-008
+- Created `CreateGroupModal.vue` with fields: name, icon (IconPicker), currency (dropdown from API), default split method
+- Added "+ Create Group" button to dashboard section header, opens modal on click
+- On successful creation, new group is pushed to list and modal closes
+- Files changed: `frontend/src/components/CreateGroupModal.vue` (new), `frontend/src/views/DashboardView.vue`
+- **Learnings for future iterations:**
+  - Modal pattern: `modal-overlay` with `@click.self` for backdrop close, inner `.modal` div
+  - `api.currencies()` returns `{id, code, name}` — use for currency dropdown
+  - Group create API accepts `{name, icon, currency, default_split_method}`, returns full group object
+---
