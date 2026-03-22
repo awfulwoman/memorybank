@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
+from .permissions import IsGroupMemberOrAdmin
 from .serializers import (
     AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
     GroupTypeSerializer, SettlementSerializer, UserSerializer,
@@ -153,6 +154,8 @@ class GroupMemberView(APIView):
 
 
 class GroupExpenseView(APIView):
+    permission_classes = [IsGroupMemberOrAdmin]
+
     def get(self, request, pk):
         group = Group.objects.get(pk=pk)
         expenses = Expense.objects.filter(group=group).select_related(

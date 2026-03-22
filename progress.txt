@@ -8,6 +8,14 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
 ---
 
+## 2026-03-22 - US-002
+- Applied `IsGroupMemberOrAdmin` permission to `GroupExpenseView`
+- Files changed: `backend/core/views.py`
+- **Learnings for future iterations:**
+  - Just add `permission_classes = [IsGroupMemberOrAdmin]` and import — minimal change
+  - All 59 tests still pass (existing tests use group members or staff)
+---
+
 ## 2026-03-22 - US-001
 - Created `IsGroupMemberOrAdmin` permission class in `backend/core/permissions.py`
 - Extracts group pk from URL kwargs, checks membership via `group.members.filter(pk=user.pk).exists()`
