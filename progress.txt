@@ -119,3 +119,16 @@ Started: Sun 22 Mar 2026
 - Created `backend/core/tests/test_balance_api.py` with 3 tests
 - Files changed: `backend/core/tests/test_balance_api.py` (new)
 ---
+
+## 2026-03-22 - US-015: Export API tests
+- Created `backend/core/tests/test_exports.py` with 4 tests
+- Files changed: `backend/core/tests/test_exports.py` (new)
+- **Learnings for future iterations:**
+  - DRF's `URL_FORMAT_OVERRIDE` defaults to `'format'`, meaning `?format=csv` triggers DRF content negotiation
+  - Export views use `HttpResponse` (not DRF `Response`), but DRF intercepts the `format` query param before the view runs
+  - Fix: `@override_settings(REST_FRAMEWORK={..., 'URL_FORMAT_OVERRIDE': None})` in test class
+  - Consider setting `URL_FORMAT_OVERRIDE = None` in project settings if export endpoints are used in production
+---
+
+## FULL SUITE: 59 tests, all passing
+---

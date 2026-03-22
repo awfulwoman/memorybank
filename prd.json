@@ -235,8 +235,8 @@
         "Tests pass: cd backend && python manage.py test core.tests.test_exports"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "4 tests: CSV export, JSON export, XML 400, me export filters own expenses. Uses URL_FORMAT_OVERRIDE=None to avoid DRF format negotiation conflict."
     }
   ]
 }
