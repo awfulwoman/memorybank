@@ -1,0 +1,32 @@
+# Ralph Progress Log
+Started: Sun 22 Mar 15:20:19 CET 2026
+---
+
+## Codebase Patterns
+
+- Django project package is `memorybank` (at `backend/memorybank/`), app is `core` (at `backend/core/`)
+- DJANGO_SETTINGS_MODULE = `memorybank.settings`
+- DB path configurable via `SQLITE_PATH` env var; media path via `MEDIA_ROOT` env var
+- Run Django commands from `backend/` directory: `cd backend && python manage.py ...`
+- Data volumes mounted at `data/db/` and `data/media/` in repo root
+
+---
+
+## 2026-03-22 - US-001
+
+- What was implemented: Django project scaffolding with `memorybank` project package and `core` app, SQLite configuration, MEDIA_ROOT, multi-stage Dockerfile, docker-compose.yml with volume mounts
+- Files changed:
+  - `backend/memorybank/settings.py` — full settings with env-configurable SECRET_KEY, DEBUG, ALLOWED_HOSTS, SQLITE_PATH, MEDIA_ROOT
+  - `backend/memorybank/urls.py` — root URL conf with admin
+  - `backend/memorybank/wsgi.py`, `asgi.py` — fixed module reference from `memorybank_proj` to `memorybank`
+  - `backend/manage.py` — fixed settings module reference
+  - `backend/core/__init__.py`, `models.py`, `views.py`, `admin.py`, `apps.py` — core app scaffold
+  - `backend/core/migrations/__init__.py` — migrations package
+  - `backend/requirements.txt` — Django, DRF, Pillow, gunicorn
+  - `backend/Dockerfile` — multi-stage build
+  - `docker-compose.yml` — backend service with db/media volumes
+- **Learnings for future iterations:**
+  - Django was scaffolded via `django-admin startproject` into a temp dir then moved; the `memorybank/` and `core/` dirs already existed as placeholders
+  - Django 6.0.3 is installed on this machine
+  - `python manage.py check` and `migrate` both pass cleanly
+---
