@@ -1,0 +1,475 @@
+{
+  "project": "MemoryBank",
+  "branchName": "ralph/memorybank-expense-splitter",
+  "description": "MemoryBank — Self-hosted shared expense splitting app with Django backend, Vue frontend, and Docker deployment",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Django project scaffolding and Docker setup",
+      "description": "As a developer, I need the Django project structure, settings, and Docker configuration so the backend can run.",
+      "acceptanceCriteria": [
+        "Django project created with app named 'core'",
+        "Settings configured for SQLite database",
+        "MEDIA_ROOT configured for file uploads",
+        "Dockerfile for backend service with multi-stage build",
+        "docker-compose.yml with backend service, volume mounts for db and media",
+        "Backend starts successfully with docker compose up",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "User model and admin account creation",
+      "description": "As a developer, I need the user model with username, display_name, and avatar fields so accounts can be managed.",
+      "acceptanceCriteria": [
+        "Custom user model extends AbstractUser with display_name (CharField) and avatar (ImageField, optional)",
+        "Migration generated and runs successfully",
+        "Django admin registered for user model",
+        "Admin can create users via Django admin",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Category, GroupType, and Currency models",
+      "description": "As a developer, I need the lookup table models so they can be referenced by groups and expenses.",
+      "acceptanceCriteria": [
+        "Category model with name field",
+        "GroupType model with name field",
+        "Currency model with name, symbol, and code fields",
+        "All three registered in Django admin for CRUD",
+        "Migrations generated and run successfully",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Group model with members and default split",
+      "description": "As a developer, I need the Group model so expenses can be organized into groups.",
+      "acceptanceCriteria": [
+        "Group model with: name, group_type (FK to GroupType), currency (FK to Currency), default_split_method (equal/custom), created_by (FK to User)",
+        "ManyToMany relationship for group members",
+        "A default group created via data migration",
+        "Group registered in Django admin",
+        "Migration generated and runs successfully",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Expense model with soft delete",
+      "description": "As a developer, I need the Expense model to store expense records.",
+      "acceptanceCriteria": [
+        "Expense model with: amount (DecimalField), description, date, category (FK), group (FK), created_by (FK to User), receipt_image (ImageField, optional), is_deleted (BooleanField, default False), created_at, updated_at",
+        "Default manager excludes soft-deleted records",
+        "all_objects manager includes soft-deleted records",
+        "Migration generated and runs successfully",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "ExpenseSplit model",
+      "description": "As a developer, I need the ExpenseSplit model to track how each expense is divided among group members.",
+      "acceptanceCriteria": [
+        "ExpenseSplit model with: expense (FK), user (FK), amount (DecimalField)",
+        "Each expense can have multiple splits, one per participating member",
+        "Sum of splits must equal expense amount (validated in model clean method)",
+        "Migration generated and runs successfully",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Settlement model",
+      "description": "As a developer, I need the Settlement model to record payments between users.",
+      "acceptanceCriteria": [
+        "Settlement model with: group (FK), payer (FK to User), payee (FK to User), amount (DecimalField), date, created_at",
+        "Migration generated and runs successfully",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Django REST Framework setup and auth",
+      "description": "As a developer, I need DRF configured with session auth and API key auth.",
+      "acceptanceCriteria": [
+        "Django REST Framework installed and configured",
+        "Session authentication enabled for frontend",
+        "Custom API key model with per-user key generation",
+        "API key authentication class that checks X-API-Key header",
+        "Login/logout API endpoints",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "User API endpoints",
+      "description": "As a developer, I need user-related API endpoints for profile management.",
+      "acceptanceCriteria": [
+        "GET /api/users/me/ returns current user profile",
+        "PATCH /api/users/me/ updates display_name",
+        "POST /api/users/me/avatar/ uploads avatar image (max 5MB enforced)",
+        "POST /api/users/me/api-key/ generates new API key",
+        "DELETE /api/users/me/api-key/ revokes API key",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Admin API endpoints for categories, group types, currencies",
+      "description": "As an admin, I need CRUD API endpoints for lookup tables.",
+      "acceptanceCriteria": [
+        "CRUD endpoints for /api/categories/ (admin only)",
+        "CRUD endpoints for /api/group-types/ (admin only)",
+        "CRUD endpoints for /api/currencies/ (admin only)",
+        "Non-admin users get 403 on create/update/delete",
+        "All users can list/read",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Group API endpoints",
+      "description": "As an admin, I need CRUD API endpoints for groups and member management.",
+      "acceptanceCriteria": [
+        "CRUD endpoints for /api/groups/ (create/update/delete admin only)",
+        "GET /api/groups/ lists groups the current user belongs to",
+        "POST /api/groups/{id}/members/ adds a member (admin only)",
+        "DELETE /api/groups/{id}/members/{user_id}/ removes a member (admin only)",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Expense API endpoints",
+      "description": "As a user, I need API endpoints to create, read, update, and soft-delete expenses.",
+      "acceptanceCriteria": [
+        "POST /api/groups/{id}/expenses/ creates expense with split data",
+        "GET /api/groups/{id}/expenses/ lists non-deleted expenses for group",
+        "PATCH /api/expenses/{id}/ updates expense (only by creator)",
+        "DELETE /api/expenses/{id}/ soft-deletes expense (only by creator)",
+        "Receipt image upload supported on create/update (max 5MB)",
+        "Equal split auto-calculates amounts; custom split accepts per-member amounts",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Settlement API endpoints",
+      "description": "As a user, I need API endpoints to record and list settlements.",
+      "acceptanceCriteria": [
+        "POST /api/groups/{id}/settlements/ records a settlement",
+        "GET /api/groups/{id}/settlements/ lists settlements for group",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Balance calculation API",
+      "description": "As a user, I need API endpoints that compute balances from expenses and settlements.",
+      "acceptanceCriteria": [
+        "GET /api/groups/{id}/balances/ returns per-member net balance and pairwise debt list",
+        "Balances computed from expenses and settlements (not stored as mutable state)",
+        "GET /api/users/me/balances/ returns per-person net balance aggregated across all groups",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Export API endpoints",
+      "description": "As a user, I need endpoints to export expense data as CSV or JSON.",
+      "acceptanceCriteria": [
+        "GET /api/groups/{id}/export/?format=csv returns CSV download",
+        "GET /api/groups/{id}/export/?format=json returns JSON download",
+        "GET /api/users/me/export/?format=csv returns all user expenses as CSV",
+        "GET /api/users/me/export/?format=json returns all user expenses as JSON",
+        "Export includes: date, amount, description, category, payer, split details",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Vue project scaffolding and Docker setup",
+      "description": "As a developer, I need the Vue 3 frontend project with router and Docker configuration.",
+      "acceptanceCriteria": [
+        "Vue 3 project created with Composition API, Vue Router, and Pinia",
+        "Dockerfile for frontend service with multi-stage build (build + nginx serve)",
+        "docker-compose.yml updated with frontend service",
+        "API proxy configured for development",
+        "Frontend starts successfully with docker compose up",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Login page",
+      "description": "As a user, I want a login page so I can authenticate with my username and password.",
+      "acceptanceCriteria": [
+        "Login page with username and password fields",
+        "Submitting form calls login API endpoint",
+        "On success, redirects to group dashboard",
+        "On failure, shows error message",
+        "Unauthenticated users redirected to login",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Group dashboard — list groups",
+      "description": "As a user, I want to see my groups after login so I can pick one to view.",
+      "acceptanceCriteria": [
+        "Dashboard page is the default view after login",
+        "Lists all groups the user belongs to",
+        "Each group card shows: name, type, currency, member count",
+        "Clicking a group navigates to group detail page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Group detail — expense list and balances",
+      "description": "As a user, I want to see a group's expenses and balances on one page.",
+      "acceptanceCriteria": [
+        "Group detail page shows list of expenses (description, amount, date, category, payer)",
+        "Balance summary section shows per-member net balance with color coding (green=owed, red=owes)",
+        "Pairwise debt list shown (e.g. 'Alice owes Bob $25')",
+        "Settlements shown in list, visually distinct from expenses",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Add expense form",
+      "description": "As a user, I want a form to add an expense to a group.",
+      "acceptanceCriteria": [
+        "Form with fields: amount, description, date, category dropdown, receipt image upload",
+        "Split method toggle: equal or custom",
+        "Equal split pre-fills even amounts for all group members",
+        "Custom split shows per-member amount inputs",
+        "Default split method from group settings pre-selected",
+        "Submitting calls create expense API and refreshes list",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Edit expense form",
+      "description": "As a user, I want to edit an expense I created to correct mistakes.",
+      "acceptanceCriteria": [
+        "Edit button visible only on expenses created by current user",
+        "Form pre-filled with existing expense data",
+        "Submitting calls update expense API and refreshes list",
+        "Last-modified timestamp shown",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Delete expense with soft delete",
+      "description": "As a user, I want to delete an expense I created.",
+      "acceptanceCriteria": [
+        "Delete button visible only on expenses created by current user",
+        "Clicking delete shows confirmation dialog",
+        "Confirming calls soft-delete API endpoint",
+        "Expense disappears from list after deletion",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Record settlement form",
+      "description": "As a user, I want to record a payment to another group member.",
+      "acceptanceCriteria": [
+        "Settlement form with: payee dropdown (group members), amount, date",
+        "Submitting calls create settlement API",
+        "Settlement appears in group expense list, visually distinct",
+        "Balances update after recording",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "User profile page",
+      "description": "As a user, I want a profile page showing my info and cross-group balances.",
+      "acceptanceCriteria": [
+        "Profile page shows username, display name, avatar",
+        "Edit display name inline",
+        "Upload/change avatar button",
+        "Per-person net balance aggregated across all groups",
+        "Expandable breakdown by group",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "API key management in profile",
+      "description": "As a user, I want to generate and revoke my API key from my profile.",
+      "acceptanceCriteria": [
+        "Section in profile page showing current API key (masked) or 'No key generated'",
+        "Generate button creates new key and displays it once",
+        "Revoke button deletes current key with confirmation",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Export buttons on group and profile pages",
+      "description": "As a user, I want export buttons to download expense data.",
+      "acceptanceCriteria": [
+        "Export button on group detail page with CSV/JSON format choice",
+        "Export button on profile page with CSV/JSON format choice",
+        "Clicking triggers file download via export API",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Admin console — manage categories, group types, currencies",
+      "description": "As an admin, I want UI pages to manage lookup tables.",
+      "acceptanceCriteria": [
+        "Admin section in navigation (visible only to admin users)",
+        "Categories page: list, add, edit, delete categories",
+        "Group types page: list, add, edit, delete group types",
+        "Currencies page: list, add, edit, delete currencies",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Admin console — manage users and groups",
+      "description": "As an admin, I want UI pages to manage users and groups.",
+      "acceptanceCriteria": [
+        "Users page: list users, create user (username, display name, password), edit, deactivate",
+        "Groups page: list groups, create group (name, type, currency, split method), edit, manage members",
+        "Non-admin users cannot access admin pages",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Receipt image viewer",
+      "description": "As a user, I want to view receipt images attached to expenses.",
+      "acceptanceCriteria": [
+        "Expense detail or modal shows receipt image if attached",
+        "Image loads from backend media endpoint",
+        "Placeholder shown if no receipt",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Final Docker Compose and README",
+      "description": "As a self-hoster, I want the complete Docker Compose file and setup documentation.",
+      "acceptanceCriteria": [
+        "docker-compose.yml defines backend, frontend, and all volumes",
+        "App fully functional after docker compose up with zero additional config",
+        "README documents: setup steps, default admin credentials, environment variables, API usage basics",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
