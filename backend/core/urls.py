@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from .views import (
     CategoryViewSet, CurrencyViewSet, GroupTypeViewSet, GroupViewSet,
-    GroupExpenseView, GroupMemberView,
+    GroupExpenseView, GroupMemberView, GroupSettlementView,
     ExpenseDetailView,
     LoginView, LogoutView, MeApiKeyView, MeAvatarView, MeView,
 )
@@ -23,5 +23,6 @@ urlpatterns = [
     path('groups/<int:pk>/members/', GroupMemberView.as_view(), name='group-members'),
     path('groups/<int:pk>/members/<int:user_id>/', GroupMemberView.as_view(), name='group-member-detail'),
     path('groups/<int:pk>/expenses/', GroupExpenseView.as_view(), name='group-expenses'),
+    path('groups/<int:pk>/settlements/', GroupSettlementView.as_view(), name='group-settlements'),
     path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expense-detail'),
 ]

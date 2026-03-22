@@ -5,10 +5,10 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ApiKey, Category, Currency, Expense, Group, GroupType, User
+from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
 from .serializers import (
     CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
-    GroupTypeSerializer, UserSerializer,
+    GroupTypeSerializer, SettlementSerializer, UserSerializer,
 )
 
 
@@ -182,3 +182,20 @@ class ExpenseDetailView(APIView):
         expense.is_deleted = True
         expense.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupSettlementView(APIView):
+    def get(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        settlements = Settlement.objects.filter(group=group).select_related(
+            'payer', 'payee'
+        ).order_by('-date', '-created_at')
+        serializer = SettlementSerializer(settlements, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        group = Group.objects.get(pk=pk)
+        serializer = SettlementSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(payer=request.user, group=group)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from .models import Category, Currency, Expense, ExpenseSplit, Group, GroupType, User
+from .models import Category, Currency, Expense, ExpenseSplit, Group, GroupType, Settlement, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -111,3 +111,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
         if split_data is not None:
             self._create_splits(instance, split_data, instance.group.members.all())
         return instance
+
+
+class SettlementSerializer(serializers.ModelSerializer):
+    payer_username = serializers.CharField(source='payer.username', read_only=True)
+    payee_username = serializers.CharField(source='payee.username', read_only=True)
+
+    class Meta:
+        model = Settlement
+        fields = ['id', 'group', 'payer', 'payer_username', 'payee', 'payee_username', 'amount', 'date', 'created_at']
+        read_only_fields = ['payer', 'group', 'created_at']

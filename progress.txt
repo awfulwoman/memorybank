@@ -149,3 +149,12 @@ Started: Sun 22 Mar 15:20:19 CET 2026
   - ExpenseSerializer handles split logic in create/update; split_data is write-only list of `{user_id, amount}` dicts
   - Soft delete: PATCH `is_deleted=True` via ExpenseDetailView.delete; uses `Expense.all_objects.get()` to find it
 ---
+
+## 2026-03-22 - US-013
+
+- What was implemented: POST/GET `/api/groups/{id}/settlements/`; payer is set from request.user, group from URL
+- Files changed:
+  - `backend/core/serializers.py` — SettlementSerializer
+  - `backend/core/views.py` — GroupSettlementView
+  - `backend/core/urls.py` — settlement routes
+---
