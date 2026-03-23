@@ -6,6 +6,49 @@ Started: Sun 22 Mar 2026 20:08:44 CET
 - Python venv at `backend/.venv/` — run tests with `.venv/bin/python manage.py test core`
 - Permission classes live in `backend/core/permissions.py`, views import from there
 - Existing `AdminWritePermission` in `views.py` — new permissions go in `permissions.py`
+- Frontend CSP meta tag in `index.html` — update if new asset sources needed
+- django-csp v4 uses `CONTENT_SECURITY_POLICY` dict with `DIRECTIVES` sub-dict, values are lists of strings
+- HTTPS/SSL settings gated behind `DJANGO_SECURE_SSL` env var pattern
+---
+
+## 2026-03-23 - #7 Harden Django cookie & HTTPS security settings
+- Added cookie security (CSRF_COOKIE_HTTPONLY, SAMESITE, SESSION_COOKIE_HTTPONLY, SAMESITE)
+- Added HTTPS settings gated behind `DJANGO_SECURE_SSL` env var
+- Changed ALLOWED_HOSTS default from `*` to `localhost,127.0.0.1`
+- Added DJANGO_SECURE_SSL to docker-compose.yml and docker-compose.ghcr.yml
+- Files changed: `backend/memorybank/settings.py`, `docker-compose.yml`, `docker-compose.ghcr.yml`
+- **Learnings for future iterations:**
+  - Always gate SSL/HTTPS settings behind env var so local dev and tests work without TLS
+  - 71 tests pass
+---
+
+## 2026-03-23 - #8 Add input length & content validation to serializers
+- Added explicit `max_length` to all text serializer fields
+- Added explicit `max_digits=12, decimal_places=2` to all DecimalFields
+- Added whitespace stripping via `validate_<field>` methods
+- Added control character rejection for expense description
+- Files changed: `backend/core/serializers.py`
+- **Learnings for future iterations:**
+  - DRF ModelSerializer inherits model constraints but explicit serializer-level fields override them
+  - 71 tests pass
+---
+
+## 2026-03-23 - #9 Add Content-Security-Policy and security headers via Django
+- Added `django-csp>=4.0` to requirements.txt, `csp.middleware.CSPMiddleware` to MIDDLEWARE
+- Configured CONTENT_SECURITY_POLICY with all directives
+- Set explicit X_FRAME_OPTIONS='DENY' and SECURE_CONTENT_TYPE_NOSNIFF=True
+- Files changed: `backend/requirements.txt`, `backend/memorybank/settings.py`
+- **Learnings for future iterations:**
+  - django-csp v4 uses dict-based config, not the old `CSP_*` settings
+  - 71 tests pass
+---
+
+## 2026-03-23 - #10 Add CSP meta tag to frontend index.html as fallback
+- Added `<meta http-equiv="Content-Security-Policy">` to `frontend/index.html` with directives: default-src 'self', script-src 'self', style-src 'self' 'unsafe-inline', img-src 'self' data:, font-src 'self', connect-src 'self', frame-ancestors 'none'
+- Files changed: `frontend/index.html`
+- **Learnings for future iterations:**
+  - Single-line change, no build/typecheck impact
+  - 71 backend tests pass on this branch
 ---
 
 ## 2026-03-22 - US-009
