@@ -10,6 +10,7 @@ services:
       - SQLITE_PATH=/data/db/db.sqlite3
       - MEDIA_ROOT=/data/media
       - DJANGO_ALLOWED_HOSTS=*
+      - DJANGO_SECURE_SSL=false
     volumes:
       - ./data/db:/data/db
       - ./data/media:/data/media
