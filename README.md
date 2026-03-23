@@ -19,15 +19,18 @@ services:
 
   backend:
     image: ghcr.io/awfulwoman/memorybank-backend:latest
-    ports:
-      - "8102:8000"
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
+      - DJANGO_SECRET_KEY="" # Set this to a secure random string
       - DJANGO_DEBUG=false
     volumes:
       - ./data/db:/data/db
       - ./data/media:/data/media
 ```
+
+> **Important:** Set `DJANGO_SECRET_KEY` to a long random string before starting. You can generate one with:
+> ```bash
+> python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+> ```
 
 ## Default Admin Credentials
 
@@ -37,14 +40,14 @@ Create the first admin user via the Django management command:
 docker compose exec backend python manage.py createsuperuser
 ```
 
-Or set the initial password interactively. The Django admin panel is available at http://localhost:8000/admin/.
+Or set the initial password interactively. The Django admin panel is available at http://localhost:8080/admin/.
 
 ## Environment Variables
 
-| Variable            | Default          | Description                                 |
-| ------------------- | ---------------- | ------------------------------------------- |
-| `DJANGO_SECRET_KEY` | insecure default | Set to a secure random string in production |
-| `DJANGO_DEBUG`      | `true`           | Set to `false` in production                |
+| Variable            | Default | Description                                          |
+| ------------------- | ------- | ---------------------------------------------------- |
+| `DJANGO_SECRET_KEY` | (none)  | **Required.** Set to a secure random string.         |
+| `DJANGO_DEBUG`      | `false` | Set to `true` for development only.                  |
 
 ## Data Persistence
 
@@ -65,7 +68,7 @@ The application can be accessed via a REST API.
 Generate a key via the Profile page, then pass it as a header:
 
 ```bash
-curl -H "X-API-Key: <your-key>" http://localhost:8000/api/users/me/
+curl -H "X-API-Key: <your-key>" http://localhost:8080/api/users/me/
 ```
 
 ### Key Endpoints

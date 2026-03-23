@@ -15,7 +15,8 @@ if not _secret_key:
     else:
         raise RuntimeError(
             'DJANGO_SECRET_KEY environment variable is required. '
-            'Set it to a unique, unpredictable value.'
+            'Set it in your docker-compose.yaml or .env file. '
+            'Generate one with: python3 -c "import secrets; print(secrets.token_urlsafe(50))"'
         )
 SECRET_KEY = _secret_key
 
