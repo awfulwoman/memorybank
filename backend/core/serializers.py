@@ -1,22 +1,38 @@
+import re
 from decimal import Decimal
 from rest_framework import serializers
 from .models import Category, Currency, Expense, ExpenseSplit, Group, GroupType, Settlement, User
 
+_CONTROL_CHAR_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
+
+
+def _strip_text(value):
+    return value.strip() if isinstance(value, str) else value
+
 
 class UserSerializer(serializers.ModelSerializer):
+    display_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'display_name', 'avatar', 'is_staff']
         read_only_fields = ['id', 'username', 'avatar', 'is_staff']
 
+    def validate_display_name(self, value):
+        return _strip_text(value)
+
 
 class AdminUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    display_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'display_name', 'is_active', 'is_staff', 'password']
         read_only_fields = ['id']
+
+    def validate_display_name(self, value):
+        return _strip_text(value)
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
@@ -37,24 +53,32 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=50)
+
     class Meta:
         model = Category
         fields = ['id', 'name']
 
 
 class GroupTypeSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=50)
+
     class Meta:
         model = GroupType
         fields = ['id', 'name']
 
 
 class CurrencySerializer(serializers.ModelSerializer):
+    code = serializers.CharField(max_length=3)
+    name = serializers.CharField(max_length=50)
+
     class Meta:
         model = Currency
         fields = ['id', 'name', 'symbol', 'code']
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=100)
     member_count = serializers.SerializerMethodField()
     member_ids = serializers.SerializerMethodField()
     group_type_name = serializers.CharField(source='group_type.name', read_only=True)
@@ -69,6 +93,9 @@ class GroupSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_by']
 
+    def validate_name(self, value):
+        return _strip_text(value)
+
     def get_member_count(self, obj):
         return obj.members.count()
 
@@ -78,6 +105,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class ExpenseSplitSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
         model = ExpenseSplit
@@ -85,6 +113,8 @@ class ExpenseSplitSerializer(serializers.ModelSerializer):
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    description = serializers.CharField(max_length=500)
     splits = ExpenseSplitSerializer(many=True, read_only=True)
     split_data = serializers.ListField(
         child=serializers.DictField(), write_only=True, required=False
@@ -100,6 +130,12 @@ class ExpenseSerializer(serializers.ModelSerializer):
             'is_deleted', 'created_at', 'updated_at', 'splits', 'split_data',
         ]
         read_only_fields = ['created_by', 'group', 'is_deleted', 'created_at', 'updated_at']
+
+    def validate_description(self, value):
+        value = _strip_text(value)
+        if _CONTROL_CHAR_RE.search(value):
+            raise serializers.ValidationError('Description contains invalid control characters.')
+        return value
 
     def validate_receipt_image(self, value):
         if value and value.size > 5 * 1024 * 1024:
@@ -153,6 +189,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 class SettlementSerializer(serializers.ModelSerializer):
     payer_username = serializers.CharField(source='payer.username', read_only=True)
     payee_username = serializers.CharField(source='payee.username', read_only=True)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
         model = Settlement
