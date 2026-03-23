@@ -30,14 +30,21 @@
           <label>Receipts</label>
           <div v-if="receipts.length === 0" class="receipts-empty">No receipts attached</div>
           <div v-else class="receipts-grid">
-            <img
-              v-for="r in receipts"
-              :key="r.id"
-              :src="r.image"
-              class="receipt-thumb"
-              alt="Receipt"
-              @click="viewingReceipt = r.image"
-            />
+            <div v-for="r in receipts" :key="r.id" class="receipt-thumb-wrap">
+              <img
+                :src="r.image"
+                class="receipt-thumb"
+                alt="Receipt"
+                @click="viewingReceipt = r.image"
+              />
+              <button
+                v-if="isCreator"
+                type="button"
+                class="receipt-delete-btn"
+                title="Delete receipt"
+                @click="deleteReceipt(r.id)"
+              >&#10005;</button>
+            </div>
           </div>
         </div>
         <div class="field">
@@ -80,6 +87,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{
   expense: any
@@ -103,6 +111,8 @@ const customSplits = ref<Record<number, string>>({})
 const categories = ref<any[]>([])
 const receipts = ref<Array<{ id: number; image: string }>>(props.expense.receipts ?? [])
 const viewingReceipt = ref<string | null>(null)
+const auth = useAuthStore()
+const isCreator = computed(() => auth.user?.id === props.expense.created_by)
 const receiptFile = ref<File | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -136,6 +146,16 @@ const equalShare = computed(() => {
 function onFile(e: Event) {
   const input = e.target as HTMLInputElement
   receiptFile.value = input.files?.[0] ?? null
+}
+
+async function deleteReceipt(receiptId: number) {
+  if (!confirm('Delete this receipt?')) return
+  try {
+    await api.deleteReceipt(props.expense.id, receiptId)
+    receipts.value = receipts.value.filter(r => r.id !== receiptId)
+  } catch (e: any) {
+    error.value = e?.detail ?? 'Failed to delete receipt'
+  }
 }
 
 async function submit() {
@@ -226,7 +246,16 @@ input, select {
 
 .receipts-empty { font-size: 0.875rem; color: var(--color-text-placeholder); }
 .receipts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.receipt-thumb-wrap { position: relative; display: inline-block; }
 .receipt-thumb { max-height: 80px; border-radius: 4px; cursor: pointer; object-fit: contain; }
+.receipt-delete-btn {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--color-danger, #e53e3e); color: white;
+  border: none; font-size: 0.7rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; padding: 0;
+}
 
 .receipt-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.8);
