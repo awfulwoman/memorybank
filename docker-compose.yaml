@@ -9,8 +9,7 @@ services:
   backend:
     image: ghcr.io/awfulwoman/memorybank-backend:latest
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
-      - DJANGO_DEBUG=false
+      - DJANGO_SECRET_KEY="" # Set this key in a secure manner
     volumes:
       - ./data/db:/data/db
       - ./data/media:/data/media
