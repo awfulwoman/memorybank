@@ -1,8 +1,15 @@
 services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8101:8101"
+    depends_on:
+      - backend
+
   backend:
     build: ./backend
     ports:
-      - "8102:8000"
+      - "8102:8102"
     environment:
       - DJANGO_SETTINGS_MODULE=memorybank.settings
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
@@ -17,9 +24,4 @@ services:
       sh -c "python manage.py migrate &&
              gunicorn memorybank.wsgi:application --bind 0.0.0.0:8000 --workers 2"
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "8101:80"
-    depends_on:
-      - backend
+
