@@ -16,5 +16,3 @@ services:
     volumes:
       - ./data/db:/data/db
       - ./data/media:/data/media
-
-
