@@ -46,10 +46,13 @@
               >&#10005;</button>
             </div>
           </div>
-        </div>
-        <div class="field">
-          <label>Replace receipt image</label>
-          <input type="file" accept="image/*" @change="onFile" />
+          <input
+            v-if="isCreator && receipts.length < 5"
+            type="file"
+            accept="image/*"
+            class="receipt-upload-input"
+            @change="uploadReceipt"
+          />
         </div>
         <div class="field">
           <label>Split method</label>
@@ -113,7 +116,7 @@ const receipts = ref<Array<{ id: number; image: string }>>(props.expense.receipt
 const viewingReceipt = ref<string | null>(null)
 const auth = useAuthStore()
 const isCreator = computed(() => auth.user?.id === props.expense.created_by)
-const receiptFile = ref<File | null>(null)
+const uploading = ref(false)
 const loading = ref(false)
 const error = ref('')
 const splitError = ref('')
@@ -143,9 +146,20 @@ const equalShare = computed(() => {
   return (amt / props.members.length).toFixed(2)
 })
 
-function onFile(e: Event) {
+async function uploadReceipt(e: Event) {
   const input = e.target as HTMLInputElement
-  receiptFile.value = input.files?.[0] ?? null
+  const file = input.files?.[0]
+  if (!file) return
+  uploading.value = true
+  try {
+    const receipt = await api.uploadReceipt(props.expense.id, file)
+    receipts.value.push(receipt)
+  } catch (err: any) {
+    error.value = err?.message ?? 'Failed to upload receipt'
+  } finally {
+    uploading.value = false
+    input.value = ''
+  }
 }
 
 async function deleteReceipt(receiptId: number) {
@@ -184,19 +198,7 @@ async function submit() {
       payload.split_data = splits
     }
 
-    if (receiptFile.value) {
-      const form2 = new FormData()
-      form2.append('receipt_image', receiptFile.value)
-      Object.entries(payload).forEach(([k, v]) => form2.append(k, String(v)))
-      await fetch(`/api/expenses/${props.expense.id}/`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '' },
-        body: form2,
-      })
-    } else {
-      await api.updateExpense(props.expense.id, payload)
-    }
+    await api.updateExpense(props.expense.id, payload)
 
     emit('saved')
   } catch (e: any) {
@@ -256,6 +258,8 @@ input, select {
   display: flex; align-items: center; justify-content: center;
   line-height: 1; padding: 0;
 }
+
+.receipt-upload-input { margin-top: 0.5rem; width: auto; }
 
 .receipt-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.8);

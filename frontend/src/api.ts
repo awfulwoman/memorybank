@@ -100,6 +100,20 @@ export const api = {
   deleteReceipt: (expenseId: number, receiptId: number) =>
     request<void>(`/expenses/${expenseId}/receipts/${receiptId}/`, { method: 'DELETE' }),
 
+  uploadReceipt: (expenseId: number, file: File) => {
+    const form = new FormData()
+    form.append('image', file)
+    return fetch(`${BASE}/expenses/${expenseId}/receipts/`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-CSRFToken': getCsrfToken() },
+      body: form,
+    }).then(r => {
+      if (!r.ok) throw new Error(`Upload failed: ${r.status}`)
+      return r.json() as Promise<{ id: number; image: string }>
+    })
+  },
+
   adminUsers: () => request<any[]>('/admin/users/'),
   createUser: (data: any) => request('/admin/users/', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id: number, data: any) => request(`/admin/users/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
