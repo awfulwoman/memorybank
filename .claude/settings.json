@@ -1,14 +1,5 @@
 {
   "enabledPlugins": {
-    "commit-commands@claude-plugins-official": true,
-    "ralph-skills@ralph-marketplace": true
+    "commit-commands@claude-plugins-official": true
   },
-  "extraKnownMarketplaces": {
-    "ralph-marketplace": {
-      "source": {
-        "source": "github",
-        "repo": "snarktank/ralph"
-      }
-    }
-  }
 }
