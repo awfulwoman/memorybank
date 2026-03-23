@@ -149,3 +149,41 @@ class ReceiptDeleteTest(TestCase):
             f'/api/expenses/99999/receipts/{self.receipt.pk}/'
         )
         self.assertEqual(resp.status_code, 404)
+
+
+class ReceiptSerializerTest(TestCase):
+    """US-004: Verify receipts array is included in expense API responses."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='user1', password='pass')
+        self.group = Group.objects.create(name='G', created_by=self.user)
+        self.group.members.add(self.user)
+        self.client.force_login(self.user)
+        resp = self.client.post(f'/api/groups/{self.group.pk}/expenses/', {
+            'amount': '30.00', 'description': 'Lunch', 'date': '2026-01-01',
+        }, format='json')
+        self.expense_id = resp.json()['id']
+
+    def test_expense_list_includes_receipts_array(self):
+        ReceiptImage.objects.create(expense_id=self.expense_id, image='receipts/a.png')
+        ReceiptImage.objects.create(expense_id=self.expense_id, image='receipts/b.png')
+        resp = self.client.get(f'/api/groups/{self.group.pk}/expenses/')
+        self.assertEqual(resp.status_code, 200)
+        expense = resp.json()[0]
+        self.assertIn('receipts', expense)
+        self.assertEqual(len(expense['receipts']), 2)
+        self.assertIn('id', expense['receipts'][0])
+        self.assertIn('image', expense['receipts'][0])
+
+    def test_expense_list_empty_receipts(self):
+        resp = self.client.get(f'/api/groups/{self.group.pk}/expenses/')
+        expense = resp.json()[0]
+        self.assertIn('receipts', expense)
+        self.assertEqual(len(expense['receipts']), 0)
+
+    def test_receipt_image_field_still_present(self):
+        """Old receipt_image field remains for backwards compatibility."""
+        resp = self.client.get(f'/api/groups/{self.group.pk}/expenses/')
+        expense = resp.json()[0]
+        self.assertIn('receipt_image', expense)
