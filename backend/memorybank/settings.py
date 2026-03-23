@@ -67,7 +67,7 @@ WSGI_APPLICATION = 'memorybank.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.environ.get('SQLITE_PATH', str(BASE_DIR / 'db.sqlite3')),
+        'NAME': os.environ.get('SQLITE_PATH', '/data/db/db.sqlite3' if os.path.isdir('/data/db') else str(BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -87,7 +87,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.environ.get('MEDIA_ROOT', str(BASE_DIR / 'media'))
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/data/media' if os.path.isdir('/data/media') else str(BASE_DIR / 'media'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
