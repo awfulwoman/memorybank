@@ -2,14 +2,14 @@ services:
   frontend:
     image: ghcr.io/awfulwoman/memorybank-frontend:latest
     ports:
-      - "8101:8101"
+      - "8101:80"
     depends_on:
       - backend
 
   backend:
     image: ghcr.io/awfulwoman/memorybank-backend:latest
     ports:
-      - "8102:8102"
+      - "8102:8000"
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
       - DJANGO_DEBUG=false
