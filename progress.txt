@@ -1,156 +1,126 @@
-## Codebase Patterns
-- Backend venv: `backend/.venv/bin/python`
-- Django requires `DJANGO_SECRET_KEY=dev-secret-key` env var for manage.py commands
-- Run tests: `cd backend && DJANGO_SECRET_KEY=dev-secret-key .venv/bin/python manage.py test core`
-- Migrations dir: `backend/core/migrations/`
-- `GroupViewSet` uses `get_permissions()` to vary permission by action (not a single `permission_classes` list)
-- When changing permission behavior, check `test_permissions.py` for tests that assert old behavior
-- GroupSerializer returns `members_list` with `[{id, username, display_name}]` — use for member UIs
-- GroupMemberView accepts `user_id` OR `username` in POST body
-
 # Ralph Progress Log
-Started: Sun 22 Mar 2026 20:32:57 CET
+Started: Mon 23 Mar 2026 13:00:27 CET
 ---
 
-## 2026-03-22 - US-001
-- Added `icon` CharField to Category (default: `mdi-shape-outline`) and Group (default: `mdi-account-group`) models
-- Added `icon` to CategorySerializer and GroupSerializer fields
-- Generated migration `0009_category_icon_group_icon.py`
-- Files changed: `core/models.py`, `core/serializers.py`, `core/migrations/0009_category_icon_group_icon.py`
-- **Learnings for future iterations:**
-  - Django SECRET_KEY is required via env var since security hardening (US-007 from prior PRD)
-  - python3 not in path with django; must use `.venv/bin/python`
+## Codebase Patterns
+- Backend venv: `backend/.venv/bin/python`, needs `DJANGO_SECRET_KEY=dev-secret`
+- Need `whitenoise` installed in venv for tests to pass
+- Migrations numbered sequentially in `core/migrations/`
+- Data migrations use `apps.get_model()` pattern with forward + reverse functions
+- Tests in `core/tests/test_*.py`, use `APIClient` + `force_login`
 ---
 
-## 2026-03-22 - US-002
-- Changed `GroupViewSet` to use `get_permissions()` — `create` action allows any authenticated user, other write actions still require staff
-- Updated `perform_create()` to auto-add creator to `group.members` after save
-- Updated `test_permissions.py`: changed `test_non_staff_post_groups_403` → `test_non_staff_post_groups_allowed` (201)
-- Added tests in `test_groups.py`: `test_non_staff_create_group`, `test_staff_create_group_also_added_to_members`
-- Files changed: `core/views.py`, `core/tests/test_groups.py`, `core/tests/test_permissions.py`
+## 2026-03-23 - US-001
+- Created `ReceiptImage` model (FK to Expense, related_name='receipts', ImageField upload_to='receipts/', auto_now_add created_at)
+- Generated schema migration `0011_receiptimage.py`
+- Created data migration `0012_migrate_receipt_images.py` to copy existing `receipt_image` paths
+- Added tests in `test_models.py`: creation and cascade delete
+- Files changed: `core/models.py`, `core/migrations/0011_receiptimage.py`, `core/migrations/0012_migrate_receipt_images.py`, `core/tests/test_models.py`
 - **Learnings for future iterations:**
-  - When loosening permissions on a ViewSet, existing permission tests will break — always check `test_permissions.py`
-  - `get_permissions()` returning instances (not classes) is the pattern for per-action permission control
+  - `python` not available, use `.venv/bin/python` with `DJANGO_SECRET_KEY=dev-secret`
+  - `whitenoise` missing from venv, needed manual install
+  - All 90 tests pass
 ---
 
-## 2026-03-22 - US-003
-- Added `IsGroupOwnerOrAdmin` permission class to `core/permissions.py`
-- Follows same pattern as `IsGroupMemberOrAdmin`: extends `IsAuthenticated`, extracts group pk from `view.kwargs`
-- Returns True for `group.created_by == request.user` or `request.user.is_staff`
-- Added 5 unit tests in `test_permissions.py` using `APIRequestFactory` and fake view objects
-- Files changed: `core/permissions.py`, `core/tests/test_permissions.py`
+## 2026-03-23 - US-002
+- Created `ExpenseReceiptView` with POST handler: validates creator ownership (403), file presence (400), size max 5MB (400), max 5 receipts (400), returns 201 with {id, image}
+- Added URL pattern `expenses/<int:pk>/receipts/` in `core/urls.py`
+- Added 6 tests in `core/tests/test_receipts.py`: success, no image, non-creator 403, max 5 limit, too large, nonexistent expense
+- Files changed: `core/views.py`, `core/urls.py`, `core/tests/test_receipts.py`
 - **Learnings for future iterations:**
-  - Unit-testing permission classes directly (with APIRequestFactory + fake view) avoids coupling to ViewSet wiring
-  - Permission class tests should cover: owner allowed, staff allowed, non-owner denied, nonexistent group, missing pk
+  - `MultiPartParser` already imported in views.py (used by MeAvatarView)
+  - Use `Expense.objects.get()` (not `all_objects`) so deleted expenses can't get receipts
+  - All 96 tests pass
 ---
 
-## 2026-03-22 - US-004
-- Wired `IsGroupOwnerOrAdmin` into `GroupViewSet.get_permissions()` for `update`, `partial_update`, and `destroy` actions
-- Added 5 integration tests in `test_groups.py`: non-owner PATCH 403, owner PATCH 200, staff PATCH 200, owner DELETE 204, non-owner DELETE 403
-- Files changed: `core/views.py`, `core/tests/test_groups.py`
+## 2026-03-23 - US-003
+- Added DELETE handler to `ExpenseReceiptView`: validates creator ownership (403), receipt belongs to expense (404), returns 204 on success
+- Added URL pattern `expenses/<int:pk>/receipts/<int:receipt_id>/` in `core/urls.py`
+- Added 4 tests in `ReceiptDeleteTest`: success, non-creator 403, receipt not on expense 404, nonexistent expense 404
+- Files changed: `core/views.py`, `core/urls.py`, `core/tests/test_receipts.py`
 - **Learnings for future iterations:**
-  - `get_permissions()` pattern supports easy per-action branching — just add more `if self.action in (...)` clauses
-  - Integration tests for ViewSet permissions need `content_type="application/json"` for PATCH requests
+  - DELETE method on same view class, URL adds `<int:receipt_id>` param — Django routes to same view, method dispatch handles it
+  - All 100 tests pass
 ---
 
-## 2026-03-22 - US-005
-- Changed `GroupMemberView` permission from `IsAdminUser` to `IsGroupOwnerOrAdmin`
-- This allows group owners (created_by) to add/remove members, not just staff
-- Added 5 integration tests: owner add, owner remove, non-owner add 403, non-owner remove 403, staff add to any group
-- Files changed: `core/views.py`, `core/tests/test_groups.py`
+## 2026-03-23 - US-004
+- Added `ReceiptImageSerializer` (read-only: id, image) to `core/serializers.py`
+- Added `receipts = ReceiptImageSerializer(many=True, read_only=True)` to `ExpenseSerializer`
+- Old `receipt_image` field kept for backwards compatibility
+- Added 3 tests in `ReceiptSerializerTest`: receipts array in list, empty receipts, receipt_image field still present
+- Files changed: `core/serializers.py`, `core/tests/test_receipts.py`
 - **Learnings for future iterations:**
-  - `IsGroupOwnerOrAdmin` reuses cleanly for any view that takes `pk` as a group identifier in URL kwargs
-  - Existing `GroupMemberTest` tests still pass since they use staff user (who is also group creator)
+  - `related_name='receipts'` on ReceiptImage FK means DRF nested serializer works automatically
+  - All 103 tests pass
 ---
 
-## 2026-03-22 - US-006
-- Installed `@mdi/font` npm package
-- Imported `@mdi/font/css/materialdesignicons.min.css` in `main.ts`
-- Created `IconPicker.vue` with search input, scrollable grid of 75 curated icons, v-model support
-- Uses `update:modelValue` emit for v-model binding pattern
-- Files changed: `frontend/package.json`, `frontend/package-lock.json`, `frontend/src/main.ts`, `frontend/src/components/IconPicker.vue`
+## 2026-03-23 - US-005
+- Added Receipts section to EditExpenseForm.vue below form fields, above "Replace receipt image"
+- Shows thumbnails (max 80px height, aspect ratio preserved via object-fit: contain) from expense.receipts array
+- Shows "No receipts attached" placeholder when array empty
+- Added `receipts` ref initialized from `props.expense.receipts`
+- Files changed: `frontend/src/components/EditExpenseForm.vue`
 - **Learnings for future iterations:**
-  - IconPicker uses v-model pattern (`modelValue` prop + `update:modelValue` emit) for easy parent integration
-  - Curated icon list of 75 common MDI icons covers categories like food, transport, health, entertainment, household, tech
-  - CSS vars `--color-border`, `--color-background-soft`, `--color-text`, `--color-primary` used for theming consistency
+  - expense.receipts is `Array<{id, image}>` from ReceiptImageSerializer (US-004)
+  - Thumbnails use `cursor: pointer` anticipating US-006 click-to-view
+  - All 103 backend tests pass, typecheck passes
 ---
 
-## 2026-03-22 - US-007
-- Added MDI icon display to dashboard group cards next to group name
-- Icon renders via `<span class="mdi" :class="group.icon">` with fallback to `mdi-account-group`
-- Styled at 1.25rem size with `var(--color-primary)` color, using flexbox for alignment
-- Files changed: `frontend/src/views/DashboardView.vue`
+## 2026-03-23 - US-006
+- Added full-size receipt viewer overlay to EditExpenseForm.vue
+- Clicking a thumbnail sets `viewingReceipt` ref, opening a fixed overlay (z-index 200) with dark background
+- Close by clicking background or X button; image click stopped from propagating
+- Reused same CSS pattern from GroupDetailView's receipt-overlay
+- Files changed: `frontend/src/components/EditExpenseForm.vue`
 - **Learnings for future iterations:**
-  - MDI icons render via `<span class="mdi mdi-icon-name">` — use `:class` binding for dynamic icons
-  - Group cards use h3 with flexbox for icon+text alignment
+  - Receipt overlay placed inside modal-overlay but with higher z-index (200 vs 100) works fine
+  - `@click.self` on modal-overlay doesn't fire for clicks on child overlay elements
+  - All 103 backend tests pass, typecheck passes
 ---
 
-## 2026-03-22 - US-008
-- Created `CreateGroupModal.vue` with fields: name, icon (IconPicker), currency (dropdown from API), default split method
-- Added "+ Create Group" button to dashboard section header, opens modal on click
-- On successful creation, new group is pushed to list and modal closes
-- Files changed: `frontend/src/components/CreateGroupModal.vue` (new), `frontend/src/views/DashboardView.vue`
+## 2026-03-23 - US-007
+- Added delete button (X) on each receipt thumbnail, visible only to expense creator
+- Clicking delete shows `confirm()` prompt, then calls `DELETE /api/expenses/{id}/receipts/{receipt_id}/`
+- Thumbnail removed from list on success; error shown on failure
+- Added `deleteReceipt` method to `api.ts`
+- Wrapped thumbnails in `receipt-thumb-wrap` div for relative positioning of delete button
+- Files changed: `frontend/src/components/EditExpenseForm.vue`, `frontend/src/api.ts`
 - **Learnings for future iterations:**
-  - Modal pattern: `modal-overlay` with `@click.self` for backdrop close, inner `.modal` div
-  - `api.currencies()` returns `{id, code, name}` — use for currency dropdown
-  - Group create API accepts `{name, icon, currency, default_split_method}`, returns full group object
+  - `expense.created_by` (user id) available on expense object, compare with `auth.user?.id` for creator check
+  - `confirm()` is simplest confirmation approach for destructive actions in modals
+  - All 103 backend tests pass, typecheck passes
 ---
 
-## 2026-03-22 - US-009
-- Created `GroupSettingsModal.vue` with editable name and IconPicker for icon
-- Added gear/cog button to group detail page header, visible only to group owner (`created_by == user.id`) or staff
-- Save calls `PATCH /api/groups/{id}/` and updates group data in-place
-- Reused modal pattern from CreateGroupModal (overlay, form, actions)
-- Files changed: `frontend/src/components/GroupSettingsModal.vue` (new), `frontend/src/views/GroupDetailView.vue`
+## 2026-03-23 - US-008
+- Added `uploadReceipt` method to `api.ts` using FormData POST to `/api/expenses/{id}/receipts/`
+- Replaced old "Replace receipt image" file input with inline upload input below receipt thumbnails
+- File input hidden when 5 receipts attached or user is not the creator
+- New thumbnail appended to list on successful upload; input reset after each upload
+- Removed old `receiptFile` ref and `onFile` handler; removed legacy FormData PATCH upload from submit
+- Files changed: `frontend/src/components/EditExpenseForm.vue`, `frontend/src/api.ts`
 - **Learnings for future iterations:**
-  - Group serializer returns `created_by` as user ID (number), not username — compare with `auth.user.id`
-  - `api.updateGroup()` returns the full updated group object — can assign directly to `group.value`
+  - `api.uploadReceipt` uses raw `fetch` (like `uploadAvatar`) since it's multipart FormData, not JSON
+  - Reset `input.value = ''` after upload so same file can be re-selected
+  - All 103 backend tests pass, typecheck passes
 ---
 
-## 2026-03-22 - US-010
-- Added member management to GroupSettingsModal: member list with remove buttons, add-by-username input
-- Added `members_list` field to GroupSerializer (returns `[{id, username, display_name}]`)
-- Extended GroupMemberView.post to accept `username` as alternative to `user_id`
-- Added `addMemberByUsername` to frontend api.ts
-- Owner cannot remove themselves (shows "you" badge instead of remove button)
-- Files changed: `core/serializers.py`, `core/views.py`, `frontend/src/api.ts`, `frontend/src/components/GroupSettingsModal.vue`, `frontend/src/views/GroupDetailView.vue`
+## 2026-03-23 - US-009
+- Replaced old PATCH `/api/expenses/{id}/` with `receipt_image` FormData upload with `api.uploadReceipt(expense.id, file)` which POSTs to `/api/expenses/{id}/receipts/`
+- Kept existing file input in add expense form
+- Removed 8 lines of manual fetch code, replaced with 1-line API call
+- Files changed: `frontend/src/components/AddExpenseForm.vue`
 - **Learnings for future iterations:**
-  - GroupSerializer now returns `members_list` with id/username/display_name — use this instead of just `member_ids` for UI
-  - GroupMemberView accepts both `user_id` and `username` for adding members
-  - Modal member management pattern: local `members` ref copied from props, updated after API calls
+  - `api.uploadReceipt` already existed from US-008, just needed to wire it into the create flow
+  - All 103 backend tests pass, typecheck passes
 ---
 
-## 2026-03-22 - US-011
-- Added "Danger Zone" section to GroupSettingsModal with Delete Group button
-- Inline confirmation dialog (not browser `confirm()`) — shows warning text with Cancel/Yes buttons
-- On successful deletion, emits `deleted` event; GroupDetailView handles it with `router.push('/')`
-- Files changed: `frontend/src/components/GroupSettingsModal.vue`, `frontend/src/views/GroupDetailView.vue`
+## 2026-03-23 - US-010
+- Replaced old `receipt_image`-based "📎 Receipt" button with paperclip icon + count using `e.receipts.length`
+- Indicator only shown when `e.receipts?.length > 0`
+- Removed unused `viewingReceipt` ref, receipt overlay template, and related CSS (receipts now viewed from edit modal)
+- Files changed: `frontend/src/views/GroupDetailView.vue`
 - **Learnings for future iterations:**
-  - Inline confirmation pattern (toggle `confirmingDelete` ref) is better UX than `window.confirm()`
-  - `api.deleteGroup` already existed in api.ts — always check before adding new API methods
----
-
-## 2026-03-22 - US-012
-- Added IconPicker to admin category creation form (shows icon preview + picker below name input)
-- Added icon display to category list rows (MDI icon rendered before name)
-- Added IconPicker to category edit mode (appears below row when editing)
-- Updated `saveNew` to send `icon` field with `createCategory` API call
-- Updated `saveEdit` to send `icon` field with `updateCategory` API call
-- Updated `editing` ref type to include optional `icon` field
-- Files changed: `frontend/src/views/AdminView.vue`
-- **Learnings for future iterations:**
-  - The admin view uses inline editing pattern — for icon editing, an expandable IconPicker below the row works well
-  - `startEdit` must copy all editable fields (including `icon`) to the editing ref
-  - Category API already accepts `icon` field from US-001 serializer work — no backend changes needed
----
-
-## 2026-03-22 - US-013
-- Added `category_icon` field to ExpenseSerializer (source: `category.icon`, read-only)
-- Added icon display next to category name in expense list rows (GroupDetailView) with `mdi-shape-outline` fallback
-- Added icon preview in category `<select>` dropdowns in AddExpenseForm and EditExpenseForm using absolute-positioned icon overlay
-- Files changed: `core/serializers.py`, `frontend/src/components/AddExpenseForm.vue`, `frontend/src/components/EditExpenseForm.vue`, `frontend/src/views/GroupDetailView.vue`
-- **Learnings for future iterations:**
-  - HTML `<select>` options can't render icons — use an absolute-positioned `<span>` next to the select to show the selected category's icon
-  - `selectedCategory` computed from categories array + form.category value pattern works well for derived display data
-  - ExpenseSerializer can expose related model fields via `source='category.icon'` — no migration needed
+  - Old receipt_image field on expenses is now fully unused in frontend — could be removed from serializer in future cleanup
+  - MDI `mdi-paperclip` icon available for receipt indicators
+  - All 103 backend tests pass, typecheck passes
 ---

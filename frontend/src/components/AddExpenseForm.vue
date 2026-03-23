@@ -139,14 +139,7 @@ async function submit() {
     const expense = await api.createExpense(props.groupId, payload) as any
 
     if (receiptFile.value) {
-      const form2 = new FormData()
-      form2.append('receipt_image', receiptFile.value)
-      await fetch(`/api/expenses/${expense.id}/`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '' },
-        body: form2,
-      })
+      await api.uploadReceipt(expense.id, receiptFile.value)
     }
 
     emit('saved')

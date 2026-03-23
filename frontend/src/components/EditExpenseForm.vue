@@ -27,8 +27,32 @@
           </div>
         </div>
         <div class="field">
-          <label>Replace receipt image</label>
-          <input type="file" accept="image/*" @change="onFile" />
+          <label>Receipts</label>
+          <div v-if="receipts.length === 0" class="receipts-empty">No receipts attached</div>
+          <div v-else class="receipts-grid">
+            <div v-for="r in receipts" :key="r.id" class="receipt-thumb-wrap">
+              <img
+                :src="r.image"
+                class="receipt-thumb"
+                alt="Receipt"
+                @click="viewingReceipt = r.image"
+              />
+              <button
+                v-if="isCreator"
+                type="button"
+                class="receipt-delete-btn"
+                title="Delete receipt"
+                @click="deleteReceipt(r.id)"
+              >&#10005;</button>
+            </div>
+          </div>
+          <input
+            v-if="isCreator && receipts.length < 5"
+            type="file"
+            accept="image/*"
+            class="receipt-upload-input"
+            @change="uploadReceipt"
+          />
         </div>
         <div class="field">
           <label>Split method</label>
@@ -54,12 +78,19 @@
         </div>
       </form>
     </div>
+
+    <!-- Full-size receipt viewer -->
+    <div v-if="viewingReceipt" class="receipt-overlay" @click="viewingReceipt = null">
+      <img :src="viewingReceipt" class="receipt-image" alt="Receipt" @click.stop />
+      <button class="receipt-close" @click="viewingReceipt = null">&#10005;</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{
   expense: any
@@ -81,7 +112,11 @@ const form = ref({
 const splitMethod = ref('equal')
 const customSplits = ref<Record<number, string>>({})
 const categories = ref<any[]>([])
-const receiptFile = ref<File | null>(null)
+const receipts = ref<Array<{ id: number; image: string }>>(props.expense.receipts ?? [])
+const viewingReceipt = ref<string | null>(null)
+const auth = useAuthStore()
+const isCreator = computed(() => auth.user?.id === props.expense.created_by)
+const uploading = ref(false)
 const loading = ref(false)
 const error = ref('')
 const splitError = ref('')
@@ -111,9 +146,30 @@ const equalShare = computed(() => {
   return (amt / props.members.length).toFixed(2)
 })
 
-function onFile(e: Event) {
+async function uploadReceipt(e: Event) {
   const input = e.target as HTMLInputElement
-  receiptFile.value = input.files?.[0] ?? null
+  const file = input.files?.[0]
+  if (!file) return
+  uploading.value = true
+  try {
+    const receipt = await api.uploadReceipt(props.expense.id, file)
+    receipts.value.push(receipt)
+  } catch (err: any) {
+    error.value = err?.message ?? 'Failed to upload receipt'
+  } finally {
+    uploading.value = false
+    input.value = ''
+  }
+}
+
+async function deleteReceipt(receiptId: number) {
+  if (!confirm('Delete this receipt?')) return
+  try {
+    await api.deleteReceipt(props.expense.id, receiptId)
+    receipts.value = receipts.value.filter(r => r.id !== receiptId)
+  } catch (e: any) {
+    error.value = e?.detail ?? 'Failed to delete receipt'
+  }
 }
 
 async function submit() {
@@ -142,19 +198,7 @@ async function submit() {
       payload.split_data = splits
     }
 
-    if (receiptFile.value) {
-      const form2 = new FormData()
-      form2.append('receipt_image', receiptFile.value)
-      Object.entries(payload).forEach(([k, v]) => form2.append(k, String(v)))
-      await fetch(`/api/expenses/${props.expense.id}/`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '' },
-        body: form2,
-      })
-    } else {
-      await api.updateExpense(props.expense.id, payload)
-    }
+    await api.updateExpense(props.expense.id, payload)
 
     emit('saved')
   } catch (e: any) {
@@ -201,6 +245,32 @@ input, select {
 .actions button[type="submit"] { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
 .error { color: var(--color-danger); font-size: 0.875rem; }
+
+.receipts-empty { font-size: 0.875rem; color: var(--color-text-placeholder); }
+.receipts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.receipt-thumb-wrap { position: relative; display: inline-block; }
+.receipt-thumb { max-height: 80px; border-radius: 4px; cursor: pointer; object-fit: contain; }
+.receipt-delete-btn {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--color-danger, #e53e3e); color: white;
+  border: none; font-size: 0.7rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; padding: 0;
+}
+
+.receipt-upload-input { margin-top: 0.5rem; width: auto; }
+
+.receipt-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+}
+.receipt-image { max-width: 90vw; max-height: 90vh; border-radius: 4px; }
+.receipt-close {
+  position: fixed; top: 1rem; right: 1rem; background: white;
+  border: none; border-radius: 50%; width: 2rem; height: 2rem;
+  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 
 .category-select-wrapper {
   position: relative;

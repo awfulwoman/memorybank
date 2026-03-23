@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ApiKey, Category, Currency, Expense, Group, GroupType, Settlement, User
+from .models import ApiKey, Category, Currency, Expense, Group, GroupType, ReceiptImage, Settlement, User
 from .permissions import IsGroupMemberOrAdmin, IsGroupOwnerOrAdmin
 from .serializers import (
     AdminUserSerializer, CategorySerializer, CurrencySerializer, ExpenseSerializer, GroupSerializer,
@@ -213,6 +213,45 @@ class ExpenseDetailView(APIView):
             return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
         expense.is_deleted = True
         expense.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+MAX_RECEIPT_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_RECEIPTS_PER_EXPENSE = 5
+
+
+class ExpenseReceiptView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, pk):
+        try:
+            expense = Expense.objects.get(pk=pk)
+        except Expense.DoesNotExist:
+            return Response({'detail': 'Expense not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if expense.created_by != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        image = request.FILES.get('image')
+        if not image:
+            return Response({'detail': 'No image provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        if image.size > MAX_RECEIPT_SIZE:
+            return Response({'detail': 'Image too large. Max 5MB.'}, status=status.HTTP_400_BAD_REQUEST)
+        if expense.receipts.count() >= MAX_RECEIPTS_PER_EXPENSE:
+            return Response({'detail': 'Maximum 5 receipts per expense.'}, status=status.HTTP_400_BAD_REQUEST)
+        receipt = ReceiptImage.objects.create(expense=expense, image=image)
+        return Response({'id': receipt.id, 'image': receipt.image.url}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk, receipt_id):
+        try:
+            expense = Expense.objects.get(pk=pk)
+        except Expense.DoesNotExist:
+            return Response({'detail': 'Expense not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if expense.created_by != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            receipt = expense.receipts.get(pk=receipt_id)
+        except ReceiptImage.DoesNotExist:
+            return Response({'detail': 'Receipt not found.'}, status=status.HTTP_404_NOT_FOUND)
+        receipt.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

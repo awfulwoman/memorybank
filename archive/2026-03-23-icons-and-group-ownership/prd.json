@@ -14,7 +14,7 @@
         "Tests pass: cd backend && python manage.py test core"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -31,7 +31,7 @@
         "Tests pass: cd backend && python manage.py test core"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -47,7 +47,7 @@
         "Tests pass: cd backend && python manage.py test core"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -61,7 +61,7 @@
         "Tests pass: cd backend && python manage.py test core"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -77,7 +77,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -93,7 +93,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -110,7 +110,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -127,7 +127,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -142,7 +142,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -157,7 +157,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]

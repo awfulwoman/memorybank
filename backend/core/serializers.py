@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from .models import Category, Currency, Expense, ExpenseSplit, Group, GroupType, Settlement, User
+from .models import Category, Currency, Expense, ExpenseSplit, Group, GroupType, ReceiptImage, Settlement, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -85,6 +85,13 @@ class GroupSerializer(serializers.ModelSerializer):
         ]
 
 
+class ReceiptImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReceiptImage
+        fields = ['id', 'image']
+        read_only_fields = ['id', 'image']
+
+
 class ExpenseSplitSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
 
@@ -95,6 +102,7 @@ class ExpenseSplitSerializer(serializers.ModelSerializer):
 
 class ExpenseSerializer(serializers.ModelSerializer):
     splits = ExpenseSplitSerializer(many=True, read_only=True)
+    receipts = ReceiptImageSerializer(many=True, read_only=True)
     split_data = serializers.ListField(
         child=serializers.DictField(), write_only=True, required=False
     )
@@ -108,7 +116,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'amount', 'description', 'date', 'category', 'category_name', 'category_icon',
             'group', 'created_by', 'created_by_username', 'created_by_display_name', 'receipt_image',
-            'is_deleted', 'created_at', 'updated_at', 'splits', 'split_data',
+            'is_deleted', 'created_at', 'updated_at', 'splits', 'split_data', 'receipts',
         ]
         read_only_fields = ['created_by', 'group', 'is_deleted', 'created_at', 'updated_at']
 

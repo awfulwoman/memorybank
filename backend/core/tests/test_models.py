@@ -7,6 +7,7 @@ from core.models import (
     Expense,
     Group,
     GroupType,
+    ReceiptImage,
     User,
 )
 
@@ -75,6 +76,31 @@ class ExpenseManagerTest(TestCase):
         self.assertIn(exp, Expense.objects.all())
         self.assertNotIn(deleted_exp, Expense.objects.all())
         self.assertIn(deleted_exp, Expense.all_objects.all())
+
+
+class ReceiptImageModelTest(TestCase):
+    def test_create_receipt_image(self):
+        user = User.objects.create_user(username="u1", password="pass")
+        group = Group.objects.create(name="G")
+        expense = Expense.objects.create(
+            amount=100, description="Test", date="2026-01-01",
+            group=group, created_by=user,
+        )
+        receipt = ReceiptImage.objects.create(expense=expense, image='receipts/test.jpg')
+        self.assertEqual(receipt.expense, expense)
+        self.assertEqual(str(receipt), f'Receipt for {expense}')
+        self.assertEqual(expense.receipts.count(), 1)
+
+    def test_receipts_deleted_with_expense(self):
+        user = User.objects.create_user(username="u1", password="pass")
+        group = Group.objects.create(name="G")
+        expense = Expense.objects.create(
+            amount=100, description="Test", date="2026-01-01",
+            group=group, created_by=user,
+        )
+        ReceiptImage.objects.create(expense=expense, image='receipts/test.jpg')
+        expense.delete()
+        self.assertEqual(ReceiptImage.objects.count(), 0)
 
 
 class ApiKeyModelTest(TestCase):
