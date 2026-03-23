@@ -4,6 +4,8 @@ An expense-splitting app that can be easily self-hosted.
 
 Built with Django + Vue 3.
 
+[![Publish](https://github.com/awfulwoman/memorybank/actions/workflows/publish.yml/badge.svg)](https://github.com/awfulwoman/memorybank/actions/workflows/publish.yml)
+
 ## Quick Start
 
 Create a `docker-compose.yaml` file and run `docker compose up`.
