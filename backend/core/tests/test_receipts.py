@@ -94,3 +94,58 @@ class ReceiptUploadTest(TestCase):
             format='multipart',
         )
         self.assertEqual(resp.status_code, 404)
+
+
+class ReceiptDeleteTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.creator = User.objects.create_user(username='creator', password='pass')
+        self.other = User.objects.create_user(username='other', password='pass')
+        self.group = Group.objects.create(name='G', created_by=self.creator)
+        self.group.members.add(self.creator, self.other)
+        self.client.force_login(self.creator)
+        resp = self.client.post(f'/api/groups/{self.group.pk}/expenses/', {
+            'amount': '50.00', 'description': 'Test', 'date': '2026-01-01',
+        }, format='json')
+        self.expense_id = resp.json()['id']
+        self.receipt = ReceiptImage.objects.create(
+            expense_id=self.expense_id, image='receipts/test.png'
+        )
+
+    def test_delete_receipt_success(self):
+        self.client.force_login(self.creator)
+        resp = self.client.delete(
+            f'/api/expenses/{self.expense_id}/receipts/{self.receipt.pk}/'
+        )
+        self.assertEqual(resp.status_code, 204)
+        self.assertFalse(ReceiptImage.objects.filter(pk=self.receipt.pk).exists())
+
+    def test_delete_by_non_creator_returns_403(self):
+        self.client.force_login(self.other)
+        resp = self.client.delete(
+            f'/api/expenses/{self.expense_id}/receipts/{self.receipt.pk}/'
+        )
+        self.assertEqual(resp.status_code, 403)
+        self.assertTrue(ReceiptImage.objects.filter(pk=self.receipt.pk).exists())
+
+    def test_delete_receipt_not_on_expense_returns_404(self):
+        # Create another expense with its own receipt
+        resp = self.client.post(f'/api/groups/{self.group.pk}/expenses/', {
+            'amount': '25.00', 'description': 'Other', 'date': '2026-01-01',
+        }, format='json')
+        other_expense_id = resp.json()['id']
+        other_receipt = ReceiptImage.objects.create(
+            expense_id=other_expense_id, image='receipts/other.png'
+        )
+        # Try to delete other_receipt via the first expense's URL
+        resp = self.client.delete(
+            f'/api/expenses/{self.expense_id}/receipts/{other_receipt.pk}/'
+        )
+        self.assertEqual(resp.status_code, 404)
+
+    def test_delete_nonexistent_expense_returns_404(self):
+        self.client.force_login(self.creator)
+        resp = self.client.delete(
+            f'/api/expenses/99999/receipts/{self.receipt.pk}/'
+        )
+        self.assertEqual(resp.status_code, 404)

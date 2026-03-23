@@ -240,6 +240,20 @@ class ExpenseReceiptView(APIView):
         receipt = ReceiptImage.objects.create(expense=expense, image=image)
         return Response({'id': receipt.id, 'image': receipt.image.url}, status=status.HTTP_201_CREATED)
 
+    def delete(self, request, pk, receipt_id):
+        try:
+            expense = Expense.objects.get(pk=pk)
+        except Expense.DoesNotExist:
+            return Response({'detail': 'Expense not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if expense.created_by != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            receipt = expense.receipts.get(pk=receipt_id)
+        except ReceiptImage.DoesNotExist:
+            return Response({'detail': 'Receipt not found.'}, status=status.HTTP_404_NOT_FOUND)
+        receipt.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class GroupSettlementView(APIView):
     permission_classes = [IsGroupMemberOrAdmin]

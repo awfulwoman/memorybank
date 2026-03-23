@@ -32,4 +32,5 @@ urlpatterns = [
     path('groups/<int:pk>/export/', GroupExportView.as_view(), name='group-export'),
     path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expense-detail'),
     path('expenses/<int:pk>/receipts/', ExpenseReceiptView.as_view(), name='expense-receipts'),
+    path('expenses/<int:pk>/receipts/<int:receipt_id>/', ExpenseReceiptView.as_view(), name='expense-receipt-detail'),
 ]
