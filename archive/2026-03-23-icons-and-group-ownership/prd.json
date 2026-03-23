@@ -1,0 +1,164 @@
+{
+  "project": "MemoryBank",
+  "branchName": "ralph/expense-receipts",
+  "description": "Support multiple receipt images per expense (max 5), with thumbnails in edit modal, full-size viewer, upload, and delete",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create ReceiptImage model and data migration",
+      "description": "As a developer, I need a model to store multiple receipt images per expense.",
+      "acceptanceCriteria": [
+        "Create ReceiptImage model with fields: id, expense (FK to Expense, related_name='receipts'), image (ImageField upload_to='receipts/'), created_at (auto_now_add)",
+        "Generate and run migration successfully",
+        "Add data migration: for each Expense with a non-empty receipt_image, create a ReceiptImage record copying the image path",
+        "Tests pass: cd backend && python manage.py test core"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add receipt upload endpoint",
+      "description": "As a developer, I need an API endpoint to upload receipt images to an expense.",
+      "acceptanceCriteria": [
+        "POST /api/expenses/{id}/receipts/ accepts multipart form data with 'image' field",
+        "Validates image file size max 5MB, returns 400 if too large",
+        "Returns 400 if expense already has 5 receipt images",
+        "Only expense creator can upload (403 for others)",
+        "Returns 201 with {id, image} on success",
+        "Add URL pattern to core/urls.py",
+        "Tests pass: cd backend && python manage.py test core"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Add receipt delete endpoint",
+      "description": "As a developer, I need an API endpoint to delete a receipt image from an expense.",
+      "acceptanceCriteria": [
+        "DELETE /api/expenses/{id}/receipts/{receipt_id}/ deletes the ReceiptImage record",
+        "Only expense creator can delete (403 for others)",
+        "Returns 404 if receipt does not belong to the expense",
+        "Returns 204 on success",
+        "Add URL pattern to core/urls.py",
+        "Tests pass: cd backend && python manage.py test core"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Include receipts in ExpenseSerializer",
+      "description": "As a developer, I need the expense API to return all receipt images.",
+      "acceptanceCriteria": [
+        "ExpenseSerializer includes a read-only 'receipts' field: list of {id, image} objects",
+        "GET /api/groups/{id}/expenses/ returns receipts array for each expense",
+        "The old receipt_image field remains for backwards compatibility but is no longer used for new uploads",
+        "Tests pass: cd backend && python manage.py test core"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Display receipt thumbnails in edit expense modal",
+      "description": "As a user, I want to see all attached receipts when editing an expense.",
+      "acceptanceCriteria": [
+        "Edit expense modal shows a Receipts section below form fields",
+        "Each receipt renders as a thumbnail (max 80px height, aspect ratio preserved)",
+        "If no receipts, show 'No receipts attached' text",
+        "Thumbnails loaded from expense.receipts array",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Full-size receipt viewer overlay",
+      "description": "As a user, I want to click a receipt thumbnail to see the full-size image.",
+      "acceptanceCriteria": [
+        "Clicking a thumbnail opens a full-screen overlay showing the full-size image",
+        "Overlay has dark background and close button (X)",
+        "Clicking overlay background closes it",
+        "Reuse existing receipt-overlay CSS pattern from GroupDetailView",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Delete receipt from edit modal",
+      "description": "As the expense creator, I want to delete individual receipts from the edit modal.",
+      "acceptanceCriteria": [
+        "Each receipt thumbnail has a small X/delete button in the corner",
+        "Clicking it shows a confirmation prompt before deleting",
+        "Confirming calls DELETE /api/expenses/{id}/receipts/{receipt_id}/",
+        "Thumbnail removed from list after successful deletion",
+        "Delete button only shown if current user is the expense creator",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Upload additional receipts from edit modal",
+      "description": "As the expense creator, I want to add more receipts to an existing expense.",
+      "acceptanceCriteria": [
+        "Edit modal shows an Add receipt file input below existing thumbnails",
+        "Selecting a file uploads it via POST /api/expenses/{id}/receipts/",
+        "New thumbnail appears in the list after successful upload",
+        "File input hidden when 5 receipts already attached",
+        "Only shown if current user is the expense creator",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Upload receipt during expense creation",
+      "description": "As a user, I want to attach a receipt image when creating a new expense.",
+      "acceptanceCriteria": [
+        "Add expense form keeps existing file input for receipt",
+        "After expense is created via POST /api/groups/{id}/expenses/, selected file uploaded via POST /api/expenses/{id}/receipts/",
+        "Remove old receipt_image field usage from create flow",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Update expense list receipt indicator",
+      "description": "As a user, I want to see which expenses have receipts in the expense list.",
+      "acceptanceCriteria": [
+        "Expense rows in group detail show receipt count if 1+ receipts (e.g. paperclip icon + count)",
+        "No indicator for expenses with 0 receipts",
+        "Uses the receipts array length from the API response",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
