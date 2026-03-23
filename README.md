@@ -30,19 +30,18 @@ services:
 ```
 
 > **Important:** Set `DJANGO_SECRET_KEY` to a long random string before starting. You can generate one with:
+
 > ```bash
 > python3 -c "import secrets; print(secrets.token_urlsafe(50))"
 > ```
 
-## Default Admin Credentials
+## Creating the Initial Admin User
 
 Create the first admin user via the Django management command:
 
 ```bash
 docker compose exec backend python manage.py createsuperuser
 ```
-
-Or set the initial password interactively. The Django admin panel is available at http://localhost:8080/admin/.
 
 ## Environment Variables
 
@@ -55,8 +54,8 @@ Or set the initial password interactively. The Django admin panel is available a
 
 Two volume maps are required:
 
-- `./data/db/` — SQLite database
-- `./data/media/` — uploaded files (avatars, receipts)
+- `<customdirectory_db>:/data/db/` — SQLite database
+- `<customdirectory_media>:/data/media/` — uploaded files (avatars, receipts)
 
 These can be provided as volumes or directories.
 
@@ -64,7 +63,7 @@ These can be provided as volumes or directories.
 
 The application can be accessed via a REST API.
 
-### Authentication
+### API Authentication
 
 **API Key:**
 Generate a key via the Profile page, then pass it as a header:
@@ -73,7 +72,7 @@ Generate a key via the Profile page, then pass it as a header:
 curl -H "X-API-Key: <your-key>" http://localhost:8080/api/users/me/
 ```
 
-### Key Endpoints
+### API Endpoints
 
 | Endpoint | Method | Description |
 | -------- | ------ | ----------- |
@@ -91,7 +90,12 @@ curl -H "X-API-Key: <your-key>" http://localhost:8080/api/users/me/
 | `/api/currencies/` | CRUD | Currencies (write: admin only) |
 | `/api/group-types/` | CRUD | Group types (write: admin only) |
 
+## Development
+
+```bash
+docker compose up -d --build -f docker-compose.dev.yaml
+```
 
 ## LLM Disclaimer
 
-I'm testing out a Ralph loop to create this. Don't even think of using it in any kind of production capability.
+A [Ralph Loop](https://ghuntley.com/ralph/) was used to create this app - don't hate me, I needed to learn about the concept. But as such don't even think of using this in any kind of production capability.
