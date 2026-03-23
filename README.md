@@ -1,16 +1,33 @@
 # MemoryBank
 
-Self-hosted shared expense splitting app. Built with Django + Vue 3.
+An expense-splitting app that can be easily self-hosted.
+
+Built with Django + Vue 3.
 
 ## Quick Start
 
-```bash
-docker compose up
+Create a `docker-compose.yaml` file and run `docker compose up`.
+
+```yaml
+services:
+  frontend:
+    image: ghcr.io/awfulwoman/memorybank-frontend:latest
+    ports:
+      - "8101:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: ghcr.io/awfulwoman/memorybank-backend:latest
+    ports:
+      - "8102:8000"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
+      - DJANGO_DEBUG=false
+    volumes:
+      - ./data/db:/data/db
+      - ./data/media:/data/media
 ```
-
-The app will be available at http://localhost (frontend) and the Django backend at http://localhost:8000.
-
-On first run, Django migrations are applied automatically.
 
 ## Default Admin Credentials
 
@@ -24,33 +41,29 @@ Or set the initial password interactively. The Django admin panel is available a
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable            | Default          | Description                                 |
+| ------------------- | ---------------- | ------------------------------------------- |
 | `DJANGO_SECRET_KEY` | insecure default | Set to a secure random string in production |
-| `DJANGO_DEBUG` | `true` | Set to `false` in production |
-| `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated list of allowed hosts |
-| `SQLITE_PATH` | `/data/db/db.sqlite3` | Path to SQLite database file |
-| `MEDIA_ROOT` | `/data/media` | Path to media file storage |
-| `CSRF_TRUSTED_ORIGINS` | `http://localhost` | Comma-separated trusted origins for CSRF |
+| `DJANGO_DEBUG`      | `true`           | Set to `false` in production                |
 
 ## Data Persistence
 
-Two volumes are mounted:
+Two volume maps are required:
+
 - `./data/db/` — SQLite database
 - `./data/media/` — uploaded files (avatars, receipts)
 
+These can be provided as volumes or directories.
+
 ## API Usage
+
+The application can be accessed via a REST API.
 
 ### Authentication
 
-**Session (browser):**
-```bash
-POST /api/auth/login/
-{"username": "admin", "password": "password"}
-```
-
 **API Key:**
 Generate a key via the Profile page, then pass it as a header:
+
 ```bash
 curl -H "X-API-Key: <your-key>" http://localhost:8000/api/users/me/
 ```
@@ -58,7 +71,7 @@ curl -H "X-API-Key: <your-key>" http://localhost:8000/api/users/me/
 ### Key Endpoints
 
 | Endpoint | Method | Description |
-|---|---|---|
+| -------- | ------ | ----------- |
 | `/api/auth/login/` | POST | Login |
 | `/api/auth/logout/` | POST | Logout |
 | `/api/users/me/` | GET/PATCH | Current user profile |
@@ -73,47 +86,7 @@ curl -H "X-API-Key: <your-key>" http://localhost:8000/api/users/me/
 | `/api/currencies/` | CRUD | Currencies (write: admin only) |
 | `/api/group-types/` | CRUD | Group types (write: admin only) |
 
-## Deploy
-
-Run MemoryBank from pre-built images published to GitHub Container Registry — no need to clone the repository.
-
-### Images
-
-- Backend: [ghcr.io/awfulwoman/memorybank-backend](https://github.com/awfulwoman/memorybank/pkgs/container/memorybank-backend)
-- Frontend: [ghcr.io/awfulwoman/memorybank-frontend](https://github.com/awfulwoman/memorybank/pkgs/container/memorybank-frontend)
-
-### Steps
-
-1. Download the Compose file:
-   ```bash
-   curl -O https://raw.githubusercontent.com/awfulwoman/memorybank/main/docker-compose.ghcr.yml
-   ```
-
-2. Create the data directories:
-   ```bash
-   mkdir -p data/db data/media
-   ```
-
-3. Start the stack:
-   ```bash
-   docker compose -f docker-compose.ghcr.yml up -d
-   ```
-
-The app will be available at http://localhost (frontend) and http://localhost:8000 (API).
-
-### Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `SQLITE_PATH` | `/data/db/db.sqlite3` | Path to SQLite database file inside the container |
-| `MEDIA_ROOT` | `/data/media` | Path to media file storage inside the container |
-| `CSRF_TRUSTED_ORIGINS` | `http://localhost` | Comma-separated trusted origins for CSRF (set to your domain in production) |
-
-Pass them inline or via a `.env` file:
-```bash
-CSRF_TRUSTED_ORIGINS=https://expenses.example.com docker compose -f docker-compose.ghcr.yml up -d
-```
 
 ## LLM Disclaimer
 
-I'm testing out a Ralph loop to create this. Don't even think of using it yourself.
+I'm testing out a Ralph loop to create this. Don't even think of using it in any kind of production capability.
