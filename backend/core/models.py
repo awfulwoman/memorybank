@@ -130,6 +130,15 @@ class Settlement(models.Model):
         return f'{self.payer} paid {self.payee} {self.amount}'
 
 
+class ReceiptImage(models.Model):
+    expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='receipts')
+    image = models.ImageField(upload_to='receipts/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Receipt for {self.expense}'
+
+
 class ApiKey(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='api_key'
