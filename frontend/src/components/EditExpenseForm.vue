@@ -27,6 +27,19 @@
           </div>
         </div>
         <div class="field">
+          <label>Receipts</label>
+          <div v-if="receipts.length === 0" class="receipts-empty">No receipts attached</div>
+          <div v-else class="receipts-grid">
+            <img
+              v-for="r in receipts"
+              :key="r.id"
+              :src="r.image"
+              class="receipt-thumb"
+              alt="Receipt"
+            />
+          </div>
+        </div>
+        <div class="field">
           <label>Replace receipt image</label>
           <input type="file" accept="image/*" @change="onFile" />
         </div>
@@ -81,6 +94,7 @@ const form = ref({
 const splitMethod = ref('equal')
 const customSplits = ref<Record<number, string>>({})
 const categories = ref<any[]>([])
+const receipts = ref<Array<{ id: number; image: string }>>(props.expense.receipts ?? [])
 const receiptFile = ref<File | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -201,6 +215,10 @@ input, select {
 .actions button[type="submit"] { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 .actions button:disabled { opacity: 0.6; cursor: not-allowed; }
 .error { color: var(--color-danger); font-size: 0.875rem; }
+
+.receipts-empty { font-size: 0.875rem; color: var(--color-text-placeholder); }
+.receipts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.receipt-thumb { max-height: 80px; border-radius: 4px; cursor: pointer; object-fit: contain; }
 
 .category-select-wrapper {
   position: relative;
