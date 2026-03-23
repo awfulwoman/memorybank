@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "8102:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=memorybank.settings
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-to-a-real-secret-key}
@@ -20,6 +20,6 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "8101:80"
     depends_on:
       - backend
