@@ -36,6 +36,7 @@
               :src="r.image"
               class="receipt-thumb"
               alt="Receipt"
+              @click="viewingReceipt = r.image"
             />
           </div>
         </div>
@@ -67,6 +68,12 @@
         </div>
       </form>
     </div>
+
+    <!-- Full-size receipt viewer -->
+    <div v-if="viewingReceipt" class="receipt-overlay" @click="viewingReceipt = null">
+      <img :src="viewingReceipt" class="receipt-image" alt="Receipt" @click.stop />
+      <button class="receipt-close" @click="viewingReceipt = null">&#10005;</button>
+    </div>
   </div>
 </template>
 
@@ -95,6 +102,7 @@ const splitMethod = ref('equal')
 const customSplits = ref<Record<number, string>>({})
 const categories = ref<any[]>([])
 const receipts = ref<Array<{ id: number; image: string }>>(props.expense.receipts ?? [])
+const viewingReceipt = ref<string | null>(null)
 const receiptFile = ref<File | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -219,6 +227,17 @@ input, select {
 .receipts-empty { font-size: 0.875rem; color: var(--color-text-placeholder); }
 .receipts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .receipt-thumb { max-height: 80px; border-radius: 4px; cursor: pointer; object-fit: contain; }
+
+.receipt-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+}
+.receipt-image { max-width: 90vw; max-height: 90vh; border-radius: 4px; }
+.receipt-close {
+  position: fixed; top: 1rem; right: 1rem; background: white;
+  border: none; border-radius: 50%; width: 2rem; height: 2rem;
+  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 
 .category-select-wrapper {
   position: relative;
