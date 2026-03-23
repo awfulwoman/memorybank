@@ -4,7 +4,7 @@ from .views import (
     AdminUserViewSet,
     CategoryViewSet, CurrencyViewSet, GroupTypeViewSet, GroupViewSet,
     GroupBalanceView, GroupExpenseView, GroupExportView, GroupMemberView, GroupSettlementView,
-    ExpenseDetailView,
+    ExpenseDetailView, ExpenseReceiptView,
     LoginView, LogoutView, MeApiKeyView, MeAvatarView, MeBalanceView, MeExportView, MeView,
 )
 
@@ -31,4 +31,5 @@ urlpatterns = [
     path('groups/<int:pk>/balances/', GroupBalanceView.as_view(), name='group-balances'),
     path('groups/<int:pk>/export/', GroupExportView.as_view(), name='group-export'),
     path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expense-detail'),
+    path('expenses/<int:pk>/receipts/', ExpenseReceiptView.as_view(), name='expense-receipts'),
 ]

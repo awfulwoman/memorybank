@@ -21,3 +21,14 @@ Started: Mon 23 Mar 2026 13:00:27 CET
   - `whitenoise` missing from venv, needed manual install
   - All 90 tests pass
 ---
+
+## 2026-03-23 - US-002
+- Created `ExpenseReceiptView` with POST handler: validates creator ownership (403), file presence (400), size max 5MB (400), max 5 receipts (400), returns 201 with {id, image}
+- Added URL pattern `expenses/<int:pk>/receipts/` in `core/urls.py`
+- Added 6 tests in `core/tests/test_receipts.py`: success, no image, non-creator 403, max 5 limit, too large, nonexistent expense
+- Files changed: `core/views.py`, `core/urls.py`, `core/tests/test_receipts.py`
+- **Learnings for future iterations:**
+  - `MultiPartParser` already imported in views.py (used by MeAvatarView)
+  - Use `Expense.objects.get()` (not `all_objects`) so deleted expenses can't get receipts
+  - All 96 tests pass
+---
