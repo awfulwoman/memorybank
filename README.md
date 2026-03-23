@@ -29,11 +29,11 @@ services:
       - ./data/media:/data/media
 ```
 
-> **Important:** Set `DJANGO_SECRET_KEY` to a long random string before starting. You can generate one with:
+**Important:** Set `DJANGO_SECRET_KEY` to a long random string before starting. You can generate one with:
 
-> ```bash
-> python3 -c "import secrets; print(secrets.token_urlsafe(50))"
-> ```
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+```
 
 ## Creating the Initial Admin User
 
