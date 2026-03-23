@@ -37,9 +37,9 @@
               </div>
               <div class="expense-meta">
                 {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_display_name }}
-                <button v-if="e.receipt_image" class="receipt-btn" @click="viewingReceipt = e.receipt_image">
-                  📎 Receipt
-                </button>
+                <span v-if="e.receipts?.length" class="receipt-indicator">
+                  <span class="mdi mdi-paperclip"></span> {{ e.receipts.length }}
+                </span>
               </div>
             </div>
           </section>
@@ -101,12 +101,6 @@
         </div>
       </div>
     </main>
-
-    <!-- Receipt viewer -->
-    <div v-if="viewingReceipt" class="receipt-overlay" @click="viewingReceipt = null">
-      <img :src="viewingReceipt" class="receipt-image" alt="Receipt" @click.stop />
-      <button class="receipt-close" @click="viewingReceipt = null">✕</button>
-    </div>
 
     <SettlementForm
       v-if="showSettlement && group"
@@ -174,7 +168,6 @@ const loadingBalances = ref(true)
 const showAddExpense = ref(false)
 const showSettlement = ref(false)
 const editingExpense = ref<any>(null)
-const viewingReceipt = ref<string | null>(null)
 const showSettings = ref(false)
 
 const canEditGroup = computed(() => {
@@ -451,24 +444,11 @@ onMounted(async () => {
   color: var(--color-primary); text-decoration: none; font-size: 0.9rem;
 }
 
-.receipt-btn {
-  background: none; border: none; font-size: 0.75rem; cursor: pointer;
-  color: var(--color-primary); padding: 0; margin-left: 0.5rem;
-}
-
-.receipt-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-  display: flex; align-items: center; justify-content: center; z-index: 200;
-}
-
-.receipt-image {
-  max-width: 90vw; max-height: 90vh; border-radius: 4px;
-}
-
-.receipt-close {
-  position: fixed; top: 1rem; right: 1rem; background: white;
-  border: none; border-radius: 50%; width: 2rem; height: 2rem;
-  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+.receipt-indicator {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-left: 0.5rem;
+  white-space: nowrap;
 }
 
 /* ── Responsive: phone — collapse to single column ── */
