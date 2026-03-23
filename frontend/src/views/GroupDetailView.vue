@@ -15,83 +15,91 @@
           <span class="mdi mdi-cog"></span>
         </button>
       </div>
-      <!-- Balance Summary -->
-      <section class="card">
-        <h3>Balances</h3>
-        <div v-if="loadingBalances" class="loading">Loading balances…</div>
-        <div v-else>
-          <div v-for="b in balances" :key="b.user_id" class="balance-row">
-            <span>{{ b.display_name }}</span>
-            <span :class="Number(b.balance) >= 0 ? 'positive' : 'negative'">
-              {{ Number(b.balance) >= 0 ? '+' : '-' }}{{ sym }}{{ Math.abs(Number(b.balance)).toFixed(2) }}
-            </span>
-          </div>
-          <div v-if="balances.length === 0" class="empty">No balances yet.</div>
-        </div>
-      </section>
 
-      <!-- Pairwise Debts -->
-      <section class="card">
-        <h3>Who owes whom</h3>
-        <div v-if="debts.length === 0" class="empty">All settled up!</div>
-        <div v-for="d in debts" :key="`${d.from_user_id}-${d.to_user_id}`" class="debt-row">
-          <span class="negative">{{ d.from_display_name }}</span>
-          owes
-          <span class="positive">{{ d.to_display_name }}</span>
-          <strong>{{ sym }}{{ d.amount }}</strong>
+      <div class="two-col">
+        <!-- Main column: Expenses -->
+        <div class="col-main">
+          <section class="card">
+            <div class="section-header">
+              <h3>Expenses</h3>
+              <button class="add-btn" @click="showAddExpense = true">+ Add Expense</button>
+            </div>
+            <div v-if="loadingExpenses" class="loading">Loading expenses…</div>
+            <div v-else-if="expenses.length === 0" class="empty">No expenses yet.</div>
+            <div v-for="e in expenses" :key="e.id" class="expense-row">
+              <div class="expense-main">
+                <span class="amount">{{ sym }}{{ e.amount }}</span>
+                <span class="desc">{{ e.description }}</span>
+                <span v-if="e.created_by_username === auth.user?.username" class="expense-actions">
+                  <button class="edit-btn" @click="editingExpense = e">Edit</button>
+                  <button class="delete-btn" @click="confirmDelete(e)">Delete</button>
+                </span>
+              </div>
+              <div class="expense-meta">
+                {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_display_name }}
+                <button v-if="e.receipt_image" class="receipt-btn" @click="viewingReceipt = e.receipt_image">
+                  📎 Receipt
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <!-- Expenses -->
-      <section class="card">
-        <div class="section-header">
-          <h3>Expenses</h3>
-          <button class="add-btn" @click="showAddExpense = true">+ Add Expense</button>
-        </div>
-        <div v-if="loadingExpenses" class="loading">Loading expenses…</div>
-        <div v-else-if="expenses.length === 0" class="empty">No expenses yet.</div>
-        <div v-for="e in expenses" :key="e.id" class="expense-row">
-          <div class="expense-main">
-            <span class="amount">{{ sym }}{{ e.amount }}</span>
-            <span class="desc">{{ e.description }}</span>
-            <span v-if="e.created_by_username === auth.user?.username" class="expense-actions">
-              <button class="edit-btn" @click="editingExpense = e">Edit</button>
-              <button class="delete-btn" @click="confirmDelete(e)">Delete</button>
-            </span>
-          </div>
-          <div class="expense-meta">
-            {{ e.date }} · <span class="mdi" :class="e.category_icon || 'mdi-shape-outline'"></span> {{ e.category_name || 'Uncategorised' }} · paid by {{ e.created_by_display_name }}
-            <button v-if="e.receipt_image" class="receipt-btn" @click="viewingReceipt = e.receipt_image">
-              📎 Receipt
-            </button>
-          </div>
-        </div>
-      </section>
+        <!-- Side column: Summary + Tools -->
+        <div class="col-side">
+          <!-- Balance & Debts Summary -->
+          <section class="card">
+            <div v-if="groupMembers.length > 2">
+              <h3>Balances</h3>
+              <div v-if="loadingBalances" class="loading">Loading balances…</div>
+              <div v-else>
+                <div v-for="b in balances" :key="b.user_id" class="balance-row">
+                  <span>{{ b.display_name }}</span>
+                  <span :class="Number(b.balance) >= 0 ? 'positive' : 'negative'">
+                    {{ Number(b.balance) >= 0 ? '+' : '-' }}{{ sym }}{{ Math.abs(Number(b.balance)).toFixed(2) }}
+                  </span>
+                </div>
+                <div v-if="balances.length === 0" class="empty">No balances yet.</div>
+              </div>
+            </div>
 
-      <!-- Export -->
-      <section class="card">
-        <h3>Export Expenses</h3>
-        <div class="export-buttons">
-          <a :href="api.groupExport(groupId, 'csv')" class="export-btn">Download CSV</a>
-          <a :href="api.groupExport(groupId, 'json')" class="export-btn">Download JSON</a>
-        </div>
-      </section>
+            <div :class="{ 'debts-section': groupMembers.length > 2 }">
+              <h3 v-if="groupMembers.length <= 2">Split</h3>
+              <h4 v-else>Split</h4>
+              <div v-if="loadingBalances" class="loading">Loading…</div>
+              <div v-else-if="debts.length === 0" class="empty">All settled up!</div>
+              <div v-for="d in debts" :key="`${d.from_user_id}-${d.to_user_id}`" class="debt-row">
+                <span class="negative">{{ d.from_display_name }}</span>
+                owes
+                <span class="positive">{{ d.to_display_name }}</span>
+                <strong>{{ sym }}{{ d.amount }}</strong>
+              </div>
+            </div>
+          </section>
 
-      <!-- Settlements -->
-      <section class="card">
-        <div class="section-header">
-          <h3>Settlements</h3>
-          <button class="add-btn" @click="showSettlement = true">+ Record Payment</button>
+          <!-- Tools -->
+          <section class="card">
+            <h3>Tools</h3>
+
+            <h4>Settlements</h4>
+            <button class="add-btn tool-btn" @click="showSettlement = true">+ Record Payment</button>
+            <div v-if="settlements.length === 0" class="empty">No settlements yet.</div>
+            <div v-for="s in settlements" :key="s.id" class="settlement-row">
+              <span>{{ s.payer_display_name }}</span>
+              paid
+              <span>{{ s.payee_display_name }}</span>
+              <strong>{{ sym }}{{ s.amount }}</strong>
+              <span class="date">{{ s.date }}</span>
+            </div>
+
+            <h4>Export</h4>
+            <div class="export-buttons">
+              <a :href="api.groupExport(groupId, 'csv')" class="export-btn">CSV</a>
+              <a :href="api.groupExport(groupId, 'json')" class="export-btn">JSON</a>
+            </div>
+          </section>
         </div>
-        <div v-if="settlements.length === 0" class="empty">No settlements yet.</div>
-        <div v-for="s in settlements" :key="s.id" class="settlement-row">
-          <span>{{ s.payer_display_name }}</span>
-          paid
-          <span>{{ s.payee_display_name }}</span>
-          <strong>{{ sym }}{{ s.amount }}</strong>
-          <span class="date">{{ s.date }}</span>
-        </div>
-      </section>
+      </div>
     </main>
 
     <!-- Receipt viewer -->
@@ -247,12 +255,57 @@ onMounted(async () => {
 }
 
 .content {
-  max-width: 800px;
+  max-width: 1100px;
   margin: 2rem auto;
   padding: 0 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.col-main, .col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.col-side .card h4 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.col-side .card h4:first-of-type {
+  margin-top: 0;
+}
+
+.debts-section {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.debts-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tool-btn {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 0.75rem;
 }
 
 .page-header {
@@ -416,6 +469,13 @@ onMounted(async () => {
   position: fixed; top: 1rem; right: 1rem; background: white;
   border: none; border-radius: 50%; width: 2rem; height: 2rem;
   font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Responsive: phone — collapse to single column ── */
+@media (max-width: 767px) {
+  .two-col {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Responsive: phone (<768px) ── */
