@@ -113,3 +113,14 @@ Started: Mon 23 Mar 2026 13:00:27 CET
   - `api.uploadReceipt` already existed from US-008, just needed to wire it into the create flow
   - All 103 backend tests pass, typecheck passes
 ---
+
+## 2026-03-23 - US-010
+- Replaced old `receipt_image`-based "📎 Receipt" button with paperclip icon + count using `e.receipts.length`
+- Indicator only shown when `e.receipts?.length > 0`
+- Removed unused `viewingReceipt` ref, receipt overlay template, and related CSS (receipts now viewed from edit modal)
+- Files changed: `frontend/src/views/GroupDetailView.vue`
+- **Learnings for future iterations:**
+  - Old receipt_image field on expenses is now fully unused in frontend — could be removed from serializer in future cleanup
+  - MDI `mdi-paperclip` icon available for receipt indicators
+  - All 103 backend tests pass, typecheck passes
+---
