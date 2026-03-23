@@ -13,7 +13,7 @@ services:
   frontend:
     image: ghcr.io/awfulwoman/memorybank-frontend:latest
     ports:
-      - "8101:80"
+      - "8080:80"
     depends_on:
       - backend
 
