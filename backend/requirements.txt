@@ -3,3 +3,4 @@ djangorestframework>=3.14
 Pillow>=10.0
 gunicorn>=21.0
 whitenoise>=6.0
+django-csp>=4.0
