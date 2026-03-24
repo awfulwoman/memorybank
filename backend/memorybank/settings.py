@@ -22,7 +22,7 @@ SECRET_KEY = _secret_key
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -107,6 +107,23 @@ REST_FRAMEWORK = {
 }
 
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
+
+# Cookie & HTTPS security settings
+# Gate HTTPS/Secure flags behind DJANGO_SECURE_SSL env var so local dev without TLS works
+_secure_ssl = os.environ.get('DJANGO_SECURE_SSL', 'false').lower() in ('true', '1', 'yes')
+
+CSRF_COOKIE_SECURE = _secure_ssl
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+
+SESSION_COOKIE_SECURE = _secure_ssl
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+SECURE_SSL_REDIRECT = _secure_ssl
+SECURE_HSTS_SECONDS = 31536000 if _secure_ssl else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = _secure_ssl
+SECURE_HSTS_PRELOAD = _secure_ssl
 
 # Security headers
 X_FRAME_OPTIONS = 'DENY'
