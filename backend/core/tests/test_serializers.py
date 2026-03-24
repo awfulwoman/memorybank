@@ -3,7 +3,11 @@ from decimal import Decimal
 from django.test import TestCase, RequestFactory
 
 from core.models import Category, Currency, Group, GroupType, User
-from core.serializers import AdminUserSerializer, ExpenseSerializer, GroupSerializer
+from core.serializers import (
+    AdminUserSerializer, CategorySerializer, CurrencySerializer,
+    ExpenseSerializer, GroupSerializer, GroupTypeSerializer,
+    SettlementSerializer, UserSerializer,
+)
 
 
 class ExpenseSerializerEqualSplitTest(TestCase):
@@ -97,3 +101,89 @@ class GroupSerializerTest(TestCase):
         serializer = GroupSerializer(group)
         self.assertEqual(serializer.data["member_count"], 2)
         self.assertCountEqual(serializer.data["member_ids"], [u1.pk, u2.pk])
+
+
+class InputValidationTest(TestCase):
+    """Tests for issue #8: input length & content validation."""
+
+    def test_group_name_max_length(self):
+        s = GroupSerializer(data={"name": "x" * 101, "default_split_method": "equal"})
+        self.assertFalse(s.is_valid())
+        self.assertIn("name", s.errors)
+
+    def test_group_name_trims_whitespace(self):
+        cur = Currency.objects.get_or_create(code="USD", defaults={"name": "USD", "symbol": "$"})[0]
+        s = GroupSerializer(data={"name": "  Trip  ", "currency": cur.pk, "default_split_method": "equal"})
+        self.assertTrue(s.is_valid(), s.errors)
+        self.assertEqual(s.validated_data["name"], "Trip")
+
+    def test_expense_description_max_length(self):
+        s = ExpenseSerializer(data={
+            "amount": "10.00", "description": "x" * 501, "date": "2026-01-01",
+        })
+        self.assertFalse(s.is_valid())
+        self.assertIn("description", s.errors)
+
+    def test_expense_description_rejects_control_chars(self):
+        s = ExpenseSerializer(data={
+            "amount": "10.00", "description": "hello\x00world", "date": "2026-01-01",
+        })
+        self.assertFalse(s.is_valid())
+        self.assertIn("description", s.errors)
+
+    def test_expense_description_allows_newline_tab(self):
+        s = ExpenseSerializer(data={
+            "amount": "10.00", "description": "line1\nline2\ttab", "date": "2026-01-01",
+        })
+        self.assertTrue(s.is_valid(), s.errors)
+
+    def test_expense_description_trims_whitespace(self):
+        s = ExpenseSerializer(data={
+            "amount": "10.00", "description": "  Dinner  ", "date": "2026-01-01",
+        })
+        self.assertTrue(s.is_valid(), s.errors)
+        self.assertEqual(s.validated_data["description"], "Dinner")
+
+    def test_expense_amount_max_digits(self):
+        s = ExpenseSerializer(data={
+            "amount": "12345678901.00", "description": "Big", "date": "2026-01-01",
+        })
+        self.assertFalse(s.is_valid())
+        self.assertIn("amount", s.errors)
+
+    def test_user_display_name_max_length(self):
+        s = UserSerializer(data={"display_name": "x" * 101})
+        self.assertFalse(s.is_valid())
+        self.assertIn("display_name", s.errors)
+
+    def test_user_display_name_trims_whitespace(self):
+        s = UserSerializer(data={"display_name": "  Alice  "})
+        self.assertTrue(s.is_valid(), s.errors)
+        self.assertEqual(s.validated_data["display_name"], "Alice")
+
+    def test_category_name_max_length(self):
+        s = CategorySerializer(data={"name": "x" * 51})
+        self.assertFalse(s.is_valid())
+        self.assertIn("name", s.errors)
+
+    def test_currency_code_max_length(self):
+        s = CurrencySerializer(data={"code": "ABCD", "name": "Test", "symbol": "$"})
+        self.assertFalse(s.is_valid())
+        self.assertIn("code", s.errors)
+
+    def test_currency_name_max_length(self):
+        s = CurrencySerializer(data={"code": "TST", "name": "x" * 51, "symbol": "$"})
+        self.assertFalse(s.is_valid())
+        self.assertIn("name", s.errors)
+
+    def test_group_type_name_max_length(self):
+        s = GroupTypeSerializer(data={"name": "x" * 51})
+        self.assertFalse(s.is_valid())
+        self.assertIn("name", s.errors)
+
+    def test_settlement_amount_max_digits(self):
+        s = SettlementSerializer(data={
+            "amount": "12345678901.00", "payee": 1, "date": "2026-01-01",
+        })
+        self.assertFalse(s.is_valid())
+        self.assertIn("amount", s.errors)
